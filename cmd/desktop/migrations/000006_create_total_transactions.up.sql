@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS total_transactions (
+    id SERIAL PRIMARY KEY,
+    "clientId" INTEGER,
+    "businessId" INTEGER NOT NULL REFERENCES businesses(id),
+    total NUMERIC NOT NULL DEFAULT 0,
+    cash NUMERIC NOT NULL DEFAULT 0,
+    card NUMERIC NOT NULL DEFAULT 0,
+    click NUMERIC NOT NULL DEFAULT 0,
+    debt NUMERIC NOT NULL DEFAULT 0,
+    "clientNumber" TEXT,
+    description TEXT,
+    "debtLimitDate" TIMESTAMP WITH TIME ZONE,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

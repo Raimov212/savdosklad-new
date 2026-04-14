@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS marketplace_categories (
+    id SERIAL PRIMARY KEY,
+    "categoryId" INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    image TEXT,
+    "isVisible" BOOLEAN NOT NULL DEFAULT TRUE,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

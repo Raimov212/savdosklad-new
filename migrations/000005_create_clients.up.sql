@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS clients (
+    id SERIAL PRIMARY KEY,
+    "businessId" INTEGER NOT NULL REFERENCES businesses(id),
+    "fullName" TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    address TEXT,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

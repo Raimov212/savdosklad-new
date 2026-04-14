@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS expenses (
+    id SERIAL PRIMARY KEY,
+    name CHARACTER VARYING(100),
+    description CHARACTER VARYING(200),
+    value NUMERIC NOT NULL DEFAULT 0,
+    "businessId" INTEGER NOT NULL REFERENCES businesses(id),
+    "totalExpenseId" INTEGER NOT NULL DEFAULT 0,
+    "expenseDate" DATE NOT NULL DEFAULT '-infinity'::date,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

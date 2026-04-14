@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SavdoSklad — Boshqaruv paneli</title>
+    <meta name="description" content="SavdoSklad biznes boshqaruv paneli">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Init theme immediately to prevent flashing
+        const savedTheme = localStorage.getItem('appTheme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="brand-container">
+                    <div class="brand-logo-glow"></div>
+                    <h2 class="brand-name">SavdoSklad</h2>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')"
+                    title="Bosh sahifa" data-i18n-title="Bosh sahifa">
+                    <span class="icon">📊</span> <span data-i18n="Bosh sahifa">Bosh sahifa</span>
+                </button>
+                <button class="nav-item" data-page="categories" onclick="navigateTo('categories')" title="Kategoriyalar"
+                    data-i18n-title="Kategoriyalar">
+                    <span class="icon">📁</span> <span data-i18n="Kategoriyalar">Kategoriyalar</span>
+                </button>
+                <button class="nav-item" data-page="products" onclick="navigateTo('products')" title="Ombor"
+                    data-i18n-title="Ombor">
+                    <span class="icon">📦</span> <span data-i18n="Ombor">Ombor</span>
+                </button>
+                <button class="nav-item" data-page="clients" onclick="navigateTo('clients')" title="Mijozlar"
+                    data-i18n-title="Mijozlar">
+                    <span class="icon">👥</span> <span data-i18n="Mijozlar">Mijozlar</span>
+                </button>
+                <button class="nav-item owner-only" data-page="employees" onclick="navigateTo('employees')"
+                    title="Xodimlar" data-i18n-title="Xodimlar" style="display:none;">
+                    <span class="icon">👨‍💼</span> <span data-i18n="Xodimlar">Xodimlar</span>
+                </button>
+                <button class="nav-item" data-page="transactions" onclick="navigateTo('transactions')" title="Sotuvlar"
+                    data-i18n-title="Sotuvlar">
+                    <span class="icon">🛒</span> <span data-i18n="Sotuvlar">Sotuvlar</span>
+                </button>
+                <button class="nav-item" data-page="refunds" onclick="navigateTo('refunds')" title="Qaytarishlar"
+                    data-i18n-title="Qaytarishlar">
+                    <span class="icon">🔄</span> <span data-i18n="Qaytarishlar">Qaytarishlar</span>
+                </button>
+                <button class="nav-item" data-page="debts" onclick="navigateTo('debts')" title="Qarzlar"
+                    data-i18n-title="Qarzlar">
+                    <span class="icon">📝</span> <span data-i18n="Qarzlar">Qarzlar</span>
+                </button>
+                <button class="nav-item owner-only" data-page="expenses" onclick="navigateTo('expenses')"
+                    title="Xarajatlar" data-i18n-title="Xarajatlar" style="display:none;">
+                    <span class="icon">💸</span> <span data-i18n="Xarajatlar">Xarajatlar</span>
+                </button>
+                <button class="nav-item owner-only" data-page="businesses" onclick="navigateTo('businesses')"
+                    title="Bizneslar" data-i18n-title="Bizneslar" style="display:none;">
+                    <span class="icon">🏢</span> <span data-i18n="Bizneslar">Bizneslar</span>
+                </button>
+                <button class="nav-item owner-only" data-page="calculations" onclick="navigateTo('calculations')"
+                    title="Hisobotlar" data-i18n-title="Hisobotlar" style="display:none;">
+                    <span class="icon">📉</span> <span data-i18n="Hisobotlar">Hisobotlar</span>
+                </button>
+                <button class="nav-item" data-page="profile" onclick="navigateTo('profile')" title="Sozlamalar"
+                    data-i18n-title="Sozlamalar">
+                    <span class="icon">⚙️</span> <span data-i18n="Sozlamalar">Sozlamalar</span>
+                </button>
+
+                <div class="nav-section-title mp-only" style="display:none;" data-i18n="Marketplace">MARKETPLACE</div>
+                <div class="mp-only" style="display:none;">
+                    <button class="nav-item" data-page="mp-stats" onclick="navigateTo('mp-stats')" title="Statistika"
+                        data-i18n-title="Statistika">
+                        <span class="icon">📈</span> <span data-i18n="Statistika">Statistika</span>
+                    </button>
+                    <button class="nav-item" data-page="mp-categories" onclick="navigateTo('mp-categories')"
+                        title="Kategoriyalar" data-i18n-title="Kategoriyalar">
+                        <span class="icon">🏷️</span> <span data-i18n="Kategoriyalar">Kategoriyalar</span>
+                    </button>
+                    <button class="nav-item" data-page="mp-products" onclick="navigateTo('mp-products')"
+                        title="Mahsulotlar" data-i18n-title="Mahsulotlar">
+                        <span class="icon">🛍️</span> <span data-i18n="Mahsulotlar">Mahsulotlar</span>
+                    </button>
+                    <button class="nav-item" data-page="mp-sales" onclick="navigateTo('mp-sales')" title="Sotuvlar"
+                        data-i18n-title="Sotuvlar">
+                        <span class="icon">📜</span> <span data-i18n="Sotilgan tovarlar">Sotuvlar</span>
+                    </button>
+                </div>
+
+                <div class="nav-section-title admin-only" style="display:none;" data-i18n="Admin">ADMIN</div>
+                <button class="nav-item admin-only" data-page="admin" onclick="navigateTo('admin')" title="Admin panel"
+                    data-i18n-title="Admin panel" style="display:none;">
+                    <span class="icon">🛡️</span> <span data-i18n="Admin panel">Admin panel</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="nav-item" onclick="api.logout()" style="color:var(--danger) !important; opacity:0.8;"
+                    title="Chiqish" data-i18n-title="Chiqish">
+                    <span class="icon">🚪</span> <span data-i18n="Chiqish">Chiqish</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button onclick="toggleSidebar()" class="btn-icon" title="Sidebarni ochish/yopish">
+                        ☰
+                    </button>
+                    <h3 id="page-title" data-i18n="Bosh sahifa">Bosh sahifa</h3>
+                </div>
+                <div class="topbar-center" style="display:flex; flex-direction:column; align-items:center; flex:1;">
+                    <span id="topbar-page-title-center"
+                        style="font-weight:600; font-size:16px; color: var(--topbar-text, white);"></span>
+                    <span id="topbar-date" style="color:var(--text-secondary); font-size:12px;"></span>
+                </div>
+                <div class="topbar-right">
+                    <select class="business-selector" id="lang-selector-app" onchange="setAppLang(this.value)"
+                        style="min-width: 80px;">
+                        <option value="uz">O'zb</option>
+                        <option value="uz-cyrl">Ўзб</option>
+                        <option value="ru">Рус</option>
+                        <option value="en">Eng</option>
+                    </select>
+                    <select class="business-selector" id="business-selector" onchange="onBusinessChange(this.value)">
+                        <option value="" data-i18n="Biznes tanlang">${t("Biznes tanlang")}</option>
+                    </select>
+                    <div class="user-badge" style="margin-right: 5px;">
+                        <div class="user-avatar" id="user-avatar">U</div>
+                        <span class="user-name" id="user-name">User</span>
+                    </div>
+                    <button class="btn-icon theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Mavzu"
+                        style="font-size: 18px;">☀️</button>
+                </div>
+            </header>
+
+            <div class="content fade-in" id="page-content">
+                <div class="loader">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal container -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal" id="modal-body">
+            <!-- Dynamic modal content -->
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/i18n.js"></script>
+    <script type="module" src="/src/js/api.js"></script>
+    <script type="module" src="/src/js/businesses.js"></script>
+    <script type="module" src="/src/js/categories.js"></script>
+    <script type="module" src="/src/js/products.js"></script>
+    <script type="module" src="/src/js/clients.js"></script>
+    <script type="module" src="/src/js/employees.js"></script>
+    <script type="module" src="/src/js/transactions.js"></script>
+    <script type="module" src="/src/js/refunds.js"></script>
+    <script type="module" src="/src/js/debts.js"></script>
+    <script type="module" src="/src/js/expenses.js"></script>
+    <script type="module" src="/src/js/calculations.js"></script>
+    <script type="module" src="/src/js/admin.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script type="module" src="/src/js/app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const ls = document.getElementById('lang-selector-app');
+            if (ls) ls.value = currentLang;
+
+            // Initialize theme icon based on current root dataset
+            if (typeof updateThemeIcon === 'function') {
+                updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'dark');
+            }
+        });
+    </script>
+</body>
+
+</html>

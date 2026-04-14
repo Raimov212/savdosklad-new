@@ -1,0 +1,860 @@
+package handler
+
+import (
+	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+
+	"savdosklad/internal/entity"
+	"savdosklad/internal/usecase"
+	"savdosklad/pkg/i18n"
+)
+
+type BusinessHandler struct{ uc *usecase.BusinessUseCase }
+
+func NewBusinessHandler(uc *usecase.BusinessUseCase) *BusinessHandler {
+	return &BusinessHandler{uc: uc}
+}
+
+// @Summary Create business
+// @Tags Businesses
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param input body entity.CreateBusinessRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /businesses [post]
+func (h *BusinessHandler) Create(c *gin.Context) {
+	if c.GetInt("role") < 1 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can create businesses"})
+		return
+	}
+	var req entity.CreateBusinessRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userID := c.GetInt("userID")
+	id, err := h.uc.Create(userID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get all businesses
+// @Tags Businesses
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {array} entity.Business
+// @Router /businesses [get]
+func (h *BusinessHandler) GetAll(c *gin.Context) {
+	list, err := h.uc.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Get business by ID
+// @Tags Businesses
+// @Security BearerAuth
+// @Param id path int true "Business ID"
+// @Success 200 {object} entity.Business
+// @Router /businesses/{id} [get]
+func (h *BusinessHandler) GetByID(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	b, err := h.uc.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": i18n.Tc(c, i18n.MsgNotFound)})
+		return
+	}
+	c.JSON(http.StatusOK, b)
+}
+
+// @Summary Get businesses by user
+// @Tags Businesses
+// @Security BearerAuth
+// @Success 200 {array} entity.Business
+// @Router /businesses/my [get]
+func (h *BusinessHandler) GetMy(c *gin.Context) {
+	uid := c.GetInt("userID")
+	list, err := h.uc.GetByUserID(uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Update business
+// @Tags Businesses
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Param input body entity.UpdateBusinessRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /businesses/{id} [put]
+func (h *BusinessHandler) Update(c *gin.Context) {
+	if c.GetInt("role") < 1 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can update businesses"})
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateBusinessRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.Update(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// @Summary Delete business
+// @Tags Businesses
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Success 200 {object} map[string]string
+// @Router /businesses/{id} [delete]
+func (h *BusinessHandler) Delete(c *gin.Context) {
+	if c.GetInt("role") < 1 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can delete businesses"})
+		return
+	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.uc.Delete(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
+// ---- Category Handler ----
+type CategoryHandler struct{ uc *usecase.CategoryUseCase }
+
+func NewCategoryHandler(uc *usecase.CategoryUseCase) *CategoryHandler {
+	return &CategoryHandler{uc: uc}
+}
+
+// @Summary Create category
+// @Tags Categories
+// @Security BearerAuth
+// @Param input body entity.CreateCategoryRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /categories [post]
+func (h *CategoryHandler) Create(c *gin.Context) {
+	var req entity.CreateCategoryRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	id, err := h.uc.Create(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get categories by business
+// @Tags Categories
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.Category
+// @Router /categories [get]
+func (h *CategoryHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Update category
+// @Tags Categories
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Param input body entity.UpdateCategoryRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /categories/{id} [put]
+func (h *CategoryHandler) Update(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateCategoryRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.Update(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// @Summary Delete category
+// @Tags Categories
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Success 200 {object} map[string]string
+// @Router /categories/{id} [delete]
+func (h *CategoryHandler) Delete(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.uc.Delete(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
+// ---- Product Handler ----
+type ProductHandler struct{ uc *usecase.ProductUseCase }
+
+func NewProductHandler(uc *usecase.ProductUseCase) *ProductHandler { return &ProductHandler{uc: uc} }
+
+// @Summary Create product
+// @Tags Products
+// @Security BearerAuth
+// @Param input body entity.CreateProductRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /products [post]
+func (h *ProductHandler) Create(c *gin.Context) {
+	var req entity.CreateProductRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	id, err := h.uc.Create(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get products by business
+// @Tags Products
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.Product
+// @Router /products [get]
+func (h *ProductHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Get product by ID
+// @Tags Products
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Success 200 {object} entity.Product
+// @Router /products/{id} [get]
+func (h *ProductHandler) GetByID(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	p, err := h.uc.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": i18n.Tc(c, i18n.MsgNotFound)})
+		return
+	}
+	c.JSON(http.StatusOK, p)
+}
+
+// @Summary Update product
+// @Tags Products
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Param input body entity.UpdateProductRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /products/{id} [put]
+func (h *ProductHandler) Update(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateProductRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.Update(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// @Summary Delete product
+// @Tags Products
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Success 200 {object} map[string]string
+// @Router /products/{id} [delete]
+func (h *ProductHandler) Delete(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.uc.Delete(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
+// ---- Client Handler ----
+type ClientHandler struct{ uc *usecase.ClientUseCase }
+
+func NewClientHandler(uc *usecase.ClientUseCase) *ClientHandler { return &ClientHandler{uc: uc} }
+
+// @Summary Create client
+// @Tags Clients
+// @Security BearerAuth
+// @Param input body entity.CreateClientRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /clients [post]
+func (h *ClientHandler) Create(c *gin.Context) {
+	var req entity.CreateClientRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	id, err := h.uc.Create(req)
+	if err != nil {
+		if strings.Contains(err.Error(), "belongs to a staff member") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": i18n.Tc(c, i18n.MsgClientPhoneIsUser)})
+			return
+		}
+		if strings.Contains(err.Error(), "clients_business_phone_unique") || strings.Contains(err.Error(), "clients_phone_unique") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": i18n.Tc(c, i18n.MsgPhoneAlreadyRegistered)})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get clients by business
+// @Tags Clients
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.Client
+// @Router /clients [get]
+func (h *ClientHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Update client
+// @Tags Clients
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Param input body entity.UpdateClientRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /clients/{id} [put]
+func (h *ClientHandler) Update(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateClientRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.Update(id, req); err != nil {
+		if strings.Contains(err.Error(), "belongs to a staff member") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": i18n.Tc(c, i18n.MsgClientPhoneIsUser)})
+			return
+		}
+		if strings.Contains(err.Error(), "clients_business_phone_unique") || strings.Contains(err.Error(), "clients_phone_unique") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": i18n.Tc(c, i18n.MsgPhoneAlreadyRegistered)})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// @Summary Delete client
+// @Tags Clients
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Success 200 {object} map[string]string
+// @Router /clients/{id} [delete]
+func (h *ClientHandler) Delete(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.uc.Delete(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
+// ---- Transaction Handler ----
+type TransactionHandler struct{ uc *usecase.TransactionUseCase }
+
+func NewTransactionHandler(uc *usecase.TransactionUseCase) *TransactionHandler {
+	return &TransactionHandler{uc: uc}
+}
+
+// @Summary Create sale (total transaction + items)
+// @Tags Transactions
+// @Security BearerAuth
+// @Param input body entity.CreateTotalTransactionRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /transactions [post]
+func (h *TransactionHandler) Create(c *gin.Context) {
+	var req entity.CreateTotalTransactionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userID := c.GetInt("userID")
+	id, err := h.uc.CreateSale(userID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get transactions by business
+// @Tags Transactions
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.TotalTransaction
+// @Router /transactions [get]
+func (h *TransactionHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Get transaction items
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Total Transaction ID"
+// @Success 200 {array} entity.Transaction
+// @Router /transactions/{id}/items [get]
+func (h *TransactionHandler) GetItems(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	list, err := h.uc.GetItems(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Update total transaction (totals/payments)
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Total Transaction ID"
+// @Param input body entity.UpdateTotalTransactionRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /transactions/{id} [put]
+func (h *TransactionHandler) Update(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateTotalTransactionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.UpdateSale(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// @Summary Add items to transaction
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Total Transaction ID"
+// @Param businessId query int true "Business ID"
+// @Param input body []entity.CreateTransactionItemRequest true "Items"
+// @Success 200 {object} map[string]string
+// @Router /transactions/{id}/items [post]
+func (h *TransactionHandler) AddItems(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	var items []entity.CreateTransactionItemRequest
+	if err := c.ShouldBindJSON(&items); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.AddItemsToSale(id, bid, items); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// @Summary Send transaction receipt to customer via Telegram
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Total Transaction ID"
+// @Param pdf formData file false "PDF file"
+// @Param image formData file false "Image file"
+// @Success 200 {object} map[string]string
+// @Router /transactions/{id}/send-telegram [post]
+func (h *TransactionHandler) SendTelegram(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	var pdfBytes, imgBytes []byte
+
+	pdfFile, _ := c.FormFile("pdf")
+	if pdfFile != nil {
+		f, _ := pdfFile.Open()
+		defer f.Close()
+		buf := make([]byte, pdfFile.Size)
+		_, _ = f.Read(buf)
+		pdfBytes = buf
+	}
+
+	imgFile, _ := c.FormFile("image")
+	if imgFile != nil {
+		f, _ := imgFile.Open()
+		defer f.Close()
+		buf := make([]byte, imgFile.Size)
+		_, _ = f.Read(buf)
+		imgBytes = buf
+	}
+
+	if err := h.uc.SendReceipt(id, pdfBytes, imgBytes); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Sent successfully"})
+}
+
+// ---- Refund Handler ----
+type RefundHandler struct{ uc *usecase.RefundUseCase }
+
+func NewRefundHandler(uc *usecase.RefundUseCase) *RefundHandler { return &RefundHandler{uc: uc} }
+
+// @Summary Create refund
+// @Tags Refunds
+// @Security BearerAuth
+// @Param input body entity.CreateTotalRefundRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /refunds [post]
+func (h *RefundHandler) Create(c *gin.Context) {
+	var req entity.CreateTotalRefundRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userID := c.GetInt("userID")
+	id, err := h.uc.Create(userID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get refunds by business
+// @Tags Refunds
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.TotalRefund
+// @Router /refunds [get]
+func (h *RefundHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Get refund items
+// @Tags Refunds
+// @Security BearerAuth
+// @Param id path int true "Total Refund ID"
+// @Success 200 {array} entity.Refund
+// @Router /refunds/{id}/items [get]
+func (h *RefundHandler) GetItems(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	list, err := h.uc.GetItems(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// ---- Expense Handler ----
+type ExpenseHandler struct{ uc *usecase.ExpenseUseCase }
+
+func NewExpenseHandler(uc *usecase.ExpenseUseCase) *ExpenseHandler { return &ExpenseHandler{uc: uc} }
+
+// @Summary Create total expense
+// @Tags Expenses
+// @Security BearerAuth
+// @Param input body entity.CreateTotalExpenseRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /expenses [post]
+func (h *ExpenseHandler) Create(c *gin.Context) {
+	var req entity.CreateTotalExpenseRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	userID := c.GetInt("userID")
+	id, err := h.uc.CreateTotalExpense(userID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get expenses by business
+// @Tags Expenses
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.TotalExpense
+// @Router /expenses [get]
+func (h *ExpenseHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetTotalExpensesByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Create fixed cost
+// @Tags FixedCosts
+// @Security BearerAuth
+// @Param input body entity.CreateFixedCostRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /fixed-costs [post]
+func (h *ExpenseHandler) CreateFixedCost(c *gin.Context) {
+	var req entity.CreateFixedCostRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	id, err := h.uc.CreateFixedCost(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get fixed costs by business
+// @Tags FixedCosts
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.FixedCost
+// @Router /fixed-costs [get]
+func (h *ExpenseHandler) GetFixedCostsByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetFixedCostsByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Update fixed cost
+// @Tags FixedCosts
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Param input body entity.UpdateFixedCostRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /fixed-costs/{id} [put]
+func (h *ExpenseHandler) UpdateFixedCost(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateFixedCostRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.UpdateFixedCost(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// ---- Money Handler ----
+type MoneyHandler struct{ uc *usecase.MoneyUseCase }
+
+func NewMoneyHandler(uc *usecase.MoneyUseCase) *MoneyHandler { return &MoneyHandler{uc: uc} }
+
+// @Summary Create money movement
+// @Tags Money
+// @Security BearerAuth
+// @Param input body entity.CreateMoneyRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /money [post]
+func (h *MoneyHandler) Create(c *gin.Context) {
+	var req entity.CreateMoneyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	id, err := h.uc.Create(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get money by business
+// @Tags Money
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.Money
+// @Router /money [get]
+func (h *MoneyHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// ---- Calculation Handler ----
+type CalculationHandler struct{ uc *usecase.CalculationUseCase }
+
+func NewCalculationHandler(uc *usecase.CalculationUseCase) *CalculationHandler {
+	return &CalculationHandler{uc: uc}
+}
+
+// @Summary Create calculation
+// @Tags Calculations
+// @Security BearerAuth
+// @Param input body entity.CreateCalculationRequest true "Create"
+// @Success 201 {object} map[string]int
+// @Router /calculations [post]
+func (h *CalculationHandler) Create(c *gin.Context) {
+	var req entity.CreateCalculationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	id, err := h.uc.Create(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"id": id})
+}
+
+// @Summary Get calculations by business
+// @Tags Calculations
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Success 200 {array} entity.Calculation
+// @Router /calculations [get]
+func (h *CalculationHandler) GetByBusinessID(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	list, err := h.uc.GetByBusinessID(bid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+func RegisterRoutes(
+	r *gin.RouterGroup,
+	userH *UserHandler,
+	businessH *BusinessHandler,
+	categoryH *CategoryHandler,
+	productH *ProductHandler,
+	clientH *ClientHandler,
+	transactionH *TransactionHandler,
+	refundH *RefundHandler,
+	expenseH *ExpenseHandler,
+	moneyH *MoneyHandler,
+	calculationH *CalculationHandler,
+) {
+	// User Handlers
+	r.GET("/users", userH.GetAll)
+	r.GET("/users/my-employees", userH.GetMyEmployees)
+	r.POST("/users/employees", userH.CreateEmployee)
+	r.GET("/users/:id", userH.GetByID)
+	r.PUT("/users/:id", userH.Update)
+	r.DELETE("/users/:id", userH.Delete)
+
+	// Business Handlers
+	r.POST("/businesses", businessH.Create)
+	r.GET("/businesses", businessH.GetAll)
+	r.GET("/businesses/my", businessH.GetMy)
+	r.GET("/businesses/:id", businessH.GetByID)
+	r.PUT("/businesses/:id", businessH.Update)
+	r.DELETE("/businesses/:id", businessH.Delete)
+
+	// Category Handlers
+	r.POST("/categories", categoryH.Create)
+	r.GET("/categories", categoryH.GetByBusinessID)
+	r.PUT("/categories/:id", categoryH.Update)
+	r.DELETE("/categories/:id", categoryH.Delete)
+
+	// Product Handlers
+	r.POST("/products", productH.Create)
+	r.GET("/products", productH.GetByBusinessID)
+	r.GET("/products/:id", productH.GetByID)
+	r.PUT("/products/:id", productH.Update)
+	r.DELETE("/products/:id", productH.Delete)
+
+	// Client Handlers
+	r.POST("/clients", clientH.Create)
+	r.GET("/clients", clientH.GetByBusinessID)
+	r.PUT("/clients/:id", clientH.Update)
+	r.DELETE("/clients/:id", clientH.Delete)
+
+	// Transaction Handlers
+	r.POST("/transactions", transactionH.Create)
+	r.GET("/transactions", transactionH.GetByBusinessID)
+	r.PUT("/transactions/:id", transactionH.Update)
+	r.GET("/transactions/:id/items", transactionH.GetItems)
+	r.POST("/transactions/:id/items", transactionH.AddItems)
+	r.POST("/transactions/:id/send-telegram", transactionH.SendTelegram)
+
+	// Refund Handlers
+	r.POST("/refunds", refundH.Create)
+	r.GET("/refunds", refundH.GetByBusinessID)
+	r.GET("/refunds/:id/items", refundH.GetItems)
+	// Expense Handlers
+	r.POST("/expenses", expenseH.Create)
+	r.GET("/expenses", expenseH.GetByBusinessID)
+	r.POST("/fixed-costs", expenseH.CreateFixedCost)
+	r.GET("/fixed-costs", expenseH.GetFixedCostsByBusinessID)
+	r.PUT("/fixed-costs/:id", expenseH.UpdateFixedCost)
+
+	// Money Handlers
+	r.POST("/money", moneyH.Create)
+	r.GET("/money", moneyH.GetByBusinessID)
+
+	// Calculation Handlers
+	r.POST("/calculations", calculationH.Create)
+	r.GET("/calculations", calculationH.GetByBusinessID)
+}

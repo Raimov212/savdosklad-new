@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS fixed_facted_costs (
+    id SERIAL PRIMARY KEY,
+    "fixedCostId" INTEGER,
+    date DATE NOT NULL,
+    amount NUMERIC NOT NULL DEFAULT 0,
+    "businessId" INTEGER NOT NULL REFERENCES businesses(id),
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

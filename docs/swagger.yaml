@@ -1,0 +1,3506 @@
+basePath: /api/v1
+definitions:
+  entity.AddCartItemRequest:
+    properties:
+      productId:
+        type: integer
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - productId
+    - quantity
+    type: object
+  entity.Address:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      createdAt:
+        type: string
+      customerId:
+        type: integer
+      district:
+        type: string
+      id:
+        type: integer
+      isDefault:
+        type: boolean
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.Business:
+    properties:
+      address:
+        type: string
+      balance:
+        type: number
+      businessAccountNumber:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      districtId:
+        type: integer
+      districtName:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      marketId:
+        type: integer
+      marketName:
+        type: string
+      name:
+        type: string
+      orgName:
+        type: string
+      organizationId:
+        type: integer
+      regionId:
+        type: integer
+      regionName:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+    type: object
+  entity.Calculation:
+    properties:
+      addedMoney:
+        type: number
+      businessId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      incomeTax:
+        type: number
+      month:
+        type: integer
+      profit:
+        type: number
+      salary:
+        type: number
+      salaryTax:
+        type: number
+      totalExpense:
+        type: number
+      totalFixedCosts:
+        type: number
+      totalIncome:
+        type: number
+      totalSale:
+        type: number
+      updatedAt:
+        type: string
+      year:
+        type: integer
+    type: object
+  entity.Cart:
+    properties:
+      createdAt:
+        type: string
+      customerId:
+        type: integer
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/entity.CartItem'
+        type: array
+      total:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+  entity.CartItem:
+    properties:
+      cartId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      marketplaceProduct:
+        $ref: '#/definitions/entity.MarketplaceProduct'
+      marketplaceProductId:
+        type: integer
+      product:
+        $ref: '#/definitions/entity.Product'
+      quantity:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  entity.Category:
+    properties:
+      businessId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.Client:
+    properties:
+      address:
+        type: string
+      businessId:
+        type: integer
+      createdAt:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: integer
+      language:
+        type: string
+      phone:
+        type: string
+      telegramUserId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  entity.CreateAddressRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      district:
+        type: string
+      isDefault:
+        type: boolean
+      title:
+        type: string
+    required:
+    - address
+    - title
+    type: object
+  entity.CreateBusinessRequest:
+    properties:
+      address:
+        type: string
+      balance:
+        type: number
+      businessAccountNumber:
+        type: string
+      description:
+        type: string
+      districtId:
+        type: integer
+      image:
+        type: string
+      marketId:
+        type: integer
+      name:
+        type: string
+      organizationId:
+        type: integer
+      regionId:
+        type: integer
+    required:
+    - name
+    type: object
+  entity.CreateCalculationRequest:
+    properties:
+      addedMoney:
+        type: number
+      businessId:
+        type: integer
+      incomeTax:
+        type: number
+      month:
+        type: integer
+      profit:
+        type: number
+      salary:
+        type: number
+      salaryTax:
+        type: number
+      totalExpense:
+        type: number
+      totalFixedCosts:
+        type: number
+      totalIncome:
+        type: number
+      totalSale:
+        type: number
+      year:
+        type: integer
+    required:
+    - businessId
+    - month
+    - year
+    type: object
+  entity.CreateCategoryRequest:
+    properties:
+      businessId:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+    required:
+    - businessId
+    - name
+    type: object
+  entity.CreateClientRequest:
+    properties:
+      address:
+        type: string
+      businessId:
+        type: integer
+      fullName:
+        type: string
+      phone:
+        type: string
+    required:
+    - businessId
+    - fullName
+    - phone
+    type: object
+  entity.CreateDistrictRequest:
+    properties:
+      name:
+        type: string
+      regionId:
+        type: integer
+    required:
+    - name
+    - regionId
+    type: object
+  entity.CreateExpenseItemRequest:
+    properties:
+      description:
+        type: string
+      expenseDate:
+        type: string
+      name:
+        type: string
+      value:
+        type: number
+    required:
+    - name
+    - value
+    type: object
+  entity.CreateFixedCostRequest:
+    properties:
+      amount:
+        type: number
+      businessId:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      type:
+        type: integer
+    required:
+    - amount
+    - businessId
+    - name
+    - type
+    type: object
+  entity.CreateMarketRequest:
+    properties:
+      address:
+        type: string
+      districtId:
+        type: integer
+      name:
+        type: string
+    required:
+    - districtId
+    - name
+    type: object
+  entity.CreateMarketplaceCategoryRequest:
+    properties:
+      categoryId:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+    required:
+    - categoryId
+    - name
+    type: object
+  entity.CreateMarketplaceProductRequest:
+    properties:
+      discount:
+        type: number
+      fullDescription:
+        type: string
+      images:
+        type: string
+      marketplaceCategoryId:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      productId:
+        type: integer
+      quantity:
+        minimum: 1
+        type: integer
+      shortDescription:
+        type: string
+    required:
+    - name
+    - price
+    - productId
+    - quantity
+    type: object
+  entity.CreateMoneyRequest:
+    properties:
+      amountType:
+        type: integer
+      businessId:
+        type: integer
+      description:
+        type: string
+      value:
+        type: number
+    required:
+    - amountType
+    - businessId
+    - value
+    type: object
+  entity.CreateOrganizationRequest:
+    properties:
+      bankAccount:
+        type: string
+      bankName:
+        type: string
+      email:
+        type: string
+      legalAddress:
+        type: string
+      logo:
+        type: string
+      mfo:
+        type: string
+      orgName:
+        type: string
+      orgType:
+        type: string
+      phoneNumber:
+        type: string
+      stir:
+        type: string
+    required:
+    - orgName
+    - orgType
+    type: object
+  entity.CreateProductRequest:
+    properties:
+      barcode:
+        type: string
+      businessId:
+        type: integer
+      categoryId:
+        type: integer
+      country:
+        type: string
+      discount:
+        type: number
+      fullDescription:
+        type: string
+      images:
+        type: string
+      lokalCode:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      shortDescription:
+        type: string
+    required:
+    - businessId
+    - categoryId
+    - name
+    - price
+    - quantity
+    type: object
+  entity.CreateRefundItemRequest:
+    properties:
+      description:
+        type: string
+      productId:
+        type: integer
+      productPrice:
+        type: number
+      productQuantity:
+        type: integer
+      transactionId:
+        type: integer
+    required:
+    - productId
+    - productPrice
+    - productQuantity
+    type: object
+  entity.CreateRegionRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  entity.CreateTotalExpenseRequest:
+    properties:
+      businessId:
+        type: integer
+      card:
+        type: number
+      cash:
+        type: number
+      description:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/entity.CreateExpenseItemRequest'
+        type: array
+      total:
+        type: number
+    required:
+    - businessId
+    - total
+    type: object
+  entity.CreateTotalRefundRequest:
+    properties:
+      businessId:
+        type: integer
+      card:
+        type: number
+      cash:
+        type: number
+      click:
+        type: number
+      clientId:
+        type: integer
+      clientNumber:
+        type: string
+      debt:
+        type: number
+      debtLimitDate:
+        type: string
+      description:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/entity.CreateRefundItemRequest'
+        type: array
+      total:
+        type: number
+    required:
+    - businessId
+    - items
+    - total
+    type: object
+  entity.CreateTotalTransactionRequest:
+    properties:
+      businessId:
+        type: integer
+      card:
+        type: number
+      cash:
+        type: number
+      click:
+        type: number
+      clientId:
+        type: integer
+      clientNumber:
+        type: string
+      debt:
+        type: number
+      debtLimitDate:
+        type: string
+      description:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/entity.CreateTransactionItemRequest'
+        type: array
+      total:
+        type: number
+    required:
+    - businessId
+    - items
+    - total
+    type: object
+  entity.CreateTransactionItemRequest:
+    properties:
+      description:
+        type: string
+      productId:
+        type: integer
+      productPrice:
+        type: number
+      productQuantity:
+        type: integer
+    required:
+    - productId
+    - productPrice
+    - productQuantity
+    type: object
+  entity.Customer:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      lastName:
+        type: string
+      phoneNumber:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.District:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      regionId:
+        type: integer
+      regionName:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.ExtendSubscriptionRequest:
+    properties:
+      expirationDate:
+        example: "2026-04-28 00:00:00"
+        type: string
+      userName:
+        type: string
+    required:
+    - expirationDate
+    - userName
+    type: object
+  entity.FixedCost:
+    properties:
+      amount:
+        type: number
+      businessId:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      isDeleted:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  entity.LoginCustomerRequest:
+    properties:
+      password:
+        type: string
+      phoneNumber:
+        type: string
+    required:
+    - password
+    - phoneNumber
+    type: object
+  entity.LoginCustomerResponse:
+    properties:
+      customer:
+        $ref: '#/definitions/entity.Customer'
+      token:
+        type: string
+    type: object
+  entity.LoginRequest:
+    properties:
+      password:
+        type: string
+      userName:
+        type: string
+    required:
+    - password
+    - userName
+    type: object
+  entity.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/entity.User'
+    type: object
+  entity.Market:
+    properties:
+      address:
+        type: string
+      createdAt:
+        type: string
+      districtId:
+        type: integer
+      districtName:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.MarketplaceCategory:
+    properties:
+      categoryId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      isVisible:
+        type: boolean
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.MarketplaceProduct:
+    properties:
+      createdAt:
+        type: string
+      discount:
+        type: number
+      fullDescription:
+        type: string
+      id:
+        type: integer
+      images:
+        type: string
+      isVisible:
+        type: boolean
+      marketplaceCategoryId:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      productId:
+        type: integer
+      quantity:
+        type: integer
+      shortDescription:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.Money:
+    properties:
+      amountType:
+        type: integer
+      businessId:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
+      value:
+        type: number
+    type: object
+  entity.Organization:
+    properties:
+      bankAccount:
+        type: string
+      bankName:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      legalAddress:
+        type: string
+      logo:
+        type: string
+      mfo:
+        type: string
+      orgName:
+        type: string
+      orgType:
+        type: string
+      phoneNumber:
+        type: string
+      stir:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+    type: object
+  entity.Product:
+    properties:
+      barcode:
+        type: string
+      businessId:
+        type: integer
+      categoryId:
+        type: integer
+      country:
+        type: string
+      createdAt:
+        type: string
+      discount:
+        type: number
+      fullDescription:
+        type: string
+      id:
+        type: integer
+      images:
+        type: string
+      isDeleted:
+        type: boolean
+      lokalCode:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      shortDescription:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.Region:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entity.RegisterCustomerRequest:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      image:
+        type: string
+      lastName:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phoneNumber:
+        type: string
+    required:
+    - firstName
+    - lastName
+    - password
+    - phoneNumber
+    type: object
+  entity.RegisterRequest:
+    properties:
+      firstName:
+        type: string
+      image:
+        type: string
+      lastName:
+        type: string
+      marketId:
+        type: integer
+      password:
+        minLength: 6
+        type: string
+      phoneNumber:
+        type: string
+      userName:
+        type: string
+    required:
+    - firstName
+    - lastName
+    - password
+    - userName
+    type: object
+  entity.TotalExpense:
+    properties:
+      businessId:
+        type: integer
+      card:
+        type: number
+      cash:
+        type: number
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      total:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+  entity.TotalRefund:
+    properties:
+      businessId:
+        type: integer
+      businessName:
+        description: Join field
+        type: string
+      card:
+        type: number
+      cash:
+        type: number
+      click:
+        type: number
+      clientId:
+        type: integer
+      clientName:
+        description: Join field
+        type: string
+      clientNumber:
+        type: string
+      createdAt:
+        type: string
+      debt:
+        type: number
+      debtLimitDate:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      total:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+  entity.TotalTransaction:
+    properties:
+      businessId:
+        type: integer
+      businessName:
+        description: Join field
+        type: string
+      card:
+        type: number
+      cash:
+        type: number
+      click:
+        type: number
+      clientId:
+        type: integer
+      clientName:
+        description: Join field
+        type: string
+      clientNumber:
+        type: string
+      createdAt:
+        type: string
+      debt:
+        type: number
+      debtLimitDate:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      total:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+  entity.Transaction:
+    properties:
+      businessId:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      productBarcode:
+        description: Join field
+        type: string
+      productId:
+        type: integer
+      productName:
+        description: Join field
+        type: string
+      productPrice:
+        type: number
+      productQuantity:
+        type: integer
+      refundedQuantity:
+        description: Join field
+        type: integer
+      refundedSum:
+        description: Join field
+        type: number
+      totalTransactionId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  entity.UpdateAddressRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      district:
+        type: string
+      isDefault:
+        type: boolean
+      title:
+        type: string
+    type: object
+  entity.UpdateBusinessRequest:
+    properties:
+      address:
+        type: string
+      balance:
+        type: number
+      businessAccountNumber:
+        type: string
+      description:
+        type: string
+      districtId:
+        type: integer
+      image:
+        type: string
+      marketId:
+        type: integer
+      name:
+        type: string
+      organizationId:
+        type: integer
+      regionId:
+        type: integer
+    type: object
+  entity.UpdateCartItemRequest:
+    properties:
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - quantity
+    type: object
+  entity.UpdateCategoryRequest:
+    properties:
+      image:
+        type: string
+      name:
+        type: string
+    type: object
+  entity.UpdateClientRequest:
+    properties:
+      address:
+        type: string
+      fullName:
+        type: string
+      phone:
+        type: string
+    type: object
+  entity.UpdateCustomerRequest:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      image:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+    type: object
+  entity.UpdateDistrictRequest:
+    properties:
+      name:
+        type: string
+      regionId:
+        type: integer
+    type: object
+  entity.UpdateFixedCostRequest:
+    properties:
+      amount:
+        type: number
+      description:
+        type: string
+      isDeleted:
+        type: boolean
+      name:
+        type: string
+      type:
+        type: integer
+    type: object
+  entity.UpdateMarketRequest:
+    properties:
+      address:
+        type: string
+      districtId:
+        type: integer
+      name:
+        type: string
+    type: object
+  entity.UpdateMarketplaceCategoryRequest:
+    properties:
+      image:
+        type: string
+      isVisible:
+        type: boolean
+      name:
+        type: string
+    type: object
+  entity.UpdateMarketplaceProductRequest:
+    properties:
+      discount:
+        type: number
+      fullDescription:
+        type: string
+      images:
+        type: string
+      isVisible:
+        type: boolean
+      marketplaceCategoryId:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      shortDescription:
+        type: string
+    type: object
+  entity.UpdateOrganizationRequest:
+    properties:
+      bankAccount:
+        type: string
+      bankName:
+        type: string
+      email:
+        type: string
+      legalAddress:
+        type: string
+      logo:
+        type: string
+      mfo:
+        type: string
+      orgName:
+        type: string
+      orgType:
+        type: string
+      phoneNumber:
+        type: string
+      stir:
+        type: string
+    type: object
+  entity.UpdateProductRequest:
+    properties:
+      barcode:
+        type: string
+      categoryId:
+        type: integer
+      country:
+        type: string
+      discount:
+        type: number
+      fullDescription:
+        type: string
+      images:
+        type: string
+      isDeleted:
+        type: boolean
+      lokalCode:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      shortDescription:
+        type: string
+    type: object
+  entity.UpdateRegionRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  entity.UpdateTotalTransactionRequest:
+    properties:
+      card:
+        type: number
+      cash:
+        type: number
+      click:
+        type: number
+      clientId:
+        type: integer
+      clientNumber:
+        type: string
+      debt:
+        type: number
+      debtLimitDate:
+        type: string
+      description:
+        type: string
+      total:
+        type: number
+    type: object
+  entity.UpdateUserRequest:
+    properties:
+      expirationDate:
+        type: string
+      firstName:
+        type: string
+      image:
+        type: string
+      isExpired:
+        type: boolean
+      isVerified:
+        type: boolean
+      lastName:
+        type: string
+      marketId:
+        type: integer
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      role:
+        type: integer
+    type: object
+  entity.User:
+    properties:
+      createdAt:
+        type: string
+      expirationDate:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      inviterCode:
+        type: string
+      isExpired:
+        type: boolean
+      isVerified:
+        type: boolean
+      language:
+        type: string
+      lastName:
+        type: string
+      marketId:
+        type: integer
+      offerCode:
+        type: string
+      phoneNumber:
+        type: string
+      role:
+        type: integer
+      telegramUserId:
+        type: integer
+      updatedAt:
+        type: string
+      userName:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: SavdoSklad biznes boshqaruv tizimi API hujjatlari
+  title: SavdoSklad API
+  version: "1.0"
+paths:
+  /admin/districts:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Filter by Region ID
+        in: query
+        name: regionId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.District'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all districts (optionally by regionId)
+      tags:
+      - Admin Geography
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create district request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateDistrictRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a district
+      tags:
+      - Admin Geography
+  /admin/districts/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: District ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete district
+      tags:
+      - Admin Geography
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: District ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update district request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateDistrictRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update district
+      tags:
+      - Admin Geography
+  /admin/marketplace/categories:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.MarketplaceCategory'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Marketplace kategoriyalar ro'yxati
+      tags:
+      - Admin - Marketplace Categories
+    post:
+      consumes:
+      - application/json
+      description: Bazadagi kategoriyani marketplace-ga qo'shish
+      parameters:
+      - description: Kategoriya ma'lumotlari
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateMarketplaceCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.MarketplaceCategory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Marketplace kategoriya qo'shish
+      tags:
+      - Admin - Marketplace Categories
+  /admin/marketplace/categories/{id}:
+    delete:
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Marketplace kategoriya o'chirish
+      tags:
+      - Admin - Marketplace Categories
+    get:
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.MarketplaceCategory'
+      security:
+      - BearerAuth: []
+      summary: Marketplace kategoriya ID bo'yicha
+      tags:
+      - Admin - Marketplace Categories
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Yangilanadigan maydonlar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateMarketplaceCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Marketplace kategoriya yangilash
+      tags:
+      - Admin - Marketplace Categories
+  /admin/marketplace/products:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.MarketplaceProduct'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Marketplace mahsulotlar ro'yxati
+      tags:
+      - Admin - Marketplace Products
+    post:
+      consumes:
+      - application/json
+      description: Bazadagi mahsulotni marketplace-ga qo'shish (miqdor sinxronizatsiyasi)
+      parameters:
+      - description: Mahsulot ma'lumotlari
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateMarketplaceProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.MarketplaceProduct'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Marketplace mahsulot qo'shish
+      tags:
+      - Admin - Marketplace Products
+  /admin/marketplace/products/{id}:
+    delete:
+      description: O'chirilganda miqdor asosiy bazaga qaytariladi
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Marketplace mahsulot o'chirish
+      tags:
+      - Admin - Marketplace Products
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.MarketplaceProduct'
+      security:
+      - BearerAuth: []
+      summary: Marketplace mahsulot ID bo'yicha
+      tags:
+      - Admin - Marketplace Products
+    put:
+      consumes:
+      - application/json
+      description: Miqdor o'zgarganda asosiy bazadan sinxronizatsiya qilinadi
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Yangilanadigan maydonlar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateMarketplaceProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Marketplace mahsulot yangilash
+      tags:
+      - Admin - Marketplace Products
+  /admin/markets:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Filter by District ID
+        in: query
+        name: districtId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Market'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all markets (optionally by districtId)
+      tags:
+      - Admin Geography
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create market request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateMarketRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a market
+      tags:
+      - Admin Geography
+  /admin/markets/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Market ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete market
+      tags:
+      - Admin Geography
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Market ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update market request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateMarketRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update market
+      tags:
+      - Admin Geography
+  /admin/regions:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Region'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all regions
+      tags:
+      - Admin Geography
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create region request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateRegionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a region
+      tags:
+      - Admin Geography
+  /admin/regions/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Region ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete region
+      tags:
+      - Admin Geography
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Region ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update region request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateRegionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update region
+      tags:
+      - Admin Geography
+  /admin/users:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.User'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all users (Admin only)
+      tags:
+      - Admin User Management
+  /admin/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - Admin User Management
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user details/role/expiration
+      tags:
+      - Admin User Management
+  /admin/users/extend:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Extend subscription request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.ExtendSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Extend user subscription by username
+      tags:
+      - Admin User Management
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.LoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Register
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
+  /businesses:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Business'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all businesses
+      tags:
+      - Businesses
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateBusinessRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create business
+      tags:
+      - Businesses
+  /businesses/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete business
+      tags:
+      - Businesses
+    get:
+      parameters:
+      - description: Business ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Business'
+      security:
+      - BearerAuth: []
+      summary: Get business by ID
+      tags:
+      - Businesses
+    put:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateBusinessRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update business
+      tags:
+      - Businesses
+  /businesses/my:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Business'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get businesses by user
+      tags:
+      - Businesses
+  /calculations:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Calculation'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get calculations by business
+      tags:
+      - Calculations
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateCalculationRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create calculation
+      tags:
+      - Calculations
+  /categories:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Category'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get categories by business
+      tags:
+      - Categories
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateCategoryRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete category
+      tags:
+      - Categories
+    put:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateCategoryRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update category
+      tags:
+      - Categories
+  /clients:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Client'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get clients by business
+      tags:
+      - Clients
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateClientRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create client
+      tags:
+      - Clients
+  /clients/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete client
+      tags:
+      - Clients
+    put:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateClientRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update client
+      tags:
+      - Clients
+  /districts:
+    get:
+      parameters:
+      - description: Region ID
+        in: query
+        name: regionId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.District'
+            type: array
+      summary: Get all districts by region
+      tags:
+      - Geography
+  /excel/categories/export:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Export categories to Excel
+      tags:
+      - Excel
+  /excel/categories/import:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Business ID
+        in: formData
+        name: businessId
+        required: true
+        type: integer
+      - description: Excel file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Import categories from Excel
+      tags:
+      - Excel
+  /excel/categories/template:
+    get:
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Download category import template
+      tags:
+      - Excel
+  /excel/products/export:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Export products to Excel
+      tags:
+      - Excel
+  /excel/products/import:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Business ID
+        in: formData
+        name: businessId
+        required: true
+        type: integer
+      - description: Excel file (.xlsx)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Import products from Excel
+      tags:
+      - Excel
+  /excel/products/template:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Download product import template
+      tags:
+      - Excel
+  /expenses:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.TotalExpense'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get expenses by business
+      tags:
+      - Expenses
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateTotalExpenseRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create total expense
+      tags:
+      - Expenses
+  /fixed-costs:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.FixedCost'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get fixed costs by business
+      tags:
+      - FixedCosts
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateFixedCostRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create fixed cost
+      tags:
+      - FixedCosts
+  /fixed-costs/{id}:
+    put:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateFixedCostRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update fixed cost
+      tags:
+      - FixedCosts
+  /marketplace/addresses:
+    get:
+      description: Customer manzillari ro'yxati
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Address'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Manzillar ro'yxati
+      tags:
+      - Marketplace - Addresses
+    post:
+      consumes:
+      - application/json
+      description: Yangi yetkazib berish manzili qo'shish
+      parameters:
+      - description: Manzil ma'lumotlari
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateAddressRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Address'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Manzil qo'shish
+      tags:
+      - Marketplace - Addresses
+  /marketplace/addresses/{id}:
+    delete:
+      description: Manzilni o'chirib tashlash
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Manzilni o'chirish
+      tags:
+      - Marketplace - Addresses
+    put:
+      consumes:
+      - application/json
+      description: Mavjud manzilni yangilash
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Yangilanadigan maydonlar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateAddressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Manzilni yangilash
+      tags:
+      - Marketplace - Addresses
+  /marketplace/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Telefon raqam va parol bilan kirish
+      parameters:
+      - description: Login ma'lumotlari
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.LoginCustomerResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Customer kirish
+      tags:
+      - Marketplace - Auth
+  /marketplace/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Yangi marketplace customer yaratish
+      parameters:
+      - description: Customer ma'lumotlari
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.RegisterCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Customer ro'yxatdan o'tish
+      tags:
+      - Marketplace - Auth
+  /marketplace/businesses:
+    get:
+      description: Barcha bizneslar (do'konlar)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Business'
+            type: array
+      summary: Bizneslar ro'yxati
+      tags:
+      - Marketplace - Catalog
+  /marketplace/cart:
+    get:
+      description: Joriy customer savatini mahsulotlar bilan ko'rish
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Cart'
+      security:
+      - BearerAuth: []
+      summary: Savatni ko'rish
+      tags:
+      - Marketplace - Cart
+  /marketplace/cart/items:
+    post:
+      consumes:
+      - application/json
+      description: Marketplace mahsulotni savatga qo'shish
+      parameters:
+      - description: Mahsulot va soni
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.AddCartItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.CartItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Savatga qo'shish
+      tags:
+      - Marketplace - Cart
+  /marketplace/cart/items/{id}:
+    delete:
+      description: Mahsulotni savatdan olib tashlash
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Savatdan o'chirish
+      tags:
+      - Marketplace - Cart
+    put:
+      consumes:
+      - application/json
+      description: Savatdagi mahsulot sonini o'zgartirish
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Yangi son
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateCartItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Savat elementini yangilash
+      tags:
+      - Marketplace - Cart
+  /marketplace/categories:
+    get:
+      description: Ko'rinadigan marketplace kategoriyalar
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.MarketplaceCategory'
+            type: array
+      summary: Marketplace kategoriyalar ro'yxati
+      tags:
+      - Marketplace - Catalog
+  /marketplace/products:
+    get:
+      description: Ommaviy katalogdagi mahsulotlar (filtrlash, qidiruv, pagination)
+      parameters:
+      - description: Qidiruv so'zi
+        in: query
+        name: search
+        type: string
+      - description: Marketplace kategoriya ID
+        in: query
+        name: categoryId
+        type: integer
+      - description: Minimal narx
+        in: query
+        name: minPrice
+        type: number
+      - description: Maksimal narx
+        in: query
+        name: maxPrice
+        type: number
+      - description: 'Saralash: price_asc, price_desc, newest, name'
+        in: query
+        name: sortBy
+        type: string
+      - description: Sahifa raqami
+        in: query
+        name: page
+        type: integer
+      - description: Sahifadagi elementlar soni
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Marketplace mahsulotlar ro'yxati
+      tags:
+      - Marketplace - Catalog
+  /marketplace/products/{id}:
+    get:
+      description: Bitta marketplace mahsulotning to'liq ma'lumotlari
+      parameters:
+      - description: Marketplace Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.MarketplaceProduct'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Marketplace mahsulot batafsil
+      tags:
+      - Marketplace - Catalog
+  /marketplace/profile:
+    get:
+      description: Joriy customer profilini ko'rish
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Customer'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Customer profili
+      tags:
+      - Marketplace - Profile
+    put:
+      consumes:
+      - application/json
+      description: Customer ma'lumotlarini yangilash
+      parameters:
+      - description: Yangilanadigan maydonlar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Customer'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Customer profilini yangilash
+      tags:
+      - Marketplace - Profile
+  /markets:
+    get:
+      parameters:
+      - description: District ID
+        in: query
+        name: districtId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Market'
+            type: array
+      summary: Get all markets by district
+      tags:
+      - Geography
+  /money:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Money'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get money by business
+      tags:
+      - Money
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateMoneyRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create money movement
+      tags:
+      - Money
+  /organizations:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateOrganizationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create organization
+      tags:
+      - Organizations
+  /organizations/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete organization
+      tags:
+      - Organizations
+    get:
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Organization'
+      security:
+      - BearerAuth: []
+      summary: Get organization by ID
+      tags:
+      - Organizations
+    put:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateOrganizationRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update organization
+      tags:
+      - Organizations
+  /organizations/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Organization'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get my organizations
+      tags:
+      - Organizations
+  /products:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Product'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get products by business
+      tags:
+      - Products
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateProductRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete product
+      tags:
+      - Products
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Product'
+      security:
+      - BearerAuth: []
+      summary: Get product by ID
+      tags:
+      - Products
+    put:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateProductRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update product
+      tags:
+      - Products
+  /refunds:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.TotalRefund'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get refunds by business
+      tags:
+      - Refunds
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateTotalRefundRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create refund
+      tags:
+      - Refunds
+  /regions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Region'
+            type: array
+      summary: Get all regions
+      tags:
+      - Geography
+  /transactions:
+    get:
+      parameters:
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.TotalTransaction'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get transactions by business
+      tags:
+      - Transactions
+    post:
+      parameters:
+      - description: Create
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateTotalTransactionRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create sale (total transaction + items)
+      tags:
+      - Transactions
+  /transactions/{id}:
+    put:
+      parameters:
+      - description: Total Transaction ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateTotalTransactionRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update total transaction (totals/payments)
+      tags:
+      - Transactions
+  /transactions/{id}/items:
+    get:
+      parameters:
+      - description: Total Transaction ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Transaction'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get transaction items
+      tags:
+      - Transactions
+    post:
+      parameters:
+      - description: Total Transaction ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Business ID
+        in: query
+        name: businessId
+        required: true
+        type: integer
+      - description: Items
+        in: body
+        name: input
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/entity.CreateTransactionItemRequest'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add items to transaction
+      tags:
+      - Transactions
+  /transactions/{id}/send-telegram:
+    post:
+      parameters:
+      - description: Total Transaction ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: PDF file
+        in: formData
+        name: pdf
+        type: file
+      - description: Image file
+        in: formData
+        name: image
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Send transaction receipt to customer via Telegram
+      tags:
+      - Transactions
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Image file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload image
+      tags:
+      - Upload
+  /users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.User'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateUserRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

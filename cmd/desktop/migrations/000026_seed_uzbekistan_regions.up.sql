@@ -1,0 +1,285 @@
+INSERT INTO regions (id, name, "createdAt", "updatedAt") VALUES
+(1, 'Qoraqalpog''iston Respublikasi', NOW(), NOW()),
+(2, 'Andijon viloyati', NOW(), NOW()),
+(3, 'Buxoro viloyati', NOW(), NOW()),
+(4, 'Jizzax viloyati', NOW(), NOW()),
+(5, 'Qashqadaryo viloyati', NOW(), NOW()),
+(6, 'Navoiy viloyati', NOW(), NOW()),
+(7, 'Namangan viloyati', NOW(), NOW()),
+(8, 'Samarqand viloyati', NOW(), NOW()),
+(9, 'Surxondaryo viloyati', NOW(), NOW()),
+(10, 'Sirdaryo viloyati', NOW(), NOW()),
+(11, 'Toshkent viloyati', NOW(), NOW()),
+(12, 'Farg''ona viloyati', NOW(), NOW()),
+(13, 'Xorazm viloyati', NOW(), NOW()),
+(14, 'Toshkent shahri', NOW(), NOW())
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
+
+-- Reset regions sequence
+SELECT setval(pg_get_serial_sequence('regions', 'id'), coalesce(max(id),0) + 1, false) FROM regions;
+
+-- Insert districts
+INSERT INTO districts ("regionId", name, "createdAt", "updatedAt") VALUES
+-- Qoraqalpog'iston (1)
+(1, 'Amudaryo tumani', NOW(), NOW()),
+(1, 'Beruniy tumani', NOW(), NOW()),
+(1, 'Chimboy tumani', NOW(), NOW()),
+(1, 'Ellikqal''a tumani', NOW(), NOW()),
+(1, 'Kegeyli tumani', NOW(), NOW()),
+(1, 'Mo''ynoq tumani', NOW(), NOW()),
+(1, 'Nukus shahri', NOW(), NOW()),
+(1, 'Nukus tumani', NOW(), NOW()),
+(1, 'Qanliko''l tumani', NOW(), NOW()),
+(1, 'Qo''ng''irot tumani', NOW(), NOW()),
+(1, 'Qorao''zak tumani', NOW(), NOW()),
+(1, 'Shumanay tumani', NOW(), NOW()),
+(1, 'Taxtako''pir tumani', NOW(), NOW()),
+(1, 'To''rtko''l tumani', NOW(), NOW()),
+(1, 'Xo''jayli tumani', NOW(), NOW()),
+(1, 'Taxiatosh tumani', NOW(), NOW()),
+(1, 'Bo''zatov tumani', NOW(), NOW()),
+
+-- Andijon viloyati (2)
+(2, 'Andijon shahri', NOW(), NOW()),
+(2, 'Andijon tumani', NOW(), NOW()),
+(2, 'Asaka tumani', NOW(), NOW()),
+(2, 'Baliqchi tumani', NOW(), NOW()),
+(2, 'Bo''z tumani', NOW(), NOW()),
+(2, 'Buloqboshi tumani', NOW(), NOW()),
+(2, 'Xo''jaobod tumani', NOW(), NOW()),
+(2, 'Izboskan tumani', NOW(), NOW()),
+(2, 'Jalaquduq tumani', NOW(), NOW()),
+(2, 'Marhamat tumani', NOW(), NOW()),
+(2, 'Oltinko''l tumani', NOW(), NOW()),
+(2, 'Paxtaobod tumani', NOW(), NOW()),
+(2, 'Qo''rg''ontepa tumani', NOW(), NOW()),
+(2, 'Shahrixon tumani', NOW(), NOW()),
+(2, 'Ulug''nor tumani', NOW(), NOW()),
+(2, 'Xonabod shahri', NOW(), NOW()),
+
+-- Buxoro viloyati (3)
+(3, 'Buxoro shahri', NOW(), NOW()),
+(3, 'Buxoro tumani', NOW(), NOW()),
+(3, 'G''ijduvon tumani', NOW(), NOW()),
+(3, 'Jondor tumani', NOW(), NOW()),
+(3, 'Kogon shahri', NOW(), NOW()),
+(3, 'Kogon tumani', NOW(), NOW()),
+(3, 'Olot tumani', NOW(), NOW()),
+(3, 'Peshku tumani', NOW(), NOW()),
+(3, 'Qorako''l tumani', NOW(), NOW()),
+(3, 'Qorovulbozor tumani', NOW(), NOW()),
+(3, 'Romitan tumani', NOW(), NOW()),
+(3, 'Shofirkon tumani', NOW(), NOW()),
+(3, 'Vobkent tumani', NOW(), NOW()),
+
+-- Jizzax viloyati (4)
+(4, 'Arnasoy tumani', NOW(), NOW()),
+(4, 'Baxmal tumani', NOW(), NOW()),
+(4, 'Do''stlik tumani', NOW(), NOW()),
+(4, 'Forish tumani', NOW(), NOW()),
+(4, 'G''allaorol tumani', NOW(), NOW()),
+(4, 'Jizzax shahri', NOW(), NOW()),
+(4, 'Sharof Rashidov tumani', NOW(), NOW()),
+(4, 'Mirzacho''l tumani', NOW(), NOW()),
+(4, 'Paxtakor tumani', NOW(), NOW()),
+(4, 'Yangiobod tumani', NOW(), NOW()),
+(4, 'Zomin tumani', NOW(), NOW()),
+(4, 'Zafarobod tumani', NOW(), NOW()),
+(4, 'Zarbdor tumani', NOW(), NOW()),
+
+-- Qashqadaryo viloyati (5)
+(5, 'Chiroqchi tumani', NOW(), NOW()),
+(5, 'Dehqonobod tumani', NOW(), NOW()),
+(5, 'G''uzor tumani', NOW(), NOW()),
+(5, 'Kasbi tumani', NOW(), NOW()),
+(5, 'Kitob tumani', NOW(), NOW()),
+(5, 'Koson tumani', NOW(), NOW()),
+(5, 'Mirishkor tumani', NOW(), NOW()),
+(5, 'Muborak tumani', NOW(), NOW()),
+(5, 'Nishon tumani', NOW(), NOW()),
+(5, 'Qamashi tumani', NOW(), NOW()),
+(5, 'Qarshi shahri', NOW(), NOW()),
+(5, 'Qarshi tumani', NOW(), NOW()),
+(5, 'Shahrisabz shahri', NOW(), NOW()),
+(5, 'Shahrisabz tumani', NOW(), NOW()),
+(5, 'Yakkabog'' tumani', NOW(), NOW()),
+
+-- Navoiy viloyati (6)
+(6, 'Xatirchi tumani', NOW(), NOW()),
+(6, 'Karmana tumani', NOW(), NOW()),
+(6, 'Konimex tumani', NOW(), NOW()),
+(6, 'Navbahor tumani', NOW(), NOW()),
+(6, 'Navoiy shahri', NOW(), NOW()),
+(6, 'Nurota tumani', NOW(), NOW()),
+(6, 'Qiziltepa tumani', NOW(), NOW()),
+(6, 'Tomdi tumani', NOW(), NOW()),
+(6, 'Uchquduq tumani', NOW(), NOW()),
+(6, 'Zarafshon shahri', NOW(), NOW()),
+
+-- Namangan viloyati (7)
+(7, 'Chortoq tumani', NOW(), NOW()),
+(7, 'Chust tumani', NOW(), NOW()),
+(7, 'Kosonsoy tumani', NOW(), NOW()),
+(7, 'Mingbuloq tumani', NOW(), NOW()),
+(7, 'Namangan shahri', NOW(), NOW()),
+(7, 'Namangan tumani', NOW(), NOW()),
+(7, 'Norin tumani', NOW(), NOW()),
+(7, 'Pop tumani', NOW(), NOW()),
+(7, 'To''raqo''rg''on tumani', NOW(), NOW()),
+(7, 'Uchqo''rg''on tumani', NOW(), NOW()),
+(7, 'Uychi tumani', NOW(), NOW()),
+(7, 'Yangiqo''rg''on tumani', NOW(), NOW()),
+
+-- Samarqand viloyati (8)
+(8, 'Bulung''ur tumani', NOW(), NOW()),
+(8, 'Ishtixon tumani', NOW(), NOW()),
+(8, 'Jomboy tumani', NOW(), NOW()),
+(8, 'Kattaqo''rg''on shahri', NOW(), NOW()),
+(8, 'Kattaqo''rg''on tumani', NOW(), NOW()),
+(8, 'Narpay tumani', NOW(), NOW()),
+(8, 'Nurobod tumani', NOW(), NOW()),
+(8, 'Oqdaryo tumani', NOW(), NOW()),
+(8, 'Paxtachi tumani', NOW(), NOW()),
+(8, 'Payariq tumani', NOW(), NOW()),
+(8, 'Pastdarg''om tumani', NOW(), NOW()),
+(8, 'Qo''shrabot tumani', NOW(), NOW()),
+(8, 'Samarqand shahri', NOW(), NOW()),
+(8, 'Samarqand tumani', NOW(), NOW()),
+(8, 'Toyloq tumani', NOW(), NOW()),
+(8, 'Urgut tumani', NOW(), NOW()),
+
+-- Surxondaryo viloyati (9)
+(9, 'Angor tumani', NOW(), NOW()),
+(9, 'Bandixon tumani', NOW(), NOW()),
+(9, 'Boysun tumani', NOW(), NOW()),
+(9, 'Denov tumani', NOW(), NOW()),
+(9, 'Jarqo''rg''on tumani', NOW(), NOW()),
+(9, 'Muzrabot tumani', NOW(), NOW()),
+(9, 'Oltinsoy tumani', NOW(), NOW()),
+(9, 'Qiziriq tumani', NOW(), NOW()),
+(9, 'Qumqo''rg''on tumani', NOW(), NOW()),
+(9, 'Sariosiyo tumani', NOW(), NOW()),
+(9, 'Sherobod tumani', NOW(), NOW()),
+(9, 'Sho''rchi tumani', NOW(), NOW()),
+(9, 'Termiz shahri', NOW(), NOW()),
+(9, 'Termiz tumani', NOW(), NOW()),
+(9, 'Uzun tumani', NOW(), NOW()),
+
+-- Sirdaryo viloyati (10)
+(10, 'Boyovut tumani', NOW(), NOW()),
+(10, 'Guliston shahri', NOW(), NOW()),
+(10, 'Guliston tumani', NOW(), NOW()),
+(10, 'Oqoltin tumani', NOW(), NOW()),
+(10, 'Sardoba tumani', NOW(), NOW()),
+(10, 'Sayxunobod tumani', NOW(), NOW()),
+(10, 'Shirin shahri', NOW(), NOW()),
+(10, 'Sirdaryo tumani', NOW(), NOW()),
+(10, 'Xavos tumani', NOW(), NOW()),
+(10, 'Yangiyer shahri', NOW(), NOW()),
+
+-- Toshkent viloyati (11)
+(11, 'Angren shahri', NOW(), NOW()),
+(11, 'Bekobod shahri', NOW(), NOW()),
+(11, 'Bekobod tumani', NOW(), NOW()),
+(11, 'Bo''ka tumani', NOW(), NOW()),
+(11, 'Bo''stonliq tumani', NOW(), NOW()),
+(11, 'Chinoz tumani', NOW(), NOW()),
+(11, 'Chirchiq shahri', NOW(), NOW()),
+(11, 'Ohangaron shahri', NOW(), NOW()),
+(11, 'Ohangaron tumani', NOW(), NOW()),
+(11, 'Olmaliq shahri', NOW(), NOW()),
+(11, 'Oqqo''rg''on tumani', NOW(), NOW()),
+(11, 'Parkent tumani', NOW(), NOW()),
+(11, 'Piskent tumani', NOW(), NOW()),
+(11, 'Qibray tumani', NOW(), NOW()),
+(11, 'Quyi Chirchiq tumani', NOW(), NOW()),
+(11, 'Toshkent tumani', NOW(), NOW()),
+(11, 'O''rta Chirchiq tumani', NOW(), NOW()),
+(11, 'Yangiyo''l shahri', NOW(), NOW()),
+(11, 'Yangiyo''l tumani', NOW(), NOW()),
+(11, 'Yuqori Chirchiq tumani', NOW(), NOW()),
+(11, 'Zangiota tumani', NOW(), NOW()),
+(11, 'Nurafshon shahri', NOW(), NOW()),
+
+-- Farg'ona viloyati (12)
+(12, 'Beshariq tumani', NOW(), NOW()),
+(12, 'Bog''dod tumani', NOW(), NOW()),
+(12, 'Buvayda tumani', NOW(), NOW()),
+(12, 'Dang''ara tumani', NOW(), NOW()),
+(12, 'Farg''ona shahri', NOW(), NOW()),
+(12, 'Farg''ona tumani', NOW(), NOW()),
+(12, 'Furqat tumani', NOW(), NOW()),
+(12, 'Qo''qon shahri', NOW(), NOW()),
+(12, 'Qo''shtepa tumani', NOW(), NOW()),
+(12, 'Quva tumani', NOW(), NOW()),
+(12, 'Quvasoy shahri', NOW(), NOW()),
+(12, 'Marg''ilon shahri', NOW(), NOW()),
+(12, 'Oltiariq tumani', NOW(), NOW()),
+(12, 'O''zbekiston tumani', NOW(), NOW()),
+(12, 'Rishton tumani', NOW(), NOW()),
+(12, 'So''x tumani', NOW(), NOW()),
+(12, 'Toshloq tumani', NOW(), NOW()),
+(12, 'Uchko''prik tumani', NOW(), NOW()),
+(12, 'Yozyovon tumani', NOW(), NOW()),
+
+-- Xorazm viloyati (13)
+(13, 'Bog''ot tumani', NOW(), NOW()),
+(13, 'Gurlan tumani', NOW(), NOW()),
+(13, 'Xonqa tumani', NOW(), NOW()),
+(13, 'Xazorasp tumani', NOW(), NOW()),
+(13, 'Xiva shahri', NOW(), NOW()),
+(13, 'Xiva tumani', NOW(), NOW()),
+(13, 'Qo''shko''pir tumani', NOW(), NOW()),
+(13, 'Shovot tumani', NOW(), NOW()),
+(13, 'Urganch shahri', NOW(), NOW()),
+(13, 'Urganch tumani', NOW(), NOW()),
+(13, 'Yangiariq tumani', NOW(), NOW()),
+(13, 'Yangibozor tumani', NOW(), NOW()),
+(13, 'Tuproqqal''a tumani', NOW(), NOW()),
+
+-- Toshkent shahri (14)
+(14, 'Bektemir tumani', NOW(), NOW()),
+(14, 'Chilonzor tumani', NOW(), NOW()),
+(14, 'Mirobod tumani', NOW(), NOW()),
+(14, 'Mirzo Ulug''bek tumani', NOW(), NOW()),
+(14, 'Olmazor tumani', NOW(), NOW()),
+(14, 'Sergeli tumani', NOW(), NOW()),
+(14, 'Shayxontohur tumani', NOW(), NOW()),
+(14, 'Toshkent tumani (shahar)', NOW(), NOW()),
+(14, 'Uchtepa tumani', NOW(), NOW()),
+(14, 'Yakkasaroy tumani', NOW(), NOW()),
+(14, 'Yashnobod tumani', NOW(), NOW()),
+(14, 'Yunusobod tumani', NOW(), NOW()),
+(14, 'Yangihayot tumani', NOW(), NOW());
+
+-- Reset districts sequence
+SELECT setval(pg_get_serial_sequence('districts', 'id'), coalesce(max(id),0) + 1, false) FROM districts;
+
+-- ================== MARKETS ==================
+
+-- Insert specific popular markets in Tashkent
+INSERT INTO markets ("districtId", name, address, "createdAt", "updatedAt") VALUES
+((SELECT id FROM districts WHERE name = 'Shayxontohur tumani' LIMIT 1), 'Chorsu dehqon bozori', 'Zarqaynar ko''chasi', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Yunusobod tumani' LIMIT 1), 'Oloy bozori', 'Amir Temur shoh ko''chasi', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Bektemir tumani' LIMIT 1), 'Qo''yliq dehqon bozori', 'Farg''ona yo''li ko''chasi', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Chilonzor tumani' LIMIT 1), 'Abu Saxiy savdo markazi', 'Toshkent halqa avtomobil yo''li', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Chilonzor tumani' LIMIT 1), 'Bek Baraka savdo kompleksi', 'Toshkent halqa avtomobil yo''li', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Uchtepa tumani' LIMIT 1), 'Farhod dehqon bozori', 'Farhod ko''chasi', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Yunusobod tumani' LIMIT 1), 'Yunusobod dehqon bozori', 'Ahmad Donish ko''chasi', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Sergeli tumani' LIMIT 1), 'Sergeli avtomobil bozori', 'Sergeli tumani', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Shayxontohur tumani' LIMIT 1), 'Malika (Fleshka) savdo markazi', 'Kichik halqa yo''li', NOW(), NOW()),
+((SELECT id FROM districts WHERE name = 'Yakkasaroy tumani' LIMIT 1), 'Askiya dehqon bozori', 'Askiya ko''chasi', NOW(), NOW());
+
+-- Add a default "Markaziy dehqon bozori" to ALL districts that don't have a market yet
+INSERT INTO markets ("districtId", name, address, "createdAt", "updatedAt")
+SELECT id, TRIM(REPLACE(REPLACE(name, ' tumani', ''), ' shahri', '')) || ' markaziy dehqon bozori', '', NOW(), NOW()
+FROM districts
+WHERE id NOT IN (SELECT "districtId" FROM markets);
+
+-- Also add a default "Buyum bozori" to ALL districts
+INSERT INTO markets ("districtId", name, address, "createdAt", "updatedAt")
+SELECT id, TRIM(REPLACE(REPLACE(name, ' tumani', ''), ' shahri', '')) || ' buyum bozori', '', NOW(), NOW()
+FROM districts;
+
+-- Reset markets sequence
+SELECT setval(pg_get_serial_sequence('markets', 'id'), coalesce(max(id),0) + 1, false) FROM markets;

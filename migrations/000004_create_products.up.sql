@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    "shortDescription" CHARACTER VARYING(100),
+    "fullDescription" CHARACTER VARYING(500),
+    price NUMERIC NOT NULL DEFAULT 0,
+    discount NUMERIC NOT NULL DEFAULT 0,
+    quantity INTEGER NOT NULL DEFAULT 0,
+    images TEXT,
+    barcode CHARACTER VARYING(30),
+    country CHARACTER VARYING(30),
+    "categoryId" INTEGER NOT NULL REFERENCES categories(id),
+    "businessId" INTEGER NOT NULL REFERENCES businesses(id),
+    "isDeleted" BOOLEAN NOT NULL DEFAULT FALSE,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

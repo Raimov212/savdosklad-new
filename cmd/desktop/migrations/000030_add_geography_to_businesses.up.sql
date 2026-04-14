@@ -1,0 +1,4 @@
+-- Add geography columns to businesses table
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "regionId" INTEGER REFERENCES regions(id) ON DELETE SET NULL;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "districtId" INTEGER REFERENCES districts(id) ON DELETE SET NULL;
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "marketId" INTEGER REFERENCES markets(id) ON DELETE SET NULL;
