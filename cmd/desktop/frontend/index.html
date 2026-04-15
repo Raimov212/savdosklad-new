@@ -22,14 +22,12 @@
     };
 
     window.closeContactModal = function (e) {
-      if (e.target.classList.contains('modal-overlay')) {
-        toggleContactModal();
-      }
+      // Disabled: Modals should only close via X or Cancel buttons
     };
   </script>
-  <script type="module" crossorigin src="/assets/main-Dhr3YjDI.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/api-Ct614DI4.js">
-  <link rel="stylesheet" crossorigin href="/assets/api-BwmCR1aZ.css">
+  <script type="module" crossorigin src="/assets/main-DWqoohKC.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/api-DxYT31Ua.js">
+  <link rel="stylesheet" crossorigin href="/assets/api-D8VlJctj.css">
   <link rel="stylesheet" crossorigin href="/assets/main-DNwS0V0s.css">
 </head>
 
@@ -193,7 +191,7 @@
   </div>
 
   <!-- Contact Modal -->
-  <div id="contact-modal" class="modal-overlay" onclick="closeContactModal(event)">
+  <div id="contact-modal" class="modal-overlay">
     <div class="contact-modal-content" onclick="event.stopPropagation()">
       <button class="contact-close-btn" onclick="toggleContactModal()">×</button>
       <div class="contact-header">

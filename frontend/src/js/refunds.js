@@ -131,6 +131,9 @@ async function viewRefundItems(id) {
           </tbody>
         </table>
       </div>
+      <div class="modal-footer" style="padding-top:10px">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
+      </div>
     `);
   } catch (err) {
     showToast(err.message, 'error');
@@ -243,6 +246,9 @@ async function openRefundModal() {
         </div>
       </div>
       <div id="refund-items-area" style="margin-top:20px;"></div>
+      <div class="modal-footer" style="padding-top:10px">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
+      </div>
     </div>
   `);
 }
@@ -323,7 +329,10 @@ function renderRefundSelection() {
     </div>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; background:var(--bg-glass); padding:15px; border-radius:var(--radius-md); border: 1px solid var(--border);">
       <div style="font-size:18px; font-weight:700;">${t("Jami")}: <span id="refund-total-amount">0</span> ${t("so'm")}</div>
-      <button type="button" class="btn btn-primary" style="padding: 10px 40px;" onclick="submitRefund()">${t("Qaytarish")}</button>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
+        <button type="button" class="btn btn-primary" style="padding: 10px 40px;" onclick="submitRefund()">${t("Qaytarish")}</button>
+      </div>
     </div>
   `;
 }

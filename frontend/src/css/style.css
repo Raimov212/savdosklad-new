@@ -259,7 +259,7 @@ a:hover {
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -407,7 +407,7 @@ a:hover {
 }
 
 .form-control:hover {
-  border-color: #D1D5DB;
+  border-color: var(--border-hover);
 }
 
 .form-control:focus {
@@ -795,7 +795,7 @@ textarea.form-control {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--radius-sm);
-  color: white;
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -846,7 +846,7 @@ textarea.form-control {
   height: 32px;
   border-radius: 50%;
   background: var(--accent-gradient);
-  color: #fff;
+  color: var(--text-on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -892,7 +892,7 @@ textarea.form-control {
 .btn-logout {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
   padding: 8px 14px;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -909,7 +909,7 @@ textarea.form-control {
 
 .btn-logout:hover {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--text-primary);
 }
 
 /* Content area */
@@ -990,7 +990,7 @@ textarea.form-control {
   font-size: 26px;
   font-weight: 800;
   line-height: 1.2;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
 }
 
 .stat-label {
@@ -1021,7 +1021,7 @@ thead th {
   text-align: left;
   font-size: 12px;
   font-weight: 700;
-  color: white;
+  color: var(--text-on-accent);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   background: var(--accent-gradient);
@@ -1041,7 +1041,7 @@ tbody td {
   font-size: 14px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 tbody tr {
@@ -1049,11 +1049,11 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #EEF2FF;
+  background: var(--bg-card-hover);
 }
 
 tbody tr:nth-child(even) {
-  background: #F9FAFB;
+  background: var(--bg-secondary);
 }
 
 tbody tr:nth-child(even):hover {
@@ -1590,13 +1590,20 @@ tbody tr:last-child td {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 12px;
-  color: white;
+  color: var(--text-on-accent);
+}
+
+.stat-card .value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
 }
 
 .stat-value-white {
   font-size: 30px;
   font-weight: 800;
-  color: white;
+  color: var(--text-on-accent);
   line-height: 1.2;
   position: relative;
   z-index: 1;
