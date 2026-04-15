@@ -265,8 +265,10 @@ func main() {
 	router.NoRoute(gin.WrapH(http.FileServer(http.FS(frontendSub))))
 
 	// ==================== CRON ====================
+	// Scheduler (Rejalashtiruvchi): Vaqtga asoslangan vazifalarni avtomatlashtirish vositasi.
 	scheduler := cronpkg.NewScheduler()
 	setupCronJobs(scheduler, db)
+	// Orqa fonda rejalashtirilgan vazifalarni ishga tushiramiz.
 	scheduler.Start()
 	defer scheduler.Stop()
 
@@ -282,14 +284,16 @@ func main() {
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	log.Printf("SavdoSklad Backend starting on http://%s", addr)
 
-	// Start server in background
+	// Background Goroutine: Backend serverini asosiy oqimdan (Main UI thread) 
+	// mustaqil ravishda parallel ishga tushiramiz.
 	go func() {
 		if err := router.Run(addr); err != nil {
 			log.Printf("Server error: %v", err)
 		}
 	}()
 
-	// ==================== TELEGRAM BOT ====================
+	// Background Goroutine: Telegram bot xizmatini asosiy dasturga xalaqit
+	// bermaydigan qilib alohida "go" oqimida ishga tushiramiz.
 	go func() {
 		bot, err := telegram.NewBot(
 			cfg.Telegram,

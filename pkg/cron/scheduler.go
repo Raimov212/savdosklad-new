@@ -6,6 +6,8 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+// Scheduler (Vaqtli ishlovchi): Ma'lum vaqt oralig'ida ishlashi kerak bo'lgan
+// vazifalarni boshqarish uchun foydalaniladi. Ichida Parallelizm (Goroutines) ishlatadi.
 type Scheduler struct {
 	cron *cron.Cron
 }
@@ -17,6 +19,8 @@ func NewScheduler() *Scheduler {
 }
 
 func (s *Scheduler) AddJob(spec string, job func()) error {
+	// AddFunc yangi vazifani (job) reja asosida ro'yxatga oladi.
+	// Ishga tushganda har bir job alohida goroutineda bajariladi.
 	_, err := s.cron.AddFunc(spec, job)
 	if err != nil {
 		return err

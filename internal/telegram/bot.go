@@ -61,6 +61,8 @@ func (b *Bot) Start() {
 	log.Printf("Bot authorized on account %s", b.api.Self.UserName)
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
+	// Channels (Kanallar): Telegram API orqali kelayotgan xabarlar oqimini (stream)
+	// <-chan tgbotapi.Update kanali yordamida qabul qilamiz.
 	updates := b.api.GetUpdatesChan(u)
 
 	for update := range updates {
@@ -80,8 +82,14 @@ func (b *Bot) Start() {
 }
 
 func (b *Bot) RunScheduler() {
+	// Ticker (Vaqt o'lchagich): Har bir minutda signal jo'natib turadigan vosita.
+	// Bu orqa fonda vaqtni tekshirib turish uchun ishlatiladi.
 	ticker := time.NewTicker(1 * time.Minute)
+
+	// Goroutine (Parallel ishlovchi): Asosiy jarayonni to'xtatib qo'ymaslik uchun
+	// scheduler alohida "go" ipining (routine) ichida ishga tushiriladi.
 	go func() {
+		// Kanalni range orqali o'qish: Ticker signal berganda loop bir marta aylanadi.
 		for range ticker.C {
 			now := time.Now()
 			// Send report at 19:00 (7 PM)

@@ -192,6 +192,8 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 		}
 	}
 	if totalID != 0 && uc.notifier != nil {
+		// Goroutine: Xabar yuborish jarayoni vaqt talab qilishi mumkin.
+		// Sotuvni tezkor yakunlash uchun xabarnoma orqa fonda (go) yuboriladi.
 		go uc.notifier.NotifySale(req.BusinessID, req.Total, len(req.Items))
 	}
 	return totalID, nil
@@ -237,6 +239,7 @@ func (uc *TransactionUseCase) AddItemsToSale(totalID int, bid int, items []entit
 		for _, item := range items {
 			total += item.ProductPrice * float64(item.ProductQuantity)
 		}
+		// Goroutine: Yangi mahsulot qo'shilganda mijozga asinxron bildirishnoma yuboriladi.
 		go uc.notifier.NotifySale(bid, total, len(items))
 	}
 	return nil
@@ -263,6 +266,7 @@ func (uc *TransactionUseCase) UpdateSale(id int, req entity.UpdateTotalTransacti
 
 	err = uc.repo.UpdateTotalTransaction(tt)
 	if err == nil && uc.notifier != nil {
+		// Goroutine: Ma'lumot yangilanganda parallel ravishda xabar yuboriladi.
 		go uc.notifier.NotifySale(tt.BusinessID, tt.Total, 0) // 0 means simplified final update notification
 	}
 	return err
