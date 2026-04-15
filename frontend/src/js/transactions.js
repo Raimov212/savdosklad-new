@@ -711,7 +711,10 @@ async function viewTransactionItems(ids) {
           <button class="btn btn-ghost btn-sm" onclick='downloadTransactionPdf(${JSON.stringify(ids)})'>📄 PDF</button>
           <button class="btn btn-ghost btn-sm" onclick='downloadTransactionJpg(${JSON.stringify(ids)})'>🖼️ JPG</button>
         </div>
-        <button class="btn btn-primary btn-sm" onclick='sendTransactionToTelegram(${JSON.stringify(ids)})'>📤 Telegram</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-ghost btn-sm" onclick="closeModal()">${t("Bekor qilish")}</button>
+          <button class="btn btn-primary btn-sm" onclick='sendTransactionToTelegram(${JSON.stringify(ids)})'>📤 Telegram</button>
+        </div>
       </div>
     `);
   } catch (err) {

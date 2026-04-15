@@ -1003,6 +1003,7 @@ async function openCreateMpProductModal() {
                     <option value="">${t("Tanlang...")}</option>
                 </select>
             </div>
+            
             <form id="mp-prod-form" style="display:none" onsubmit="submitMpProduct(event)">
                 <div class="form-group">
                     <label>${t("Marketplace Nomi")}</label>
@@ -1031,6 +1032,10 @@ async function openCreateMpProductModal() {
                     <button type="submit" class="btn btn-primary">${t("Qo'shish")}</button>
                 </div>
             </form>
+
+            <div id="mp-initial-footer" class="modal-footer" style="margin-top:20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">${t("Bekor qilish")}</button>
+            </div>
         </div>
     `);
 
@@ -1069,6 +1074,7 @@ function showMpForm() {
     const catId = document.getElementById('mp-category-id').value;
     if (catId) {
         document.getElementById('mp-prod-form').style.display = 'block';
+        document.getElementById('mp-initial-footer').style.display = 'none';
     }
 }
 

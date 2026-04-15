@@ -366,7 +366,7 @@ async function renderDashboard() {
               <span class="stat-label">${t("Jami savdo")}</span>
               <div class="btn-icon" style="background:var(--success-bg); color:var(--success);"><i data-lucide="trending-up"></i></div>
             </div>
-            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800; color:#fff;">${formatPrice(totalMonthSales)}</div>
+            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800;">${formatPrice(totalMonthSales)}</div>
             <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:8px;">
               <div class="stat-trend" style="color:var(--text-muted); font-size:12px; font-weight:400;">${currentMonthLabel}</div>
               ${growthType !== 'none' ? `
@@ -385,7 +385,7 @@ async function renderDashboard() {
               <span class="stat-label">${t("Buyurtmalar")}</span>
               <div class="btn-icon" style="background:var(--secondary-glow); color:var(--secondary);"><i data-lucide="shopping-bag"></i></div>
             </div>
-            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800; color:#fff;">${transactionList.length}</div>
+            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800;">${transactionList.length}</div>
             <div class="stat-trend" style="color:var(--success); font-size:12px; margin-top:8px;">
               ↑ ${transactionsToday} <span style="color:var(--text-muted); font-weight:400;">${t("bugun")}</span>
             </div>
@@ -396,9 +396,9 @@ async function renderDashboard() {
               <span class="stat-label">${t("Faol mijozlar")}</span>
               <div class="btn-icon" style="background:var(--info-bg); color:var(--info);"><i data-lucide="users"></i></div>
             </div>
-            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800; color:#fff;">${clientList.length}</div>
+            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800;">${clientList.length}</div>
             <div class="stat-trend" style="color:var(--success); font-size:12px; margin-top:8px;">
-              <span style="color:#fff;">+${newClientsThisMonth}</span> <span style="color:var(--text-muted); font-weight:400;">${t("shu oyda qo'shilgan")}</span>
+              <span style="color:var(--text-primary);">+${newClientsThisMonth}</span> <span style="color:var(--text-muted); font-weight:400;">${t("shu oyda qo'shilgan")}</span>
             </div>
           </div>
 
@@ -407,7 +407,7 @@ async function renderDashboard() {
               <span class="stat-label">${t("Ombor holati")}</span>
               <div class="btn-icon" style="background:var(--warning-bg); color:var(--warning);"><i data-lucide="package"></i></div>
             </div>
-            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800; color:#fff;">${inventoryLevel}%</div>
+            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800;">${inventoryLevel}%</div>
             <div class="stat-trend" style="color:var(--danger); font-size:12px; margin-top:8px;">
               ${lowStock} <span style="color:var(--text-muted); font-weight:400;">${t("ta mahsulot kam")}</span>
             </div>
@@ -720,12 +720,12 @@ function renderDashboardTransactions() {
       <table class="premium-table">
         <thead>
           <tr style="background:rgba(79, 70, 229, 0.85);">
-            <th style="color:white; text-align:center; padding:15px 10px;">№</th>
-            <th style="color:white; text-align:center; padding:15px 10px;">${t("SUMMA")}</th>
-            <th style="color:white; text-align:center; padding:15px 10px;">${t("TO'LOV TURI")}</th>
-            <th style="color:white; text-align:center; padding:15px 10px;">${t("QARZ")}</th>
-            <th style="color:white; text-align:center; padding:15px 10px;">${t("Mas'ul")}</th>
-            <th style="color:white; text-align:center; padding:15px 10px;">${t("SANA")}</th>
+            <th style="text-align:center; padding:15px 10px;">№</th>
+            <th style="text-align:center; padding:15px 10px;">${t("SUMMA")}</th>
+            <th style="text-align:center; padding:15px 10px;">${t("TO'LOV TURI")}</th>
+            <th style="text-align:center; padding:15px 10px;">${t("QARZ")}</th>
+            <th style="text-align:center; padding:15px 10px;">${t("Mas'ul")}</th>
+            <th style="text-align:center; padding:15px 10px;">${t("SANA")}</th>
           </tr>
         </thead>
         <tbody>
@@ -820,7 +820,7 @@ function closeModal(force = false) {
 }
 
 function closeModalOnOverlay(e) {
-  if (e.target === e.currentTarget) closeModal();
+  // Disabled: Modals should only close via X or Cancel buttons
 }
 
 // Global exports
@@ -1136,7 +1136,7 @@ window.closeModal = closeModal;
 window.onBusinessChange = onBusinessChange;
 window.renderDashboardTransactions = renderDashboardTransactions;
 window.closeModalOnOverlay = function (e) {
-  if (e.target.id === 'modal-overlay') closeModal();
+  // Disabled: Modals should only close via X or Cancel buttons
 };
 
 window.maximizeTrendChart = function () {
