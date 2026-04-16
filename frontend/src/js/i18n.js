@@ -66,7 +66,8 @@ export const translations = {
         "To'lov summasi qarzdan ko'p bo'lishi mumkin emas!": "To'lov summasi qarzdan ko'p bo'lishi mumkin emas!",
         "To'langan summasi": "To'langan summasi",
         "Ism Familiya": "Ism Familiya",
-        "Qarz muvaffaqiyatli to'landi!": "Qarz muvaffaqiyatli to'landi!"
+        "Qarz muvaffaqiyatli to'landi!": "Qarz muvaffaqiyatli to'landi!",
+        "ta mahsulot kam qolgan": "ta mahsulot kam qolgan"
     },
     'uz-cyrl': {
         "Admin panel": "Админ панел",
@@ -557,7 +558,8 @@ export const translations = {
         "To'lov summasi qarzdan ko'p bo'lishi mumkin эмас!": "Тўлов суммаси қарздан кўп бўлиши мумкин эмас!",
         "To'langan summasi": "Тўланган сумма",
         "Ism Familiya": "Исm Фамилия",
-        "Qarz muvaffaqiyatli to'landi!": "Қарз муваффақиятли тўланди!"
+        "Qarz muvaffaqiyatli to'landi!": "Қарз муваффақиятли тўланди!",
+        "ta mahsulot kam qolgan": "та маҳсулот кам қолган"
     },
     ru: {
         "Admin panel": "Админ панель",
@@ -1043,7 +1045,8 @@ export const translations = {
         "Obuna muddati": "Срок подписки",
         "Muddati": "Срок",
         "Ism Familiya": "Имя Фамилия",
-        "Hozircha bizneslar yo'q": "Пока нет бизнесов"
+        "Hozircha bizneslar yo'q": "Пока нет бизнесов",
+        "ta mahsulot kam qolgan": "товаров мало осталось"
     },
     en: {
         "Admin panel": "Admin panel",
@@ -1527,7 +1530,8 @@ export const translations = {
         "To'langan summasi": "Paid amount",
         "To'lov summasi qarzdan ko'p bo'lishi mumkin emas!": "Payment amount cannot exceed the debt!",
         "Ism Familiya": "Name Surname",
-        "Qarz muvaffaqiyatli to'landi!": "Debt successfully paid!"
+        "Qarz muvaffaqiyatli to'landi!": "Debt successfully paid!",
+        "ta mahsulot kam qolgan": "low stock items"
     }
 };
 
