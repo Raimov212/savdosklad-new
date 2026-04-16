@@ -279,6 +279,38 @@ async function openSaleModal() {
         .sale-steps .step.active { color: white; background: var(--primary); }
         .sale-steps .step-divider { width: 20px; height: 1px; background: var(--border); }
         
+        .sale-catalog-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+          gap: 12px;
+          max-height: 220px;
+          overflow-y: auto;
+          padding: 5px;
+          background: var(--bg-input);
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          margin-bottom: 20px;
+        }
+        .catalog-item-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 12px;
+          cursor: pointer;
+          transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          position: relative;
+        }
+        .catalog-item-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow-md); background: var(--bg-glass); }
+        .catalog-item-card:active { transform: scale(0.95); }
+        .cic-name { font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cic-price { font-size: 12px; font-weight: 800; color: var(--success); }
+        .cic-stock { font-size: 10px; font-weight: 600; color: var(--text-muted); }
+        .cic-badge { position: absolute; top: 6px; right: 6px; font-size: 9px; padding: 1px 4px; border-radius: 4px; background: rgba(0,0,0,0.2); }
+        .cic-low-stock { color: #EF4444 !important; }
+
         .search-results-dropdown {
           position: absolute; top: 100%; left: 0; right: 0;
           background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);

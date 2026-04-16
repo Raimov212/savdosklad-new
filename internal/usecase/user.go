@@ -53,9 +53,9 @@ func (uc *UserUseCase) CreateEmployee(req entity.RegisterRequest, adminID int) (
 		PhoneNumber:    &req.PhoneNumber,
 		UserName:       req.UserName,
 		Password:       string(hashedPassword),
-		Role:           entity.RoleEmployee,
+		Role:           req.Role, // Use role from request
 		CreatedBy:      &adminID,
-		IsVerified:     true, // Employees added by admin are pre-verified
+		IsVerified:     true, 
 		IsExpired:      false,
 		Image:          &req.Image,
 		BrandName:      &req.BrandName,
