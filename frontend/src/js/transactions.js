@@ -173,12 +173,16 @@ function filterTransactions(query) {
 async function openSaleModal() {
   const bid = getSelectedBusinessId();
   try {
-    const [products, clients] = await Promise.all([
-      api.get(`/products?businessId=${bid}`),
-      api.get(`/clients?businessId=${bid}`)
+    const [products, clients, businesses] = await Promise.all([
+      api.get('/products/my'),
+      api.get(`/clients?businessId=${bid}`),
+      api.get('/businesses/my')
     ]);
 
-    saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0);
+    saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0).map(p => {
+       const b = (businesses || []).find(bus => bus.id === p.businessId);
+       return { ...p, businessName: b ? b.name : t("Noma'lum") };
+    });
     currentTotalTransactionID = null;
     savedBatchItems = [];
     cumulativePayments = { cash: 0, card: 0, click: 0, debt: 0 };
@@ -324,7 +328,7 @@ function searchSaleProduct(query) {
       <div class="search-result-item" style="${p.quantity <= 0 ? 'opacity: 0.6; filter: grayscale(1);' : ''}" 
            onclick="addSaleProductById(${p.id})">
         <div>
-          <div class="p-name">${escapeHtml(p.name)}</div>
+          <div class="p-name">${escapeHtml(p.name)} <span style="font-size:10px; opacity:0.6; font-weight:normal;">🏢 ${escapeHtml(p.businessName)}</span></div>
           <div class="p-info">${p.barcode ? p.barcode : ''}</div>
         </div>
         <div style="text-align: right;">
@@ -354,7 +358,14 @@ function addSaleProductById(id) {
   if (existing) {
     existing.quantity++;
   } else {
-    saleItems.push({ productId: id, quantity: 1, price: product.price, name: product.name });
+    saleItems.push({ 
+      productId: id, 
+      quantity: 1, 
+      price: product.price, 
+      name: product.name,
+      businessId: product.businessId,
+      businessName: product.businessName
+    });
   }
 
   // Clear search
@@ -396,6 +407,7 @@ function renderSaleItems() {
             <tr style="border-top: 1px solid var(--border);">
               <td style="padding: 8px 10px;">
                 <div style="font-weight: 600; font-size: 14px;">${escapeHtml(item.name || 'Unknown')}</div>
+                <div style="font-size: 10px; opacity: 0.6;">🏢 ${escapeHtml(item.businessName)}</div>
               </td>
               <td style="padding: 8px 10px;">
                 <input type="number" class="form-control" style="padding: 6px; text-align: center;" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)">
@@ -540,6 +552,7 @@ async function addToSaleBatch() {
           productId: parseInt(i.productId),
           productQuantity: i.quantity,
           productPrice: i.price,
+          businessId: i.businessId
         }))
       });
       currentTotalTransactionID = resp.id;
@@ -554,6 +567,7 @@ async function addToSaleBatch() {
           productId: parseInt(i.productId),
           productQuantity: i.quantity,
           productPrice: i.price,
+          businessId: i.businessId
         }))
       );
       // Track payments cumulatively

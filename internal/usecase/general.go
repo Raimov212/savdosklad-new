@@ -82,6 +82,12 @@ func (uc *ProductUseCase) Delete(id int) error { return uc.repo.Delete(id) }
 func (uc *ProductUseCase) Search(bid int, query string) ([]entity.Product, error) {
 	return uc.repo.Search(bid, query)
 }
+func (uc *ProductUseCase) GetByUserID(uid int) ([]entity.Product, error) {
+	return uc.repo.GetByUserID(uid)
+}
+func (uc *ProductUseCase) SearchByUserID(uid int, query string) ([]entity.Product, error) {
+	return uc.repo.SearchByUserID(uid, query)
+}
 
 type ClientUseCase struct {
 	repo     repository.ClientRepository
@@ -179,9 +185,13 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 	}
 
 	for _, item := range req.Items {
+		itemBid := item.BusinessID
+		if itemBid == 0 {
+			itemBid = req.BusinessID
+		}
 		t := &entity.Transaction{
 			ProductID: item.ProductID, ProductQuantity: item.ProductQuantity,
-			ProductPrice: item.ProductPrice, BusinessID: req.BusinessID, TotalTransactionID: totalID,
+			ProductPrice: item.ProductPrice, BusinessID: itemBid, TotalTransactionID: totalID,
 		}
 		if item.Description != "" {
 			d := item.Description

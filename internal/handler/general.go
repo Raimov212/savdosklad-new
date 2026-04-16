@@ -255,6 +255,46 @@ func (h *ProductHandler) GetByBusinessID(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
+// @Summary Get all user's products
+// @Tags Products
+// @Security BearerAuth
+// @Success 200 {array} entity.Product
+// @Router /products/my [get]
+func (h *ProductHandler) GetMyProducts(c *gin.Context) {
+	uid := c.MustGet("userID").(int)
+	list, err := h.uc.GetByUserID(uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+// @Summary Search products
+// @Tags Products
+// @Security BearerAuth
+// @Param businessId query int false "Business ID"
+// @Param q query string true "Query"
+// @Success 200 {array} entity.Product
+// @Router /products/search [get]
+func (h *ProductHandler) Search(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	query := c.Query("q")
+	var list []entity.Product
+	var err error
+	if bid != 0 {
+		list, err = h.uc.Search(bid, query)
+	} else {
+		uid := c.MustGet("userID").(int)
+		list, err = h.uc.SearchByUserID(uid, query)
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
 // @Summary Get product by ID
 // @Tags Products
 // @Security BearerAuth
@@ -795,6 +835,7 @@ func RegisterRoutes(
 	expenseH *ExpenseHandler,
 	moneyH *MoneyHandler,
 	calculationH *CalculationHandler,
+	organizationH *OrganizationHandler,
 ) {
 	// User Handlers
 	r.GET("/users", userH.GetAll)
@@ -821,6 +862,8 @@ func RegisterRoutes(
 	// Product Handlers
 	r.POST("/products", productH.Create)
 	r.GET("/products", productH.GetByBusinessID)
+	r.GET("/products/my", productH.GetMyProducts)
+	r.GET("/products/search", productH.Search)
 	r.GET("/products/:id", productH.GetByID)
 	r.PUT("/products/:id", productH.Update)
 	r.DELETE("/products/:id", productH.Delete)
@@ -857,4 +900,11 @@ func RegisterRoutes(
 	// Calculation Handlers
 	r.POST("/calculations", calculationH.Create)
 	r.GET("/calculations", calculationH.GetByBusinessID)
+
+	// Organization Handlers
+	r.POST("/organizations", organizationH.Create)
+	r.GET("/organizations/my", organizationH.GetMyOrganizations)
+	r.GET("/organizations/:id", organizationH.GetByID)
+	r.PUT("/organizations/:id", organizationH.Update)
+	r.DELETE("/organizations/:id", organizationH.Delete)
 }

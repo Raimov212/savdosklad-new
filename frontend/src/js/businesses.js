@@ -129,6 +129,13 @@ function openBusinessModal(b = null) {
       </div>
 
       <div class="form-group">
+        <label>${t("Tashkilot")}</label>
+        <select class="form-control" id="biz-org-sel">
+          <option value="">${t("Tashkilotni tanlang")} (ixtiyoriy)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label>${t("Viloyat")}</label>
         <select class="form-control" id="biz-region-sel" required onchange="if(window.onRegionChangeGlobal) window.onRegionChangeGlobal(this.value)">
           <option value="">${t("Viloyatni tanlang")}</option>
@@ -195,6 +202,7 @@ function openBusinessModal(b = null) {
   `);
 
   loadRegionsForBusiness(b);
+  loadOrganizationsForBusiness(b);
 
   // Fallback programmatic attachment
   setTimeout(() => {
@@ -252,6 +260,19 @@ async function loadRegionsForBusiness(b = null) {
   } catch (err) {
     console.error('Viloyatlarni yuklashda xatolik:', err);
     showToast(err.message, 'error');
+  }
+}
+
+async function loadOrganizationsForBusiness(b = null) {
+  const orgSelect = document.getElementById('biz-org-sel');
+  try {
+    const list = await api.get('/organizations/my');
+    if (orgSelect) {
+      orgSelect.innerHTML = `<option value="">${t("Tashkilotni tanlang")} (ixtiyoriy)</option>` +
+        list.map(o => `<option value="${o.id}" ${b && b.organizationId == o.id ? 'selected' : ''}>${o.orgName}</option>`).join('');
+    }
+  } catch (err) {
+    console.error('Tashkilotlarni yuklashda xatolik:', err);
   }
 }
 

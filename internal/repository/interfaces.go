@@ -40,10 +40,12 @@ type ProductRepository interface {
 	Create(product *entity.Product) (int, error)
 	GetByID(id int) (*entity.Product, error)
 	GetByBusinessID(businessID int) ([]entity.Product, error)
+	GetByUserID(userID int) ([]entity.Product, error)
 	GetByCategoryID(categoryID int) ([]entity.Product, error)
 	Update(id int, req entity.UpdateProductRequest) error
 	Delete(id int) error
 	Search(bid int, query string) ([]entity.Product, error)
+	SearchByUserID(userID int, query string) ([]entity.Product, error)
 }
 
 type ClientRepository interface {
@@ -105,6 +107,14 @@ type CalculationRepository interface {
 	Create(calc *entity.Calculation) (int, error)
 	GetByBusinessID(businessID int) ([]entity.Calculation, error)
 	GetByBusinessIDAndPeriod(businessID, month, year int) (*entity.Calculation, error)
+}
+
+type OrganizationRepository interface {
+	Create(org *entity.Organization) (int, error)
+	GetByID(id int) (*entity.Organization, error)
+	GetByUserID(userID int) ([]entity.Organization, error)
+	Update(id int, org *entity.Organization) error
+	Delete(id int) error
 }
 
 

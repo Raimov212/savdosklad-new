@@ -187,3 +187,61 @@ func (r *ProductRepo) Search(bid int, query string) ([]entity.Product, error) {
 	}
 	return list, nil
 }
+func (r *ProductRepo) GetByUserID(userID int) ([]entity.Product, error) {
+	rows, err := r.db.Query(
+		`SELECT p.id, p.name, p."lokalCode", p."shortDescription", p."fullDescription", p.price, p.discount, p.quantity, p.images, p.barcode, p.country, p."categoryId", p."businessId", p."isDeleted", p."createdAt", p."updatedAt"
+		FROM products p
+		WHERE p."businessId" IN (
+			SELECT id FROM businesses WHERE "userId" = $1
+			UNION
+			SELECT business_id FROM user_businesses WHERE user_id = $1
+		) AND p."isDeleted" = false
+		ORDER BY p.name`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []entity.Product
+	for rows.Next() {
+		var p entity.Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+			&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			return nil, err
+		}
+		list = append(list, p)
+	}
+	return list, nil
+}
+
+func (r *ProductRepo) SearchByUserID(userID int, query string) ([]entity.Product, error) {
+	rows, err := r.db.Query(
+		`SELECT p.id, p.name, p."lokalCode", p."shortDescription", p."fullDescription", p.price, p.discount, p.quantity, p.images, p.barcode, p.country, p."categoryId", p."businessId", p."isDeleted", p."createdAt", p."updatedAt"
+		FROM products p
+		WHERE p."businessId" IN (
+			SELECT id FROM businesses WHERE "userId" = $1
+			UNION
+			SELECT business_id FROM user_businesses WHERE user_id = $1
+		) AND p."isDeleted" = false
+		AND (p.name ILIKE $2 OR p.barcode ILIKE $3 OR p."lokalCode" ILIKE $4)
+		ORDER BY p.name`,
+		userID, "%"+query+"%", "%"+query+"%", "%"+query+"%",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []entity.Product
+	for rows.Next() {
+		var p entity.Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+			&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			return nil, err
+		}
+		list = append(list, p)
+	}
+	return list, nil
+}
