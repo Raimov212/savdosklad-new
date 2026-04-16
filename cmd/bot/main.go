@@ -54,6 +54,8 @@ func main() {
 		log.Fatalf("Failed to create bot: %v", err)
 	}
 
+	// Kunlik hisobotlar uchun rejalashtiruvchini (Ticker/Goroutine) ishga tushirish.
 	tgBot.RunScheduler()
+	// Botni xabarlarni qabul qilish (Channel) rejimida ishga tushirish.
 	tgBot.Start()
 }
