@@ -47,6 +47,7 @@ type RegisterRequest struct {
 	MarketID    *int   `json:"marketId"`
 	BusinessIDs    []int      `json:"businessIds"`
 	OfferCode      string     `json:"offerCode"`
+	Role           int        `json:"role"`
 	ExpirationDate *time.Time `json:"expirationDate"`
 }
 

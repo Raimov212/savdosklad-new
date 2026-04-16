@@ -231,12 +231,9 @@ async function createAdminUser(e) {
     const role = parseInt(document.getElementById('add-role').value);
 
     try {
-        const res = await api.post('/auth/register', data);
-
-        // /auth/register default sifatida Role=1 qilib saqlaydi, shuning uchun role farq qilsa uni yangilaymiz
-        if (res && res.user && res.user.id && role !== 1) {
-            await api.put('/admin/users/' + res.user.id, { role: role });
-        }
+        // Yangi foydalanuvchini /users/employees orqali qo'shish (auth kerak)
+        // Bu backbendda admin brand ma'lumotlarini avtomat biriktiradi
+        const res = await api.post('/users/employees', { ...data, role: role });
 
         showToast(t('Foydalanuvchi yaratildi'), 'success');
         closeModal();
