@@ -61,6 +61,7 @@ func main() {
 	expenseRepo := postgres.NewExpenseRepo(db)
 	moneyRepo := postgres.NewMoneyRepo(db)
 	calculationRepo := postgres.NewCalculationRepo(db)
+	organizationRepo := postgres.NewOrganizationRepo(db)
 
 	// Brand management and RBAC updates
 	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "brandName" VARCHAR(255);`)
@@ -131,6 +132,7 @@ func main() {
 	expenseUC := usecase.NewExpenseUseCase(expenseRepo, tgNotifier)
 	moneyUC := usecase.NewMoneyUseCase(moneyRepo)
 	calculationUC := usecase.NewCalculationUseCase(calculationRepo)
+	organizationUC := usecase.NewOrganizationUseCase(organizationRepo)
 
 	// Admin-related
 	regionUC := usecase.NewRegionUseCase(regionRepo)
@@ -139,6 +141,23 @@ func main() {
 	customerUC := usecase.NewCustomerUseCase(customerRepo, jwtManager)
 	marketplaceUC := usecase.NewMarketplaceUseCase(marketplaceRepo, cartRepo, addressRepo)
 	marketplaceAdminUC := usecase.NewMarketplaceAdminUseCase(marketplaceAdminRepo)
+
+	// Organizations table
+	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS organizations (
+		id SERIAL PRIMARY KEY,
+		"userId" INTEGER NOT NULL REFERENCES users(id),
+		"orgName" VARCHAR(200) NOT NULL,
+		"inn" VARCHAR(20),
+		"bankName" VARCHAR(100),
+		"bankAccount" VARCHAR(25),
+		"mfo" VARCHAR(10),
+		"logo" TEXT,
+		"description" TEXT,
+		"createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+		"updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+	);`)
+	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "organizationId" INTEGER REFERENCES organizations(id);`)
+	_, _ = db.Exec(`ALTER TABLE organizations ADD COLUMN IF NOT EXISTS "inn" VARCHAR(20);`) // Ensure inn exists if old schema
 
 	// Handlers
 	userH := handler.NewUserHandler(userUC)
@@ -151,6 +170,7 @@ func main() {
 	expenseH := handler.NewExpenseHandler(expenseUC)
 	moneyH := handler.NewMoneyHandler(moneyUC)
 	calculationH := handler.NewCalculationHandler(calculationUC)
+	organizationH := handler.NewOrganizationHandler(organizationUC)
 	excelH := handler.NewExcelHandler(productUC, categoryUC)
 	uploadH := handler.NewUploadHandler()
 	adminH := handler.NewAdminHandler(userUC, regionUC)
@@ -191,7 +211,7 @@ func main() {
 		protected.Use(middleware.JWTAuth(jwtManager))
 		protected.Use(middleware.SubscriptionCheck(userRepo))
 		{
-			handler.RegisterRoutes(protected, userH, businessH, categoryH, productH, clientH, transactionH, refundH, expenseH, moneyH, calculationH)
+			handler.RegisterRoutes(protected, userH, businessH, categoryH, productH, clientH, transactionH, refundH, expenseH, moneyH, calculationH, organizationH)
 
 			// Excel
 			excel := protected.Group("/excel")

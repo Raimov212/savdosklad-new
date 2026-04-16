@@ -70,6 +70,7 @@ type CreateTransactionItemRequest struct {
 	ProductID       int     `json:"productId" binding:"required"`
 	ProductQuantity int     `json:"productQuantity" binding:"required"`
 	ProductPrice    float64 `json:"productPrice" binding:"required"`
+	BusinessID      int     `json:"businessId"` // Added to track store origin
 	Description     string  `json:"description"`
 }
 

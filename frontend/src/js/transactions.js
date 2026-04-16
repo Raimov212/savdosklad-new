@@ -13,6 +13,8 @@ let allTransactionsList = [];
 let currentTotalTransactionID = null;
 let savedBatchItems = [];
 let cumulativePayments = { cash: 0, card: 0, click: 0, debt: 0 };
+let currentSaleStep = 1; // 1: Products, 2: Payment
+let globalClients = [];
 
 async function renderTransactions() {
   const content = document.getElementById('page-content');
@@ -173,137 +175,151 @@ function filterTransactions(query) {
 async function openSaleModal() {
   const bid = getSelectedBusinessId();
   try {
-    const [products, clients] = await Promise.all([
-      api.get(`/products?businessId=${bid}`),
-      api.get(`/clients?businessId=${bid}`)
+    const [products, clients, businesses] = await Promise.all([
+      api.get('/products/my'),
+      api.get(`/clients?businessId=${bid}`),
+      api.get('/businesses/my')
     ]);
 
-    saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0);
+    saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0).map(p => {
+       const b = (businesses || []).find(bus => bus.id === p.businessId);
+       return { ...p, businessName: b ? b.name : t("Noma'lum") };
+    });
+    globalClients = clients || [];
     currentTotalTransactionID = null;
     savedBatchItems = [];
     cumulativePayments = { cash: 0, card: 0, click: 0, debt: 0 };
     saleItems = [];
-
-    const clientOptions = (clients || []).map(c => `<option value="${c.id}">${escapeHtml(c.fullName)} — ${escapeHtml(c.phone)}</option>`).join('');
+    currentSaleStep = 1;
 
     openModal(`
       <div class="modal-header">
-        <h3>${t("Yangi sotuv")}</h3>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <button type="button" class="btn btn-icon" style="font-size:24px; font-weight:bold; color:var(--primary); background:var(--bg-glass); width:40px; height:40px; border-radius:50%;" onclick="addToSaleBatch()" title="${t("Batch qo'shish")}">+</button>
-          <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <h3 id="sale-modal-title">${t("Yangi sotuv")}</h3>
+          <div class="sale-steps">
+            <div class="step active" id="step-1-indicator">1. ${t("Mahsulotlar")}</div>
+            <div class="step-divider"></div>
+            <div class="step" id="step-2-indicator">2. ${t("To'lov")}</div>
+          </div>
         </div>
+        <button type="button" class="modal-close" onclick="closeModal()">✕</button>
       </div>
-      <form onsubmit="finalizeSale(event)" class="modal-wide">
-        <!-- Product Search -->
+      
+      <div id="sale-step-1" class="sale-segment">
         <div class="form-group" style="position:relative; margin-bottom: 20px;">
           <div class="search-box" style="max-width: 100%;">
             <span class="search-icon">🔍</span>
-            <input type="text" class="form-control" id="sale-product-search" placeholder="${t("Qidirish...")}" oninput="searchSaleProduct(this.value)" autocomplete="off">
+            <input type="text" class="form-control" id="sale-product-search" placeholder="${t("Qidirish (Nomi, Barcode)...")}" oninput="searchSaleProduct(this.value)" autocomplete="off">
           </div>
           <div id="sale-search-results" class="search-results-dropdown"></div>
         </div>
 
-        <div class="form-group">
-          <label>${t("Sotilgan mahsulotlar")}</label>
-          <div id="sale-batches-container" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto;">
-             <!-- Saved items will appear here -->
+        <div id="sale-batches-container" style="margin-bottom: 15px; max-height: 120px; overflow-y: auto;"></div>
+        <div id="sale-items-container" style="min-height: 200px; max-height: 350px; overflow-y: auto;"></div>
+        
+        <div class="modal-footer" style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
+          <div id="sale-total-mini" style="font-size: 18px; font-weight: 700; color: var(--primary);">0 ${t("so'm")}</div>
+          <button type="button" class="btn btn-primary" onclick="goToSalePaymentStep()" style="padding: 10px 30px;">${t("To'lovga o'tish")} →</button>
+        </div>
+      </div>
+
+      <div id="sale-step-2" class="sale-segment" style="display:none;">
+        <div style="background: var(--bg-glass); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 25px; display: flex; flex-direction: column; align-items: center;">
+          <span style="font-size: 13px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">${t("Jami summa")}</span>
+          <span id="sale-total-value" style="font-size: 36px; font-weight: 800; color: var(--success); margin: 5px 0;">0 ${t("so'm")}</span>
+          <div id="cumulative-total" style="font-size: 11px; opacity: 0.6;"></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+          <div class="form-group">
+            <label>💵 ${t("Naqd")}</label>
+            <input type="number" step="0.01" class="form-control form-control-lg" id="sale-cash" value="0" oninput="updateSalePayment()">
           </div>
-          <div id="sale-items-container">
-             <!-- Current items area -->
+          <div class="form-group">
+            <label>💳 ${t("Karta")}</label>
+            <input type="number" step="0.01" class="form-control form-control-lg" id="sale-card" value="0" oninput="updateSalePayment()">
+          </div>
+          <div class="form-group">
+            <label>📱 Click/Payme</label>
+            <input type="number" step="0.01" class="form-control form-control-lg" id="sale-click" value="0" oninput="updateSalePayment()">
+          </div>
+          <div class="form-group">
+            <label>⚠️ ${t("Qarz")}</label>
+            <input type="number" step="0.01" class="form-control form-control-lg" id="sale-debt" value="0" readonly style="color: var(--warning); font-weight: 800;">
           </div>
         </div>
 
-        <div style="display: flex; gap: 20px; align-items: stretch; margin-top: 10px;">
-          <div class="payment-total" style="flex: 1; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-            <span class="label">${t("Jami to'lov")}</span>
-            <span class="value" id="sale-total-value" style="font-size: 28px;">0 ${t("so'm")}</span>
-            <div id="cumulative-total" style="font-size:12px; margin-top:5px; opacity:0.7;">${t("Avval saqlangan")}: 0</div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; flex: 1.5;">
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px">${t("Naqd")}</label>
-              <input type="number" step="0.01" class="form-control" id="sale-cash" value="0" oninput="updateSalePayment()" style="padding: 8px;">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px">${t("Karta")}</label>
-              <input type="number" step="0.01" class="form-control" id="sale-card" value="0" oninput="updateSalePayment()" style="padding: 8px;">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px">${t("Click")}</label>
-              <input type="number" step="0.01" class="form-control" id="sale-click" value="0" oninput="updateSalePayment()" style="padding: 8px;">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px">${t("Qarz")}</label>
-              <input type="number" step="0.01" class="form-control" id="sale-debt" value="0" readonly style="padding: 8px; color: var(--warning); font-weight: 700;">
-            </div>
-          </div>
-        </div>
-        <div id="payment-error-msg" style="color: #EF4444; font-size: 13px; font-weight: 700; margin-top: 15px; display: none; text-align: center; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.2);">
+        <div id="payment-error-msg" style="color: #EF4444; font-size: 13px; font-weight: 700; margin: 15px 0; display: none; text-align: center; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px;">
           ⚠️ ${t('"JAMI" dan katta summani kirita olmaysiz!')}
         </div>
 
-        <div class="form-row" style="margin-top:20px">
-          <div class="form-group">
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-group" style="flex: 1.5;">
             <label>${t("Mijoz (ixtiyoriy)")}</label>
             <select class="form-control" id="sale-client">
               <option value="">${t("Tanlang...")}</option>
-              ${clientOptions}
+              ${globalClients.map(c => `<option value="${c.id}">${escapeHtml(c.fullName)} — ${escapeHtml(c.phone)}</option>`).join('')}
             </select>
           </div>
-          <div class="form-group">
+          <div class="form-group" style="flex: 1;">
             <label>${t("Izoh")}</label>
             <input type="text" class="form-control" id="sale-desc" placeholder="${t("Izoh")}">
           </div>
         </div>
 
-        <div class="modal-footer" style="margin-top: 20px;">
-          <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
-          <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">${t("Saqlash")}</button>
+        <div class="modal-footer" style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
+          <button type="button" class="btn btn-ghost" onclick="backToSaleProducts()">${t("Orqaga")}</button>
+          <button type="button" class="btn btn-primary" onclick="finalizeSale(event)" style="padding: 12px 50px; font-size: 16px;">✅ ${t("Saqlash")}</button>
         </div>
-      </form>
+      </div>
+
       <style>
+        .sale-steps { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+        .sale-steps .step { font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 2px 8px; border-radius: 4px; background: var(--bg-secondary); }
+        .sale-steps .step.active { color: white; background: var(--primary); }
+        .sale-steps .step-divider { width: 20px; height: 1px; background: var(--border); }
+        
         .search-results-dropdown {
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-md);
-          max-height: 300px;
-          overflow-y: auto;
-          z-index: 1100;
-          box-shadow: var(--shadow-lg);
-          display: none;
+          position: absolute; top: 100%; left: 0; right: 0;
+          background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
+          max-height: 250px; overflow-y: auto; z-index: 1100; box-shadow: var(--shadow-lg); display: none;
         }
         .search-result-item {
-          padding: 10px 14px;
-          cursor: pointer;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 1px solid var(--border);
-          transition: background 0.2s;
+          padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+          border-bottom: 1px solid var(--border); transition: 0.2s;
         }
-        .search-result-item:hover {
-          background: var(--bg-glass);
-        }
-        .search-result-item:last-child {
-          border-bottom: none;
-        }
-        .search-result-item .p-name { font-weight: 600; font-size: 14px; }
-        .search-result-item .p-info { font-size: 12px; color: var(--text-secondary); }
+        .search-result-item:hover { background: var(--bg-glass); }
+        .form-control-lg { padding: 12px; font-size: 16px; font-weight: 600; }
       </style>
     `);
 
-    // Focus search input
-    setTimeout(() => document.getElementById('sale-product-search').focus(), 100);
+    renderSaleItems();
+    setTimeout(() => document.getElementById('sale-product-search').focus(), 150);
   } catch (err) {
     showToast(err.message, 'error');
   }
 }
+
+window.goToSalePaymentStep = function() {
+  if (saleItems.length === 0 && savedBatchItems.length === 0) {
+    showToast(t("Avval mahsulotlarni tanlang"), 'warning');
+    return;
+  }
+  document.getElementById('sale-step-1').style.display = 'none';
+  document.getElementById('sale-step-2').style.display = 'block';
+  document.getElementById('step-1-indicator').classList.remove('active');
+  document.getElementById('step-2-indicator').classList.add('active');
+  currentSaleStep = 2;
+  updateSaleTotal();
+};
+
+window.backToSaleProducts = function() {
+  document.getElementById('sale-step-1').style.display = 'block';
+  document.getElementById('sale-step-2').style.display = 'none';
+  document.getElementById('step-1-indicator').classList.add('active');
+  document.getElementById('step-2-indicator').classList.remove('active');
+  currentSaleStep = 1;
+};
 
 function searchSaleProduct(query) {
   const dropdown = document.getElementById('sale-search-results');
@@ -324,7 +340,7 @@ function searchSaleProduct(query) {
       <div class="search-result-item" style="${p.quantity <= 0 ? 'opacity: 0.6; filter: grayscale(1);' : ''}" 
            onclick="addSaleProductById(${p.id})">
         <div>
-          <div class="p-name">${escapeHtml(p.name)}</div>
+          <div class="p-name">${escapeHtml(p.name)} <span style="font-size:10px; opacity:0.6; font-weight:normal;">🏢 ${escapeHtml(p.businessName)}</span></div>
           <div class="p-info">${p.barcode ? p.barcode : ''}</div>
         </div>
         <div style="text-align: right;">
@@ -354,7 +370,14 @@ function addSaleProductById(id) {
   if (existing) {
     existing.quantity++;
   } else {
-    saleItems.push({ productId: id, quantity: 1, price: product.price, name: product.name });
+    saleItems.push({ 
+      productId: id, 
+      quantity: 1, 
+      price: product.price, 
+      name: product.name,
+      businessId: product.businessId,
+      businessName: product.businessName
+    });
   }
 
   // Clear search
@@ -396,6 +419,7 @@ function renderSaleItems() {
             <tr style="border-top: 1px solid var(--border);">
               <td style="padding: 8px 10px;">
                 <div style="font-weight: 600; font-size: 14px;">${escapeHtml(item.name || 'Unknown')}</div>
+                <div style="font-size: 10px; opacity: 0.6;">🏢 ${escapeHtml(item.businessName)}</div>
               </td>
               <td style="padding: 8px 10px;">
                 <input type="number" class="form-control" style="padding: 6px; text-align: center;" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)">
@@ -454,8 +478,12 @@ function onSalePriceChange(idx, val) {
 
 function updateSaleTotal() {
   const total = saleItems.reduce((s, i) => s + (i.price * i.quantity), 0);
+  const miniEl = document.getElementById('sale-total-mini');
+  if (miniEl) miniEl.textContent = `${formatPrice(total)} ${t("so'm")}`;
+  
   const el = document.getElementById('sale-total-value');
-  if (el) el.textContent = `${formatPrice(total)} ${t("so'm")}`;
+  if (el) el.textContent = `${formatPrice(total + (savedBatchItems.reduce((s, i) => s + (i.price * i.quantity), 0)))} ${t("so'm")}`;
+  
   updateSalePayment();
 }
 
@@ -464,9 +492,15 @@ function updateSalePayment() {
   const savedTotal = savedBatchItems.reduce((s, i) => s + (i.price * i.quantity), 0);
   const overallTotal = currentTotal + savedTotal;
 
-  const cash = parseFloat(document.getElementById('sale-cash').value) || 0;
-  const card = parseFloat(document.getElementById('sale-card').value) || 0;
-  const click = parseFloat(document.getElementById('sale-click').value) || 0;
+  const cashInp = document.getElementById('sale-cash');
+  const cardInp = document.getElementById('sale-card');
+  const clickInp = document.getElementById('sale-click');
+
+  if (!cashInp) return; // Not in step 2 yet
+
+  const cash = parseFloat(cashInp.value) || 0;
+  const card = parseFloat(cardInp.value) || 0;
+  const click = parseFloat(clickInp.value) || 0;
   
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
   const currentPayments = cash + card + click;
@@ -540,6 +574,7 @@ async function addToSaleBatch() {
           productId: parseInt(i.productId),
           productQuantity: i.quantity,
           productPrice: i.price,
+          businessId: i.businessId
         }))
       });
       currentTotalTransactionID = resp.id;
@@ -554,6 +589,7 @@ async function addToSaleBatch() {
           productId: parseInt(i.productId),
           productQuantity: i.quantity,
           productPrice: i.price,
+          businessId: i.businessId
         }))
       );
       // Track payments cumulatively
@@ -610,7 +646,7 @@ function renderSavedBatches() {
 }
 
 async function finalizeSale(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
 
   const cash = parseFloat(document.getElementById('sale-cash').value) || 0;
   const card = parseFloat(document.getElementById('sale-card').value) || 0;
@@ -622,47 +658,64 @@ async function finalizeSale(e) {
   
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
   
-  if (overallPaidSoFar + cash + card + click > overallTotal) {
+  if (overallPaidSoFar + cash + card + click > overallTotal + 0.01) {
     showToast(t('"JAMI" dan katta summani kirita olmaysiz!'), 'error');
-    const totalValEl = document.getElementById('sale-total-value');
-    if (totalValEl) {
-        totalValEl.classList.add('shake');
-        setTimeout(() => totalValEl.classList.remove('shake'), 500);
-    }
     return;
   }
 
-  if (!currentTotalTransactionID) {
-    if (saleItems.length > 0) {
-      await addToSaleBatch();
-    } else {
-      showToast(t("Hali xarid qo'shilmadi"), 'warning');
-      return;
-    }
-  } else if (saleItems.length > 0) {
-    // If there were unsaved items in current form, save them too
-    await addToSaleBatch();
-  }
-
-  // Calculate final totals from all DB entries for this totalID
   try {
     showToast(t("Yakunlanmoqda..."), 'info');
-    const items = (await api.get(`/transactions/${currentTotalTransactionID}/items`)) || [];
-    const totalSum = items.reduce((s, i) => s + (i.productPrice * i.productQuantity), 0);
-
+    const bid = getSelectedBusinessId();
     const clientId = document.getElementById('sale-client').value;
+    const desc = document.getElementById('sale-desc').value.trim();
+    const debt = Math.max(0, overallTotal - (overallPaidSoFar + cash + card + click));
 
-    await api.put(`/transactions/${currentTotalTransactionID}`, {
-      total: totalSum,
-      cash: cumulativePayments.cash,
-      card: cumulativePayments.card,
-      click: cumulativePayments.click,
-      debt: cumulativePayments.debt,
-      clientId: clientId ? parseInt(clientId) : null,
-      description: document.getElementById('sale-desc').value.trim(),
-    });
+    // Calculate first batch total or just use it
+    if (!currentTotalTransactionID) {
+        // Create TotalTransaction with everything
+        const resp = await api.post('/transactions', {
+          businessId: bid,
+          total: overallTotal,
+          cash: cash,
+          card: card,
+          click: click,
+          debt: debt,
+          clientId: clientId ? parseInt(clientId) : null,
+          description: desc,
+          items: saleItems.map(i => ({
+            productId: parseInt(i.productId),
+            productQuantity: i.quantity,
+            productPrice: i.price,
+            businessId: i.businessId
+          }))
+        });
+        currentTotalTransactionID = resp.id;
+    } else {
+        // We already have some batches saved. 
+        // 1. Add current items as a batch
+        if (saleItems.length > 0) {
+            await api.post(`/transactions/${currentTotalTransactionID}/items?businessId=${bid}`,
+              saleItems.map(i => ({
+                productId: parseInt(i.productId),
+                productQuantity: i.quantity,
+                productPrice: i.price,
+                businessId: i.businessId
+              }))
+            );
+        }
+        // 2. Update the final TotalTransaction with new payments
+        await api.put(`/transactions/${currentTotalTransactionID}`, {
+          total: overallTotal,
+          cash: cumulativePayments.cash + cash,
+          card: cumulativePayments.card + card,
+          click: cumulativePayments.click + click,
+          debt: debt,
+          clientId: clientId ? parseInt(clientId) : null,
+          description: desc,
+        });
+    }
 
-    showToast(t('Sotuv muvaffaqiyatli yakunlandi!'));
+    showToast(t('Sotuv muvaffaqiyatli yakunlandi!'), 'success');
     closeModal();
     renderTransactions();
   } catch (err) {

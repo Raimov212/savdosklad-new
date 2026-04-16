@@ -316,6 +316,8 @@ async function renderDashboard() {
     const transactionsToday = transactionList.filter(t => t.createdAt.startsWith(todayStr)).length;
     const lowStock = productList.filter(p => !p.isDeleted && (p.quantity || 0) <= (p.minQuantity || 5)).length;
     const inventoryLevel = productList.length > 0 ? Math.round(((productList.length - lowStock) / productList.length) * 100) : 100;
+    const totalInventoryValue = productList.reduce((s, p) => s + ((p.quantity || 0) * (p.price || 0)), 0);
+    const totalProductsCount = productList.reduce((s, p) => s + (p.quantity || 0), 0);
 
     const user = api.getUser();
     const isEmployee = user && parseInt(user.role) === 0;
@@ -404,12 +406,16 @@ async function renderDashboard() {
 
           <div class="stat-card">
             <div class="card-header">
-              <span class="stat-label">${t("Ombor holati")}</span>
+              <span class="stat-label">${t("Ombor holati")} <span style="color:var(--warning); font-weight:800; margin-left:5px;">${inventoryLevel}%</span></span>
               <div class="btn-icon" style="background:var(--warning-bg); color:var(--warning);"><i data-lucide="package"></i></div>
             </div>
-            <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800;">${inventoryLevel}%</div>
-            <div class="stat-trend" style="color:var(--danger); font-size:12px; margin-top:8px;">
-              ${lowStock} <span style="color:var(--text-muted); font-weight:400;">${t("ta mahsulot kam")}</span>
+            <div class="stat-value" style="font-size:24px; font-family:'Outfit'; font-weight:800; line-height:1.2;">
+              <div style="font-size:13px; color:var(--text-muted); font-weight:400; margin-bottom:4px;">${t("Jami mahsulotlar")}: <b style="color:var(--text-primary);">${totalProductsCount}</b></div>
+              <div style="font-size:20px; color:var(--warning);">${formatPrice(totalInventoryValue)}</div>
+            </div>
+            <div class="stat-trend" style="color:var(--danger); font-size:12px; margin-top:8px; display:flex; align-items:center; gap:4px;">
+              <span style="font-weight:800; background:rgba(239, 68, 68, 0.1); padding:2px 6px; border-radius:4px;">${lowStock}</span> 
+              <span style="color:var(--text-muted); font-weight:400;">${t("ta mahsulot kam qolgan")}</span>
             </div>
           </div>
         </div>
