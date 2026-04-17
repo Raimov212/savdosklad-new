@@ -140,10 +140,21 @@ export function formatDateTime(dateStr) {
 }
 
 export function getSelectedBusinessId() {
-    return parseInt(localStorage.getItem('selectedBusinessId')) || 0;
+    const page = window.currentPage || 'dashboard';
+    const key = `selectedBusinessId_${page}`;
+    const val = localStorage.getItem(key);
+    if (val === null) {
+        // Fallback to global if page-specific doesn't exist
+        return parseInt(localStorage.getItem('selectedBusinessId')) || 0;
+    }
+    return parseInt(val) || 0;
 }
 
 export function setSelectedBusinessId(id) {
+    const page = window.currentPage || 'dashboard';
+    const key = `selectedBusinessId_${page}`;
+    localStorage.setItem(key, id);
+    // Also update global as a "last used" fallback
     localStorage.setItem('selectedBusinessId', id);
 }
 

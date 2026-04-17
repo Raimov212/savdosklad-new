@@ -220,6 +220,12 @@ function navigateTo(page) {
     const labelKey = isRequired ? "Biznes tanlang" : "Hammasi";
     selector.options[0].textContent = t(labelKey);
     selector.options[0].setAttribute('data-i18n', labelKey);
+
+    // Sync selector value with the saved choice for THIS page
+    const savedBid = getSelectedBusinessId();
+    // Check if the saved business still exists in options
+    const exists = Array.from(selector.options).some(o => o.value == savedBid);
+    selector.value = exists ? (savedBid || "") : "";
   }
 
   // Update centered topbar (optomsavdo style)
