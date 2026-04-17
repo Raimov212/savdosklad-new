@@ -10,19 +10,39 @@ async function renderProducts() {
   const content = document.getElementById('page-content');
   const bid = getSelectedBusinessId();
 
-  if (!bid) {
-    content.innerHTML = `<div class="empty-state"><div class="icon">📦</div><h4>${t("Avval biznes tanlang")}</h4></div>`;
-    return;
-  }
-
   try {
-    const [products, categories] = await Promise.all([
-      api.get(`/products?businessId=${bid}`),
-      api.get(`/categories?businessId=${bid}`)
-    ]);
+    if (!bid) {
+      // "Hammasi" mode — fetch from all businesses
+      const businesses = await api.get('/businesses/my').catch(() => []);
+      if (!businesses || businesses.length === 0) {
+        content.innerHTML = `<div class="empty-state"><div class="icon">🏢</div><h4>${t("Biznes yarating")}</h4></div>`;
+        return;
+      }
 
-    allProducts = (products || []).filter(p => !p.isDeleted);
-    allCategories = categories || [];
+      const results = await Promise.all(
+        businesses.map(b => 
+          Promise.all([
+            api.get(`/products?businessId=${b.id}`).catch(() => []),
+            api.get(`/categories?businessId=${b.id}`).catch(() => [])
+          ]).then(([prods, cats]) => {
+            // Tag with business name for UI
+            prods.forEach(p => { p._businessName = b.name; p._businessId = b.id; });
+            cats.forEach(c => { c._businessId = b.id; });
+            return { prods, cats };
+          })
+        )
+      );
+
+      allProducts = results.flatMap(r => r.prods).filter(p => !p.isDeleted);
+      allCategories = results.flatMap(r => r.cats);
+    } else {
+      const [products, categories] = await Promise.all([
+        api.get(`/products?businessId=${bid}`),
+        api.get(`/categories?businessId=${bid}`)
+      ]);
+      allProducts = (products || []).filter(p => !p.isDeleted);
+      allCategories = categories || [];
+    }
 
     renderProductsTable(allProducts);
   } catch (err) {
@@ -52,10 +72,11 @@ function renderProductsTable(list) {
   const items = paginated.length === 0
     ? `<div class="empty-state"><div class="icon">📦</div><h4>${t("Mahsulotlar yo'q")}</h4></div>`
     : paginated.map((p, i) => {
-      const cat = allCategories.find(c => c.id === p.categoryId);
+      const cat = allCategories.find(c => c.id === p.categoryId && (p._businessId ? c._businessId === p._businessId : true));
       const colorClass = avatarColors[i % avatarColors.length];
       const initial = (p.name || '?')[0].toUpperCase();
       const finalPrice = p.price * (1 - (p.discount || 0) / 100);
+      const bizBadge = p._businessName ? `<span class="badge" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); font-size:10px; opacity:0.7;">${escapeHtml(p._businessName)}</span>` : '';
       const stockBadge = p.quantity <= 5
         ? `<span class="badge badge-danger">${p.quantity} ${t("ta")}</span>`
         : `<span class="badge" style="background:#ECFDF5; color:#059669;">${p.quantity} ${t("ta")}</span>`;
@@ -70,7 +91,7 @@ function renderProductsTable(list) {
         }
               <div>
                 <div class="acc-title">${escapeHtml(p.name)}</div>
-                <div class="acc-subtitle">${cat ? escapeHtml(cat.name) : '—'} ${p.barcode ? '· ' + escapeHtml(p.barcode) : ''}</div>
+                <div class="acc-subtitle">${cat ? escapeHtml(cat.name) : '—'} ${p.barcode ? '· ' + escapeHtml(p.barcode) : ''} ${bizBadge}</div>
               </div>
             </div>
             <div class="acc-header-right">
@@ -129,7 +150,7 @@ function renderProductsTable(list) {
           oninput="filterProducts(this.value)"
           style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
       </div>
-      <button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>
+      ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
     </div>
   `;
 }

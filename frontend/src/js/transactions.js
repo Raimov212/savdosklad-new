@@ -129,7 +129,7 @@ function renderTransactionsTable(list) {
             </div>
             <div class="acc-actions">
               <button class="btn btn-ghost btn-sm" onclick='viewTransactionItems(${idsJson})'>👁️ ${t("Tafsilotlar")}</button>
-              <button class="btn btn-primary btn-sm" onclick='downloadTransactionPdf(${idsJson}, ${JSON.stringify(trans)})'>📄 ${t("PDF")}</button>
+              <button class="btn btn-primary btn-sm" onclick='downloadTransactionPdf(${idsJson})'>📄 ${t("PDF")}</button>
             </div>
           </div>
         </div>`;
@@ -175,11 +175,13 @@ function filterTransactions(query) {
 async function openSaleModal() {
   const bid = getSelectedBusinessId();
   try {
-    const [products, clients, businesses] = await Promise.all([
+    const businesses = await api.get('/businesses/my').catch(() => []);
+    const [products, clientsResults] = await Promise.all([
       api.get('/products/my'),
-      api.get(`/clients?businessId=${bid}`),
-      api.get('/businesses/my')
+      Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
     ]);
+
+    const clients = clientsResults.flat();
 
     saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0).map(p => {
        const b = (businesses || []).find(bus => bus.id === p.businessId);
@@ -815,10 +817,12 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
     showToast(t('PDF tayyorlanmoqda...'), 'info');
 
     // Fetch necessary data
-    const [allItems, clients] = await Promise.all([
+    const businesses = await api.get('/businesses/my').catch(() => []);
+    const [allItems, clientsResults] = await Promise.all([
       Promise.all(ids.map(id => api.get(`/transactions/${id}/items`))),
-      api.get(`/clients?businessId=${bid}`)
+      Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
     ]);
+    const clients = clientsResults.flat();
     const transItems = allItems.flat();
 
     // Use the provided grouped metadata or find the first one

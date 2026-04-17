@@ -20,8 +20,16 @@ let currentTrendChart = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  // Sync language selector UI with currentLang
+  const langSelector = document.getElementById('lang-selector-app');
+  if (langSelector) {
+    langSelector.value = currentLang;
+  }
+
   loadUserInfo();
-  loadBusinesses();
+  loadBusinesses().then(() => {
+    if (typeof translateDOM === 'function') translateDOM();
+  });
   navigateTo('dashboard');
 
   // Global UI listener for Modal Inputs (Selection start on focus)
@@ -117,7 +125,11 @@ async function loadBusinesses() {
     const selector = document.getElementById('business-selector');
     if (!selector) return;
 
-    selector.innerHTML = `<option value="">${t("Biznes tanlang")}</option>`;
+    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales'];
+    const isRequired = pagesRequiringSelection.includes(window.currentPage || 'dashboard');
+    const labelKey = isRequired ? "Biznes tanlang" : "Hammasi";
+    
+    selector.innerHTML = `<option value="" data-i18n="${labelKey}">${t(labelKey)}</option>`;
 
     if (businesses && businesses.length > 0) {
       businesses.forEach(b => {
@@ -130,9 +142,6 @@ async function loadBusinesses() {
       const savedBid = getSelectedBusinessId();
       if (savedBid && businesses.find(b => b.id === savedBid)) {
         selector.value = savedBid;
-      } else if (businesses.length === 1) {
-        selector.value = businesses[0].id;
-        setSelectedBusinessId(businesses[0].id);
       } else {
         selector.value = "";
         setSelectedBusinessId(0);
@@ -203,6 +212,16 @@ function navigateTo(page) {
   document.getElementById('page-title').textContent = t(titles[page] || page);
   document.title = `SavdoSklad — ${t(titles[page] || page)}`;
 
+  // Dynamic business selector label
+  const selector = document.getElementById('business-selector');
+  if (selector && selector.options.length > 0) {
+    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales'];
+    const isRequired = pagesRequiringSelection.includes(page);
+    const labelKey = isRequired ? "Biznes tanlang" : "Hammasi";
+    selector.options[0].textContent = t(labelKey);
+    selector.options[0].setAttribute('data-i18n', labelKey);
+  }
+
   // Update centered topbar (optomsavdo style)
   const centerTitle = document.getElementById('topbar-page-title-center');
   if (centerTitle) centerTitle.textContent = t(titles[page] || page);
@@ -256,25 +275,38 @@ async function renderDashboard() {
   const bid = getSelectedBusinessId();
   const content = document.getElementById('page-content');
 
-  if (!bid) {
-    const user = api.getUser();
-    content.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">🏢</div>
-        <h4>${t("Biznes tanlang")}</h4>
-        <p>${user.role >= 1 ? t("Yuqoridagi ro'yxatdan biznesingizni tanlang yoki yangi biznes yarating.") : t("Yuqoridagi ro'yxatdan biznesingizni tanlang.")}</p>
-        <br>
-        ${user.role >= 1 ? `<button class="btn btn-primary" onclick="navigateTo('businesses')">${t("Biznes yaratish")}</button>` : ''}
-      </div>`;
-    return;
-  }
-
   try {
-    const [products, transactions, clients] = await Promise.all([
-      api.get(`/products?businessId=${bid}`).catch(() => []),
-      api.get(`/transactions?businessId=${bid}`).catch(() => []),
-      api.get(`/clients?businessId=${bid}`).catch(() => [])
-    ]);
+    let products, transactions, clients;
+
+    if (!bid) {
+      // "Hammasi" tanlangan — barcha bizneslar bo'yicha ma'lumotlarni yuklaymiz
+      const businesses = await api.get('/businesses/my').catch(() => []);
+      if (!businesses || businesses.length === 0) {
+        const user = api.getUser();
+        content.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🏢</div>
+            <h4>${t("Biznes yarating")}</h4>
+            <p>${user.role >= 1 ? t("Yangi biznes yarating va ma'lumotlaringizni boshqaring.") : t("Hozircha biznes mavjud emas.")}</p>
+            <br>
+            ${user.role >= 1 ? `<button class="btn btn-primary" onclick="navigateTo('businesses')">${t("Biznes yaratish")}</button>` : ''}
+          </div>`;
+        return;
+      }
+      // Barcha bizneslar bo'yicha parallel so'rovlar
+      const allProducts = await Promise.all(businesses.map(b => api.get(`/products?businessId=${b.id}`).catch(() => [])));
+      const allTransactions = await Promise.all(businesses.map(b => api.get(`/transactions?businessId=${b.id}`).catch(() => [])));
+      const allClients = await Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])));
+      products = allProducts.flat();
+      transactions = allTransactions.flat();
+      clients = allClients.flat();
+    } else {
+      [products, transactions, clients] = await Promise.all([
+        api.get(`/products?businessId=${bid}`).catch(() => []),
+        api.get(`/transactions?businessId=${bid}`).catch(() => []),
+        api.get(`/clients?businessId=${bid}`).catch(() => [])
+      ]);
+    }
 
     const productList = (products || []).filter(p => !p.isDeleted);
     const transactionList = (transactions || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

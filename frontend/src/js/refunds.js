@@ -146,11 +146,14 @@ async function downloadRefundPdf(id) {
   try {
     showToast(t('PDF tayyorlanmoqda...'), 'info');
 
-    const [refundItems, clients, refund] = await Promise.all([
+    const businesses = await api.get('/businesses/my').catch(() => []);
+    const [refundItems, clientsResults, refund] = await Promise.all([
       api.get(`/refunds/${id}/items`),
-      api.get(`/clients?businessId=${bid}`),
+      Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => []))),
       Promise.resolve(allRefundsList.find(r => r.id === id))
     ]);
+
+    const clients = clientsResults.flat();
 
     const doc = new jsPDF();
     let fontName = 'helvetica';
