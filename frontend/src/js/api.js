@@ -140,11 +140,55 @@ export function formatDateTime(dateStr) {
 }
 
 export function getSelectedBusinessId() {
-    return parseInt(localStorage.getItem('selectedBusinessId')) || 0;
+    const page = window.currentPage || 'dashboard';
+    const key = `selectedBusinessId_${page}`;
+    const val = localStorage.getItem(key);
+    if (val === null) {
+        // Fallback to global if page-specific doesn't exist
+        return parseInt(localStorage.getItem('selectedBusinessId')) || 0;
+    }
+    return parseInt(val) || 0;
 }
 
 export function setSelectedBusinessId(id) {
+    const page = window.currentPage || 'dashboard';
+    const key = `selectedBusinessId_${page}`;
+    localStorage.setItem(key, id);
+    // Also update global as a "last used" fallback
     localStorage.setItem('selectedBusinessId', id);
+}
+
+// ==================== DATE PERIOD HELPERS ====================
+export function getDatePeriod() {
+    const page = window.currentPage || 'dashboard';
+    const key = `datePeriod_${page}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {}
+    }
+
+    // Default: Last 7 days
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 7);
+
+    return {
+        start: start.toISOString().split('T')[0],
+        end: end.toISOString().split('T')[0]
+    };
+}
+
+export function setDatePeriod(start, end) {
+    const page = window.currentPage || 'dashboard';
+    const key = `datePeriod_${page}`;
+    localStorage.setItem(key, JSON.stringify({ start, end }));
+}
+
+export function getDateQuery() {
+    const period = getDatePeriod();
+    return `&startDate=${period.start}&endDate=${period.end}`;
 }
 
 
@@ -200,6 +244,9 @@ window.formatDate = formatDate;
 window.formatDateTime = formatDateTime;
 window.getSelectedBusinessId = getSelectedBusinessId;
 window.setSelectedBusinessId = setSelectedBusinessId;
+window.getDatePeriod = getDatePeriod;
+window.setDatePeriod = setDatePeriod;
+window.getDateQuery = getDateQuery;
 window.escapeHtml = escapeHtml;
 window.toggleTheme = toggleTheme;
 window.updateThemeIcon = updateThemeIcon;

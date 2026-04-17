@@ -84,9 +84,11 @@ func (r *RefundRepo) GetTransactionsByTotalID(totalID int) ([]entity.Transaction
 
 func (r *RefundRepo) GetTotalRefundsByPeriod(bid int, start, end time.Time) ([]entity.TotalRefund, error) {
 	rows, err := r.db.Query(
-		`SELECT id, "total", "cash", "card", "click", "debt", "businessId", "clientId", "createdAt", "updatedAt" 
-		 FROM total_refunds 
-		 WHERE "businessId" = $1 AND "createdAt" >= $2 AND "createdAt" <= $3`,
+		`SELECT t.id, t.description, t.total, t.cash, t.card, t.click, t.debt, t."clientNumber", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		        COALESCE(u."firstName" || ' ' || u."lastName", '')
+		 FROM total_refunds t
+		 LEFT JOIN users u ON t."createdBy" = u.id
+		 WHERE t."businessId" = $1 AND t."createdAt" >= $2 AND t."createdAt" <= $3 ORDER BY t.id DESC`,
 		bid, start, end,
 	)
 	if err != nil {
@@ -94,15 +96,16 @@ func (r *RefundRepo) GetTotalRefundsByPeriod(bid int, start, end time.Time) ([]e
 	}
 	defer rows.Close()
 
-	var results []entity.TotalRefund
+	var list []entity.TotalRefund
 	for rows.Next() {
-		var t entity.TotalRefund
-		if err := rows.Scan(&t.ID, &t.Total, &t.Cash, &t.Card, &t.Click, &t.Debt, &t.BusinessID, &t.ClientID, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		var tt entity.TotalRefund
+		if err := rows.Scan(&tt.ID, &tt.Description, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt,
+			&tt.ClientNumber, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
-		results = append(results, t)
+		list = append(list, tt)
 	}
-	return results, nil
+	return list, nil
 }
 
 func (r *RefundRepo) GetRefundsByTotalID(totalID int) ([]entity.Refund, error) {

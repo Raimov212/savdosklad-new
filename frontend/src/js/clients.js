@@ -11,14 +11,30 @@ async function renderClients() {
   const content = document.getElementById('page-content');
   const bid = getSelectedBusinessId();
 
-  if (!bid) {
-    content.innerHTML = `<div class="empty-state"><div class="icon">👥</div><h4>${t("Avval biznes tanlang")}</h4></div>`;
-    return;
-  }
-
   try {
-    const clients = await api.get(`/clients?businessId=${bid}`);
-    allClientsList = clients || [];
+    if (!bid) {
+      // "Hammasi" mode — fetch from all businesses
+      const businesses = await api.get('/businesses/my').catch(() => []);
+      if (!businesses || businesses.length === 0) {
+        content.innerHTML = `<div class="empty-state"><div class="icon">🏢</div><h4>${t("Biznes yarating")}</h4></div>`;
+        return;
+      }
+
+      const results = await Promise.all(
+        businesses.map(b => 
+          api.get(`/clients?businessId=${b.id}`).catch(() => []).then(clients => {
+            // Tag with business name
+            clients.forEach(c => { c._businessName = b.name; c._businessId = b.id; });
+            return clients;
+          })
+        )
+      );
+
+      allClientsList = results.flat();
+    } else {
+      const clients = await api.get(`/clients?businessId=${bid}`);
+      allClientsList = clients || [];
+    }
     renderClientsTable(allClientsList);
   } catch (err) {
     content.innerHTML = `<div class="empty-state"><h4>${t("Xatolik")}</h4><p>${escapeHtml(err.message)}</p></div>`;
@@ -46,13 +62,14 @@ function renderClientsTable(list) {
     : paginated.map((c, i) => {
       const colorClass = avatarColors[i % avatarColors.length];
       const initial = (c.fullName || '?')[0].toUpperCase();
+      const bizBadge = c._businessName ? `<span class="badge" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); font-size:10px; opacity:0.7; margin-left:8px;">${escapeHtml(c._businessName)}</span>` : '';
       return `
         <div class="acc-item" id="client-acc-${c.id}">
           <div class="acc-header" onclick="toggleAcc('client-acc-${c.id}')">
             <div class="acc-header-left">
               <div class="acc-avatar ${colorClass}">${initial}</div>
               <div>
-                <div class="acc-title">${escapeHtml(c.fullName)}</div>
+                <div class="acc-title">${escapeHtml(c.fullName)} ${bizBadge}</div>
                 <div class="acc-subtitle">${escapeHtml(c.phone)}</div>
               </div>
             </div>
@@ -95,7 +112,7 @@ function renderClientsTable(list) {
           oninput="filterClients(this.value)"
           style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
       </div>
-      <button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>
+      ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>` : ''}
     </div>
   `;
 }

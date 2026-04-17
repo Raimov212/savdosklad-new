@@ -26,7 +26,7 @@ async function renderTransactions() {
   }
 
   try {
-    const transactions = await api.get(`/transactions?businessId=${bid}`);
+    const transactions = await api.get(`/transactions?businessId=${bid}${getDateQuery()}`);
     allTransactionsList = transactions || [];
     renderTransactionsTable(allTransactionsList);
   } catch (err) {
@@ -34,8 +34,9 @@ async function renderTransactions() {
   }
 }
 
-function renderTransactionsTable(list) {
+function renderTransactionsTable(list, isAppend = false) {
   if (list) {
+    if (!isAppend) window.transactionPage = 1;
     // Group transactions by Client ID/Number and Date
     const groupedMap = new Map();
     list.forEach(trans => {
@@ -65,20 +66,20 @@ function renderTransactionsTable(list) {
     });
 
     currentTransactions = Array.from(groupedMap.values());
-    window.transactionPage = 1;
+    if (!isAppend) window.transactionPage = 1;
   }
 
   const limit = 15;
   const totalPages = Math.ceil(currentTransactions.length / limit);
-  if (window.transactionPage > totalPages) window.transactionPage = totalPages || 1;
-  const start = (window.transactionPage - 1) * limit;
-  const paginated = currentTransactions.slice(start, start + limit);
+  const end = window.transactionPage * limit;
+  const paginated = currentTransactions.slice(end - limit, end);
 
   const content = document.getElementById('page-content');
 
   const items = paginated.length === 0
     ? `<div class="empty-state"><div class="icon">🛒</div><h4>${t("Sotuvlar yo'q")}</h4></div>`
     : paginated.map((trans, i) => {
+      const absoluteIndex = ((window.transactionPage - 1) * limit) + i + 1;
       const hasDebt = trans.debt > 0;
       const idsJson = JSON.stringify(trans.ids);
       return `
@@ -87,7 +88,7 @@ function renderTransactionsTable(list) {
             <div class="acc-header-left">
               <div class="acc-avatar acc-avatar-indigo" style="${hasDebt ? 'background:linear-gradient(135deg,#EF4444,#DC2626)' : ''}">🛒</div>
               <div>
-                <div class="acc-title">№ ${start + i + 1} — ${formatDateTime(trans.createdAt)}</div>
+                <div class="acc-title">№ ${absoluteIndex} — ${formatDateTime(trans.createdAt)}</div>
                 <div class="acc-subtitle">
                   ${trans.clientName ? `<strong>${escapeHtml(trans.clientName)}</strong>` : (trans.clientNumber ? escapeHtml(trans.clientNumber) : t('Begona xaridor'))}
                   <span style="opacity:0.6; margin-left:8px;">№: ${trans.ids.join(',')}</span>
@@ -129,26 +130,40 @@ function renderTransactionsTable(list) {
             </div>
             <div class="acc-actions">
               <button class="btn btn-ghost btn-sm" onclick='viewTransactionItems(${idsJson})'>👁️ ${t("Tafsilotlar")}</button>
-              <button class="btn btn-primary btn-sm" onclick='downloadTransactionPdf(${idsJson}, ${JSON.stringify(trans)})'>📄 ${t("PDF")}</button>
+              <button class="btn btn-primary btn-sm" onclick='downloadTransactionPdf(${idsJson})'>📄 ${t("PDF")}</button>
             </div>
           </div>
         </div>`;
     }).join('');
 
-  content.innerHTML = `
-    <div class="acc-list">${items}</div>
-    ${renderPageControls('transactionPage', totalPages, 'renderTransactionsTable()')}
-    <div class="page-bottom-bar">
-      <div class="search-box" style="flex:1; max-width:none;">
-        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-        <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
-          value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
-          oninput="filterTransactions(this.value)"
-          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+  if (!isAppend) {
+    content.innerHTML = `
+      <div class="acc-list" id="transaction-acc-list">${items}</div>
+      <div id="transaction-pagination-area">
+        ${renderPageControls('transactionPage', totalPages, 'renderTransactionsTable')}
       </div>
-      <button class="btn btn-primary" onclick="openSaleModal()">${t("Qo'shish")}</button>
-    </div>
-  `;
+      <div class="page-bottom-bar">
+        <div class="search-box" style="flex:1; max-width:none;">
+          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
+            value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
+            oninput="filterTransactions(this.value)"
+            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+        </div>
+        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+        <button class="btn btn-primary" onclick="openSaleModal()">${t("Qo'shish")}</button>
+      </div>
+    `;
+  } else {
+    const listContainer = document.getElementById('transaction-acc-list');
+    if (listContainer) {
+      listContainer.insertAdjacentHTML('beforeend', items);
+    }
+    const pagArea = document.getElementById('transaction-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls('transactionPage', totalPages, 'renderTransactionsTable');
+    }
+  }
 }
 
 function filterTransactions(query) {
@@ -175,11 +190,13 @@ function filterTransactions(query) {
 async function openSaleModal() {
   const bid = getSelectedBusinessId();
   try {
-    const [products, clients, businesses] = await Promise.all([
+    const businesses = await api.get('/businesses/my').catch(() => []);
+    const [products, clientsResults] = await Promise.all([
       api.get('/products/my'),
-      api.get(`/clients?businessId=${bid}`),
-      api.get('/businesses/my')
+      Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
     ]);
+
+    const clients = clientsResults.flat();
 
     saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0).map(p => {
        const b = (businesses || []).find(bus => bus.id === p.businessId);
@@ -815,10 +832,12 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
     showToast(t('PDF tayyorlanmoqda...'), 'info');
 
     // Fetch necessary data
-    const [allItems, clients] = await Promise.all([
+    const businesses = await api.get('/businesses/my').catch(() => []);
+    const [allItems, clientsResults] = await Promise.all([
       Promise.all(ids.map(id => api.get(`/transactions/${id}/items`))),
-      api.get(`/clients?businessId=${bid}`)
+      Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
     ]);
+    const clients = clientsResults.flat();
     const transItems = allItems.flat();
 
     // Use the provided grouped metadata or find the first one

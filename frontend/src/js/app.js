@@ -20,8 +20,16 @@ let currentTrendChart = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  // Sync language selector UI with currentLang
+  const langSelector = document.getElementById('lang-selector-app');
+  if (langSelector) {
+    langSelector.value = currentLang;
+  }
+
   loadUserInfo();
-  loadBusinesses();
+  loadBusinesses().then(() => {
+    if (typeof translateDOM === 'function') translateDOM();
+  });
   navigateTo('dashboard');
 
   // Global UI listener for Modal Inputs (Selection start on focus)
@@ -117,7 +125,11 @@ async function loadBusinesses() {
     const selector = document.getElementById('business-selector');
     if (!selector) return;
 
-    selector.innerHTML = `<option value="">${t("Biznes tanlang")}</option>`;
+    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales'];
+    const isRequired = pagesRequiringSelection.includes(window.currentPage || 'dashboard');
+    const labelKey = isRequired ? "Biznes tanlang" : "Hammasi";
+    
+    selector.innerHTML = `<option value="" data-i18n="${labelKey}">${t(labelKey)}</option>`;
 
     if (businesses && businesses.length > 0) {
       businesses.forEach(b => {
@@ -130,9 +142,6 @@ async function loadBusinesses() {
       const savedBid = getSelectedBusinessId();
       if (savedBid && businesses.find(b => b.id === savedBid)) {
         selector.value = savedBid;
-      } else if (businesses.length === 1) {
-        selector.value = businesses[0].id;
-        setSelectedBusinessId(businesses[0].id);
       } else {
         selector.value = "";
         setSelectedBusinessId(0);
@@ -203,6 +212,22 @@ function navigateTo(page) {
   document.getElementById('page-title').textContent = t(titles[page] || page);
   document.title = `SavdoSklad — ${t(titles[page] || page)}`;
 
+  // Dynamic business selector label
+  const selector = document.getElementById('business-selector');
+  if (selector && selector.options.length > 0) {
+    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales'];
+    const isRequired = pagesRequiringSelection.includes(page);
+    const labelKey = isRequired ? "Biznes tanlang" : "Hammasi";
+    selector.options[0].textContent = t(labelKey);
+    selector.options[0].setAttribute('data-i18n', labelKey);
+
+    // Sync selector value with the saved choice for THIS page
+    const savedBid = getSelectedBusinessId();
+    // Check if the saved business still exists in options
+    const exists = Array.from(selector.options).some(o => o.value == savedBid);
+    selector.value = exists ? (savedBid || "") : "";
+  }
+
   // Update centered topbar (optomsavdo style)
   const centerTitle = document.getElementById('topbar-page-title-center');
   if (centerTitle) centerTitle.textContent = t(titles[page] || page);
@@ -256,25 +281,40 @@ async function renderDashboard() {
   const bid = getSelectedBusinessId();
   const content = document.getElementById('page-content');
 
-  if (!bid) {
-    const user = api.getUser();
-    content.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">🏢</div>
-        <h4>${t("Biznes tanlang")}</h4>
-        <p>${user.role >= 1 ? t("Yuqoridagi ro'yxatdan biznesingizni tanlang yoki yangi biznes yarating.") : t("Yuqoridagi ro'yxatdan biznesingizni tanlang.")}</p>
-        <br>
-        ${user.role >= 1 ? `<button class="btn btn-primary" onclick="navigateTo('businesses')">${t("Biznes yaratish")}</button>` : ''}
-      </div>`;
-    return;
-  }
-
   try {
-    const [products, transactions, clients] = await Promise.all([
-      api.get(`/products?businessId=${bid}`).catch(() => []),
-      api.get(`/transactions?businessId=${bid}`).catch(() => []),
-      api.get(`/clients?businessId=${bid}`).catch(() => [])
-    ]);
+    let products, transactions, clients;
+
+    if (!bid) {
+      // "Hammasi" tanlangan — barcha bizneslar bo'yicha ma'lumotlarni yuklaymiz
+      const businesses = await api.get('/businesses/my').catch(() => []);
+      if (!businesses || businesses.length === 0) {
+        const user = api.getUser();
+        content.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🏢</div>
+            <h4>${t("Biznes yarating")}</h4>
+            <p>${user.role >= 1 ? t("Yangi biznes yarating va ma'lumotlaringizni boshqaring.") : t("Hozircha biznes mavjud emas.")}</p>
+            <br>
+            ${user.role >= 1 ? `<button class="btn btn-primary" onclick="navigateTo('businesses')">${t("Biznes yaratish")}</button>` : ''}
+          </div>`;
+        return;
+      }
+      // Barcha bizneslar bo'yicha parallel so'rovlar
+      const query = getDateQuery();
+      const allProducts = await Promise.all(businesses.map(b => api.get(`/products?businessId=${b.id}`).catch(() => [])));
+      const allTransactions = await Promise.all(businesses.map(b => api.get(`/transactions?businessId=${b.id}${query}`).catch(() => [])));
+      const allClients = await Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])));
+      products = allProducts.flat();
+      transactions = allTransactions.flat();
+      clients = allClients.flat();
+    } else {
+      const query = getDateQuery();
+      [products, transactions, clients] = await Promise.all([
+        api.get(`/products?businessId=${bid}`).catch(() => []),
+        api.get(`/transactions?businessId=${bid}${query}`).catch(() => []),
+        api.get(`/clients?businessId=${bid}`).catch(() => [])
+      ]);
+    }
 
     const productList = (products || []).filter(p => !p.isDeleted);
     const transactionList = (transactions || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -715,11 +755,27 @@ function renderDashboardTransactions() {
   const container = document.getElementById('dashboard-transactions-container');
   if (!container) return;
 
-  const limit = 10;
-  const totalPages = Math.ceil(currentDashboardTransactions.length / limit);
-  if (window.dashboardPage > totalPages) window.dashboardPage = totalPages || 1;
-  const start = (window.dashboardPage - 1) * limit;
-  const paginated = currentDashboardTransactions.slice(start, start + limit);
+  // Static: Only show top 10 recent transactions
+  const paginated = currentDashboardTransactions.slice(0, 10);
+
+  const rows = paginated.map((tItem, i) => {
+    return `
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="color:var(--text-muted); text-align:center; padding:12px 10px;">${i + 1}</td>
+        <td style="font-weight:700; color:#10b981; text-align:center; padding:12px 10px;">${formatPrice(tItem.total)} ${t("so'm")}</td>
+        <td style="text-align:center; padding:12px 10px;">
+           <div style="display:flex; justify-content:center; gap:12px; font-size:13px; font-weight:500;">
+             ${tItem.cash > 0 ? `<span style="color:#10b981">💵 ${t("Naqd")}</span>` : ''}
+             ${tItem.card > 0 ? `<span style="color:#3b82f6">💳 ${t("Karta")}</span>` : ''}
+             ${tItem.click > 0 ? `<span style="color:#8b5cf6">📱 ${t("Click")}</span>` : ''}
+           </div>
+        </td>
+        <td style="text-align:center; padding:12px 10px; font-size:12px; font-weight:600; color:var(--text-primary); text-transform:uppercase;">
+           ${escapeHtml(tItem.createdByName || t("Tizim"))}
+        </td>
+        <td style="font-size:12px; color:var(--text-muted); text-align:center; padding:12px 10px;">${formatDateTime(tItem.createdAt)}</td>
+      </tr>`;
+  }).join('');
 
   container.innerHTML = `
     <div class="table-container" style="border:none; box-shadow:none;">
@@ -729,37 +785,14 @@ function renderDashboardTransactions() {
             <th style="text-align:center; padding:15px 10px;">№</th>
             <th style="text-align:center; padding:15px 10px;">${t("SUMMA")}</th>
             <th style="text-align:center; padding:15px 10px;">${t("TO'LOV TURI")}</th>
-            <th style="text-align:center; padding:15px 10px;">${t("QARZ")}</th>
             <th style="text-align:center; padding:15px 10px;">${t("Mas'ul")}</th>
             <th style="text-align:center; padding:15px 10px;">${t("SANA")}</th>
           </tr>
         </thead>
-        <tbody>
-          ${currentDashboardTransactions.length === 0 ? `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Sotuvlar hali yo'q")}</td></tr>` :
-      paginated.map((tItem, i) => `
-              <tr style="border-bottom: 1px solid var(--border);">
-                <td style="color:var(--text-muted); text-align:center; padding:12px 10px;">${start + i + 1}</td>
-                <td style="font-weight:700; color:#10b981; text-align:center; padding:12px 10px;">${formatPrice(tItem.total)} ${t("so'm")}</td>
-                <td style="text-align:center; padding:12px 10px;">
-                   <div style="display:flex; justify-content:center; gap:12px; font-size:13px; font-weight:500;">
-                     ${tItem.cash > 0 ? `<span style="color:#10b981">💵 ${t("Naqd")}</span>` : ''}
-                     ${tItem.card > 0 ? `<span style="color:#3b82f6">💳 ${t("Karta")}</span>` : ''}
-                     ${tItem.click > 0 ? `<span style="color:#8b5cf6">📱 ${t("Click")}</span>` : ''}
-                   </div>
-                </td>
-                <td style="text-align:center; padding:12px 10px;">
-                  ${tItem.debt > 0 ? `<span style="color:#ef4444; font-weight:800; font-size:14px;">${formatPrice(tItem.debt)}</span>` : '<span style="color:var(--text-muted); opacity:0.5;">—</span>'}
-                </td>
-                <td style="text-align:center; padding:12px 10px; font-size:12px; font-weight:600; color:var(--text-primary); text-transform:uppercase;">
-                   ${escapeHtml(tItem.createdByName || t("Tizim"))}
-                </td>
-                <td style="font-size:12px; color:var(--text-muted); text-align:center; padding:12px 10px;">${formatDateTime(tItem.createdAt)}</td>
-              </tr>`).join('')}
+        <tbody id="dashboard-tbody">
+          ${paginated.length === 0 ? `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Sotuvlar hali yo'q")}</td></tr>` : rows}
         </tbody>
       </table>
-    </div>
-    <div style="padding: 10px 24px 24px 24px;">
-       ${renderPageControls('dashboardPage', totalPages, 'renderDashboardTransactions()')}
     </div>
   `;
 }
@@ -767,26 +800,39 @@ function renderDashboardTransactions() {
 
 // ==================== AUTH & ROUTING ====================
 function renderPageControls(pageVarName, totalPages, renderFnName) {
-  let currentPage = window[pageVarName] || 1;
-
-  const effectiveTotal = Math.max(1, totalPages);
-
-  let html = '<div class="pagination" style="display:flex; gap:5px; justify-content:center; align-items:center; margin-top:15px;">';
-  html += `<button class="btn btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="${pageVarName} = ${currentPage - 1}; ${renderFnName}">${t("Oldingi")}</button>`;
-
-  for (let i = 1; i <= effectiveTotal; i++) {
-    if (i === 1 || i === effectiveTotal || (i >= currentPage - 2 && i <= currentPage + 2)) {
-      const active = i === currentPage ? 'btn-primary active' : 'btn-secondary';
-      html += `<button class="btn btn-sm ${active}" onclick="${pageVarName} = ${i}; ${renderFnName}">${i}</button>`;
-    } else if (i === currentPage - 3 || i === currentPage + 3) {
-      html += '<span style="color:var(--text-muted);">...</span>';
+  // We now return an empty sentinel instead of pagination buttons
+  // The observer will handle the rest.
+  if (window[pageVarName] >= totalPages) return ''; // No more data
+  
+  const fnCall = renderFnName.includes('(') ? renderFnName : `${renderFnName}()`;
+  
+  return `<div id="${pageVarName}-sentinel" style="height:40px; margin:20px 0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:13px; font-weight:500;">
+    <div class="spinner-small" style="margin-right:10px;"></div> ${t("Yuklanmoqda...")}
+  </div>
+  <script>
+    if (window.initInfiniteScroll) {
+       window.initInfiniteScroll('${pageVarName}', ${totalPages}, ${renderFnName.split('(')[0]});
     }
-  }
-
-  html += `<button class="btn btn-sm" ${currentPage >= effectiveTotal ? 'disabled' : ''} onclick="${pageVarName} = ${currentPage + 1}; ${renderFnName}">${t("Keyingi")}</button>`;
-  html += '</div>';
-  return html;
+  </script>`;
 }
+
+window.initInfiniteScroll = function(pageVarName, totalPages, renderFn) {
+  // Small delay to ensure DOM is ready
+  setTimeout(() => {
+    const sentinel = document.getElementById(`${pageVarName}-sentinel`);
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && window[pageVarName] < totalPages) {
+        window[pageVarName]++;
+        renderFn(true); // Pass 'true' for appending
+        observer.disconnect();
+      }
+    }, { threshold: 0.1, rootMargin: '100px' });
+
+    observer.observe(sentinel);
+  }, 50);
+};
 
 // ==================== MODAL UTILS ====================
 let isCurrentModalMandatory = false;
@@ -1335,3 +1381,41 @@ document.addEventListener('DOMContentLoaded', () => {
     rows.forEach(row => tbody.appendChild(row));
   });
 });
+
+window.openDateFilterModal = function() {
+  const period = getDatePeriod();
+  openModal(`
+    <div class="modal-header">
+      <h3>${t("Sana bo'yicha filter")}</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body-wrapper" style="padding: 20px;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
+        <div class="form-group">
+          <label>${t("Boshlang'ich sana")}</label>
+          <input type="date" class="form-control" id="filter-start-date" value="${period.start}">
+        </div>
+        <div class="form-group">
+          <label>${t("Oxirgi sana")}</label>
+          <input type="date" class="form-control" id="filter-end-date" value="${period.end}">
+        </div>
+      </div>
+      <div class="modal-footer" style="padding-top:15px; border-top:1px solid var(--border);">
+        <button class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
+        <button class="btn btn-primary" onclick="applyDateFilter()">${t("Qo'llash")}</button>
+      </div>
+    </div>
+  `);
+};
+
+window.applyDateFilter = function() {
+  const start = document.getElementById('filter-start-date').value;
+  const end = document.getElementById('filter-end-date').value;
+  if (!start || !end) {
+    showToast(t("Sanalarni to'liq tanlang"), 'warning');
+    return;
+  }
+  setDatePeriod(start, end);
+  closeModal();
+  navigateTo(window.currentPage);
+};

@@ -32,22 +32,60 @@ async function renderCalculations() {
   }
 }
 
-function renderCalculationsTable(list) {
+function renderCalculationsTable(list, isAppend = false) {
   if (list) {
+    if (!isAppend) window.calculationPage = 1;
     currentCalculations = list;
-    calculationPage = 1;
   }
 
-  const limit = 10;
+  const limit = 15;
   const totalPages = Math.ceil(currentCalculations.length / limit);
-  if (calculationPage > totalPages) calculationPage = totalPages || 1;
-  const start = (calculationPage - 1) * limit;
-  const paginated = currentCalculations.slice(start, start + limit);
+  // Infinite scroll
+  const end = window.calculationPage * limit;
+  const paginated = currentCalculations.slice(end - limit, end);
 
   const months = ['', 'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
   const content = document.getElementById('page-content');
 
-  content.innerHTML = `
+  const cards = paginated.map(c => {
+    const monthText = t(months[c.month] || c.month);
+    const isProfit = c.profit >= 0;
+    return `
+        <div class="stat-card" style="cursor:pointer; display:block; height:auto; padding:20px; transition:all 0.3s; border:1px solid var(--border);" onclick='viewCalculationDetail(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+            <span style="font-size:16px; font-weight:700; color:var(--text-primary);">${monthText} ${c.year}</span>
+            <span class="badge" style="background:${isProfit ? '#4CAF5020' : '#f4433620'}; color:${isProfit ? '#4CAF50' : '#f44336'}; padding:6px 12px; font-weight:700;">
+                ${isProfit ? t("Foyda") : t("Zarar")}
+            </span>
+            </div>
+            
+            <div style="margin-bottom:15px">
+                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">${t("Sof foyda")}</div>
+                <div style="font-size:24px; font-weight:800; color:${isProfit ? 'var(--success)' : 'var(--danger)'};">
+                ${isProfit ? '' : '-'}${formatPrice(Math.abs(c.profit))} <small style="font-size:12px; font-weight:400; opacity:0.6;">UZS</small>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px; background:var(--bg-glass); border-radius:8px; padding:12px;">
+            <div>
+                <div style="color:var(--text-muted); font-size:10px; text-transform:uppercase;">${t("Sotuv")}</div>
+                <div style="font-weight:700; color:var(--success)">${formatPrice(c.totalSale)}</div>
+            </div>
+            <div>
+                <div style="color:var(--text-muted); font-size:10px; text-transform:uppercase;">${t("Xarajat")}</div>
+                <div style="font-weight:700; color:var(--danger)">${formatPrice(c.totalExpense + c.totalFixedCosts)}</div>
+            </div>
+            </div>
+            
+            <div style="margin-top:10px; text-align:right; font-size:11px; color:var(--text-muted); font-style:italic;">
+            ${t("Batafsil ko'rish")} →
+            </div>
+        </div>
+        `;
+  }).join('');
+
+  if (!isAppend) {
+    content.innerHTML = `
       <div class="card" style="margin-bottom:20px">
         <div class="card-header">
            <h3 style="margin:0; font-size:16px;">${t("Oylik hisob-kitoblar")}</h3>
@@ -61,49 +99,33 @@ function renderCalculationsTable(list) {
         </div>
       </div>
 
-      ${paginated.length === 0 ?
-      `<div class="empty-state"><div class="icon">📊</div><h4>${t("Hisob-kitoblar yo'q")}</h4><p>${t("Yangi hisob-kitob yarating.")}</p></div>` :
-      `<div class="stats-grid">
-           ${paginated.map(c => {
-        const monthText = t(months[c.month] || c.month);
-        const isProfit = c.profit >= 0;
-        return `
-            <div class="stat-card" style="cursor:pointer; display:block; height:auto; padding:20px; transition:all 0.3s; border:1px solid var(--border);" onclick='viewCalculationDetail(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
-                <span style="font-size:16px; font-weight:700; color:var(--text-primary);">${monthText} ${c.year}</span>
-                <span class="badge" style="background:${isProfit ? '#4CAF5020' : '#f4433620'}; color:${isProfit ? '#4CAF50' : '#f44336'}; padding:6px 12px; font-weight:700;">
-                  ${isProfit ? t("Foyda") : t("Zarar")}
-                </span>
-              </div>
-              
-              <div style="margin-bottom:15px">
-                 <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">${t("Sof foyda")}</div>
-                 <div style="font-size:24px; font-weight:800; color:${isProfit ? 'var(--success)' : 'var(--danger)'};">
-                   ${isProfit ? '' : '-'}${formatPrice(Math.abs(c.profit))} <small style="font-size:12px; font-weight:400; opacity:0.6;">UZS</small>
-                 </div>
-              </div>
-
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px; background:var(--bg-glass); border-radius:8px; padding:12px;">
-                <div>
-                  <div style="color:var(--text-muted); font-size:10px; text-transform:uppercase;">${t("Sotuv")}</div>
-                  <div style="font-weight:700; color:var(--success)">${formatPrice(c.totalSale)}</div>
-                </div>
-                <div>
-                  <div style="color:var(--text-muted); font-size:10px; text-transform:uppercase;">${t("Xarajat")}</div>
-                  <div style="font-weight:700; color:var(--danger)">${formatPrice(c.totalExpense + c.totalFixedCosts)}</div>
-                </div>
-              </div>
-              
-              <div style="margin-top:10px; text-align:right; font-size:11px; color:var(--text-muted); font-style:italic;">
-                ${t("Batafsil ko'rish")} →
-              </div>
-            </div>
-          `;
-      }).join('')}
-        </div>`
-    }
-      ${renderPageControls('calculationPage', totalPages, 'renderCalculationsTable()')}
+      <div class="stats-grid" id="calculations-grid">
+           ${paginated.length === 0 ? `<div class="empty-state"><div class="icon">📊</div><h4>${t("Hisob-kitoblar yo'q")}</h4><p>${t("Yangi hisob-kitob yarating.")}</p></div>` : cards}
+      </div>
+      <div id="calculations-pagination-area">
+        ${renderPageControls('calculationPage', totalPages, 'renderCalculationsTable')}
+      </div>
+      <div class="page-bottom-bar">
+        <div class="search-box" style="flex:1; max-width:none;">
+          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <input type="text" placeholder="${t("Yil bo'yicha")}" id="calculation-search-bottom" 
+            oninput="filterCalculations(this.value)"
+            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+        </div>
+        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+        <button class="btn btn-primary" onclick="openCalculationModal()">${t("Qo'shish")}</button>
+      </div>
     `;
+  } else {
+    const grid = document.getElementById('calculations-grid');
+    if (grid) {
+      grid.insertAdjacentHTML('beforeend', cards);
+    }
+    const pagArea = document.getElementById('calculations-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls('calculationPage', totalPages, 'renderCalculationsTable');
+    }
+  }
 }
 
 function filterCalculations(query) {

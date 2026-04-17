@@ -19,7 +19,7 @@ async function renderDebts() {
   }
 
   try {
-    const transactions = await api.get(`/transactions?businessId=${bid}`);
+    const transactions = await api.get(`/transactions?businessId=${bid}${getDateQuery()}`);
     allDebtsSource = transactions || [];
 
     // Process and segment debts
@@ -67,9 +67,24 @@ function renderDebtsTabs() {
       </div>
     </div>
     <div id="debts-table-container"></div>
+    <div class="page-bottom-bar">
+      <div class="search-box" style="flex:1; max-width:none;">
+        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+        <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="debt-search"
+          oninput="filterDebts(this.value)"
+          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+      </div>
+      <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+      <div style="width: 100px;"></div> <!-- Spacer because there is no 'Add' debt button directly -->
+    </div>
   `;
 
   renderDebtsTable(currentTab);
+}
+
+window.filterDebts = function(query) {
+  const q = query.toLowerCase();
+  renderDebtsTable(window.currentDebtTab || 'active', q);
 }
 
 window.switchDebtTab = function (tab) {
@@ -77,19 +92,27 @@ window.switchDebtTab = function (tab) {
   renderDebtsTabs();
 }
 
-function renderDebtsTable(tab) {
+function renderDebtsTable(tab, filter = '', isAppend = false) {
   const container = document.getElementById('debts-table-container');
-  let list = tab === 'active' ? activeDebtsList : paidDebtsList;
+  if (!container) return;
 
-  // Pagination
   const pageVar = tab === 'active' ? 'activeDebtPage' : 'paidDebtPage';
+  if (!isAppend) window[pageVar] = 1;
+
+  let fullList = tab === 'active' ? activeDebtsList : paidDebtsList;
+  let list = fullList.filter(d => {
+    const name = (d.clientName || d.clientNumber || t('Begona xaridor')).toLowerCase();
+    return !filter || name.includes(filter) || d.id.toString().includes(filter);
+  });
+
+  // Infinite scroll logic
   const limit = 15;
   const totalPages = Math.ceil(list.length / limit);
-  if (window[pageVar] > totalPages) window[pageVar] = totalPages || 1;
-  const start = (window[pageVar] - 1) * limit;
-  const paginated = list.slice(start, start + limit);
+  // Slice from 0 up to current page * limit
+  const end = window[pageVar] * limit;
+  const paginated = list.slice(end - limit, end);
 
-  const items = paginated.length === 0
+  const items = paginated.length === 0 && !isAppend
     ? `<div class="empty-state"><div class="icon">✅</div><h4>${tab === 'active' ? t("Qarzdorlar topilmadi") : t("Hech qanday to'langan qarz yo'q")}</h4></div>`
     : paginated.map((trans, i) => {
       const clientName = trans.clientName ? escapeHtml(trans.clientName) : (trans.clientNumber ? escapeHtml(trans.clientNumber) : t('Begona xaridor'));
@@ -130,22 +153,34 @@ function renderDebtsTable(tab) {
                 <div><div class="acc-detail-label" style="color:#EF4444;">${t("Qolgan qarz")}</div><div class="acc-detail-value" style="color:#EF4444;">${formatPrice(trans.debt)} ${t("so'm")}</div></div>
               </div>` : ''}
               <div class="acc-detail-item">
-                <span class="acc-detail-icon">📝</span>
-                <div><div class="acc-detail-label">${t("Izoh")}</div><div class="acc-detail-value">${escapeHtml(trans.description || '-')}</div></div>
+                <span class="acc-detail-icon">🏢</span>
+                <div><div class="acc-detail-label">${t("Mas'ul")}</div><div class="acc-detail-value">${escapeHtml(trans.createdByName || t("Tizim"))}</div></div>
               </div>
             </div>
-            ${tab === 'active' ? `
-            <div class="acc-actions" style="justify-content: flex-end;">
-              <button class="btn btn-primary btn-sm" onclick='openDebtPayModal(${JSON.stringify(trans)})'>💵 ${t("Qarzni to'lash")}</button>
-            </div>` : ''}
+            <div class="acc-actions">
+              ${tab === 'active' ? `<button class="btn btn-success btn-sm" onclick='openDebtPayModal(${JSON.stringify(trans)})'>💵 ${t("To'lash")}</button>` : ''}
+            </div>
           </div>
         </div>`;
     }).join('');
 
-  container.innerHTML = `
-    <div class="acc-list">${items}</div>
-    ${renderPageControls(pageVar, totalPages, `renderDebtsTable('${tab}')`)}
-  `;
+  if (!isAppend) {
+    container.innerHTML = `
+      <div class="acc-list" id="debts-acc-list">${items}</div>
+      <div id="debts-pagination-area">
+        ${renderPageControls(`${pageVar}`, totalPages, `renderDebtsTable('${tab}')`)}
+      </div>
+    `;
+  } else {
+    const listContainer = document.getElementById('debts-acc-list');
+    if (listContainer) {
+      listContainer.insertAdjacentHTML('beforeend', items);
+    }
+    const pagArea = document.getElementById('debts-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls(`${pageVar}`, totalPages, `renderDebtsTable('${tab}')`);
+    }
+  }
 }
 
 window.openDebtPayModal = function (trans) {

@@ -56,6 +56,9 @@ export const translations = {
         "Qarzdorlar topilmadi": "Qarzdorlar topilmadi",
         "Hech qanday to'langan qarz yo'q": "Hech qanday to'langan qarz yo'q",
         "Muddat": "Muddat",
+        "Hisob-kitoblar yo'q": "Hisob-kitoblar yo'q",
+        "Hammasi": "Hammasi",
+        "Biznes tanlang": "Biznes tanlang",
         "Qarzni to'lash": "Qarzni to'lash",
         "Jami qarz": "Jami qarz",
         "Qoldiq qarz": "Qoldiq qarz",
@@ -152,6 +155,7 @@ export const translations = {
         "Foydalanuvchini o'chirishni xohlaysizmi?": "Фойдаланувчини ўчиришни хоҳлайсизми?",
         "Foydalanuvchini tahrirlash": "Фойдаланувчини таҳрирлаш",
         "Hammasi": "Ҳаммаси",
+        "Biznes tanlang": "Бизнес танланг",
         "Hisob raqam": "Ҳисоб рақами",
         "Hisob raqami": "Ҳисоб рақами",
         "Hisob-kitob tafsilotlari": "Ҳисоб-китоб тафсилотлари",
@@ -638,6 +642,7 @@ export const translations = {
         "Foydalanuvchini o'chirishni xohlaysizmi?": "Вы уверены, что хотите удалить пользователя?",
         "Foydalanuvchini tahrirlash": "Редактировать пользователя",
         "Hammasi": "Все",
+        "Biznes tanlang": "Выберите бизнес",
         "Hisob raqam": "Номер счета",
         "Hisob raqami": "Номер счета",
         "Hisob-kitob tafsilotlari": "Детали отчета",
@@ -1130,6 +1135,7 @@ export const translations = {
         "Foydalanuvchini o'chirishni xohlaysizmi?": "Are you sure you want to delete this user?",
         "Foydalanuvchini tahrirlash": "Edit User",
         "Hammasi": "All",
+        "Biznes tanlang": "Choose a business",
         "Hisob raqam": "Account number",
         "Hisob raqami": "Account number",
         "Hisob-kitob tafsilotlari": "Report details",
@@ -1540,6 +1546,7 @@ export let currentLang = localStorage.getItem('appLang') || 'uz';
 export function setAppLang(lang) {
     localStorage.setItem('appLang', lang);
     currentLang = lang;
+    window.currentLang = lang;
     if (typeof translateDOM === 'function') {
         translateDOM();
     }
@@ -1552,12 +1559,11 @@ export function setAppLang(lang) {
 
 export function t(key) {
     if (!key) return key;
-    if (currentLang === 'uz') return key; // native language
-
-    const dict = translations[currentLang];
+    const lang = window.currentLang || currentLang || 'uz';
+    const dict = translations[lang];
     if (dict) {
         if (dict[key]) return dict[key];
-
+        
         const upper = key.toUpperCase();
         if (dict[upper]) return dict[upper];
 

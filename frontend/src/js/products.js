@@ -10,19 +10,39 @@ async function renderProducts() {
   const content = document.getElementById('page-content');
   const bid = getSelectedBusinessId();
 
-  if (!bid) {
-    content.innerHTML = `<div class="empty-state"><div class="icon">📦</div><h4>${t("Avval biznes tanlang")}</h4></div>`;
-    return;
-  }
-
   try {
-    const [products, categories] = await Promise.all([
-      api.get(`/products?businessId=${bid}`),
-      api.get(`/categories?businessId=${bid}`)
-    ]);
+    if (!bid) {
+      // "Hammasi" mode — fetch from all businesses
+      const businesses = await api.get('/businesses/my').catch(() => []);
+      if (!businesses || businesses.length === 0) {
+        content.innerHTML = `<div class="empty-state"><div class="icon">🏢</div><h4>${t("Biznes yarating")}</h4></div>`;
+        return;
+      }
 
-    allProducts = (products || []).filter(p => !p.isDeleted);
-    allCategories = categories || [];
+      const results = await Promise.all(
+        businesses.map(b => 
+          Promise.all([
+            api.get(`/products?businessId=${b.id}`).catch(() => []),
+            api.get(`/categories?businessId=${b.id}`).catch(() => [])
+          ]).then(([prods, cats]) => {
+            // Tag with business name for UI
+            prods.forEach(p => { p._businessName = b.name; p._businessId = b.id; });
+            cats.forEach(c => { c._businessId = b.id; });
+            return { prods, cats };
+          })
+        )
+      );
+
+      allProducts = results.flatMap(r => r.prods).filter(p => !p.isDeleted);
+      allCategories = results.flatMap(r => r.cats);
+    } else {
+      const [products, categories] = await Promise.all([
+        api.get(`/products?businessId=${bid}`),
+        api.get(`/categories?businessId=${bid}`)
+      ]);
+      allProducts = (products || []).filter(p => !p.isDeleted);
+      allCategories = categories || [];
+    }
 
     renderProductsTable(allProducts);
   } catch (err) {
@@ -33,29 +53,29 @@ async function renderProducts() {
 window.productPage = 1;
 let currentProducts = [];
 
-function renderProductsTable(list) {
+function renderProductsTable(list, isAppend = false) {
   if (list) {
+    if (!isAppend) window.productPage = 1;
     currentProducts = list;
-    window.productPage = 1;
   }
 
   const limit = 15;
   const totalPages = Math.ceil(currentProducts.length / limit);
-  if (window.productPage > totalPages) window.productPage = totalPages || 1;
-  const start = (window.productPage - 1) * limit;
-  const paginated = currentProducts.slice(start, start + limit);
+  // Infinite scroll: slice from 0 to current page * limit
+  const end = window.productPage * limit;
+  const paginated = currentProducts.slice(end - limit, end);
 
   const content = document.getElementById('page-content');
-
   const avatarColors = ['acc-avatar-indigo', 'acc-avatar-green', 'acc-avatar-blue', 'acc-avatar-orange'];
 
-  const items = paginated.length === 0
+  const items = paginated.length === 0 && !isAppend
     ? `<div class="empty-state"><div class="icon">📦</div><h4>${t("Mahsulotlar yo'q")}</h4></div>`
     : paginated.map((p, i) => {
-      const cat = allCategories.find(c => c.id === p.categoryId);
+      const cat = allCategories.find(c => c.id === p.categoryId && (p._businessId ? c._businessId === p._businessId : true));
       const colorClass = avatarColors[i % avatarColors.length];
       const initial = (p.name || '?')[0].toUpperCase();
       const finalPrice = p.price * (1 - (p.discount || 0) / 100);
+      const bizBadge = p._businessName ? `<span class="badge" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); font-size:10px; opacity:0.7;">${escapeHtml(p._businessName)}</span>` : '';
       const stockBadge = p.quantity <= 5
         ? `<span class="badge badge-danger">${p.quantity} ${t("ta")}</span>`
         : `<span class="badge" style="background:#ECFDF5; color:#059669;">${p.quantity} ${t("ta")}</span>`;
@@ -70,7 +90,7 @@ function renderProductsTable(list) {
         }
               <div>
                 <div class="acc-title">${escapeHtml(p.name)}</div>
-                <div class="acc-subtitle">${cat ? escapeHtml(cat.name) : '—'} ${p.barcode ? '· ' + escapeHtml(p.barcode) : ''}</div>
+                <div class="acc-subtitle">${cat ? escapeHtml(cat.name) : '—'} ${p.barcode ? '· ' + escapeHtml(p.barcode) : ''} ${bizBadge}</div>
               </div>
             </div>
             <div class="acc-header-right">
@@ -118,20 +138,34 @@ function renderProductsTable(list) {
         </div>`;
     }).join('');
 
-  content.innerHTML = `
-    <div class="acc-list">${items}</div>
-    ${renderPageControls('productPage', totalPages, 'renderProductsTable()')}
-    <div class="page-bottom-bar">
-      <div class="search-box" style="flex:1; max-width:none;">
-        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-        <input type="text" placeholder="${t("Qidirish...")}" id="product-search"
-          value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
-          oninput="filterProducts(this.value)"
-          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+  if (!isAppend) {
+    content.innerHTML = `
+      <div class="acc-list" id="product-acc-list">${items}</div>
+      <div id="product-pagination-area">
+        ${renderPageControls('productPage', totalPages, 'renderProductsTable')}
       </div>
-      <button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>
-    </div>
-  `;
+      <div class="page-bottom-bar">
+        <div class="search-box" style="flex:1; max-width:none;">
+          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <input type="text" placeholder="${t("Qidirish...")}" id="product-search"
+            value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
+            oninput="filterProducts(this.value)"
+            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+        </div>
+        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+        ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
+      </div>
+    `;
+  } else {
+    const listContainer = document.getElementById('product-acc-list');
+    if (listContainer) {
+      listContainer.insertAdjacentHTML('beforeend', items);
+    }
+    const pagArea = document.getElementById('product-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls('productPage', totalPages, 'renderProductsTable');
+    }
+  }
 }
 
 function filterProducts(query) {

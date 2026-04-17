@@ -15,7 +15,7 @@ async function renderRefunds() {
   }
 
   try {
-    const refunds = await api.get(`/refunds?businessId=${bid}`);
+    const refunds = await api.get(`/refunds?businessId=${bid}${getDateQuery()}`);
     allRefundsList = refunds || [];
     renderRefundsTable(allRefundsList);
   } catch (err) {
@@ -23,20 +23,21 @@ async function renderRefunds() {
   }
 }
 
-function renderRefundsTable(list) {
+function renderRefundsTable(list, isAppend = false) {
   if (list) {
+    if (!isAppend) window.refundPage = 1;
     currentRefunds = list;
   }
 
   const limit = 15;
   const totalPages = Math.ceil(currentRefunds.length / limit);
-  if (window.refundPage > totalPages) window.refundPage = totalPages || 1;
-  const start = (window.refundPage - 1) * limit;
-  const paginated = currentRefunds.slice(start, start + limit);
+  // Infinite scroll logic
+  const end = window.refundPage * limit;
+  const paginated = currentRefunds.slice(end - limit, end);
 
   const content = document.getElementById('page-content');
 
-  const items = paginated.length === 0
+  const items = paginated.length === 0 && !isAppend
     ? `<div class="empty-state"><div class="icon">🔄</div><h4>${t("Qaytarishlar yo'q")}</h4></div>`
     : paginated.map((refund, i) => {
       return `
@@ -77,20 +78,34 @@ function renderRefundsTable(list) {
         </div>`;
     }).join('');
 
-  content.innerHTML = `
-    <div class="acc-list">${items}</div>
-    ${window.renderPageControls ? window.renderPageControls('refundPage', totalPages, 'renderRefundsTable()') : ''}
-    <div class="page-bottom-bar">
-      <div class="search-box" style="flex:1; max-width:none;">
-        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-        <input type="text" placeholder="${t("Qidirish...")}" id="refund-search"
-          value="${escapeHtml(document.getElementById('refund-search')?.value || '')}"
-          oninput="filterRefunds(this.value)"
-          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+  if (!isAppend) {
+    content.innerHTML = `
+      <div class="acc-list" id="refund-acc-list">${items}</div>
+      <div id="refund-pagination-area">
+        ${renderPageControls('refundPage', totalPages, 'renderRefundsTable')}
       </div>
-      <button class="btn btn-primary" onclick="openRefundModal()">${t("Qo'shish")}</button>
-    </div>
-  `;
+      <div class="page-bottom-bar">
+        <div class="search-box" style="flex:1; max-width:none;">
+          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <input type="text" placeholder="${t("Qidirish...")}" id="refund-search"
+            value="${escapeHtml(document.getElementById('refund-search')?.value || '')}"
+            oninput="filterRefunds(this.value)"
+            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+        </div>
+        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+        <button class="btn btn-primary" onclick="openRefundModal()">${t("Qo'shish")}</button>
+      </div>
+    `;
+  } else {
+    const listContainer = document.getElementById('refund-acc-list');
+    if (listContainer) {
+      listContainer.insertAdjacentHTML('beforeend', items);
+    }
+    const pagArea = document.getElementById('refund-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls('refundPage', totalPages, 'renderRefundsTable');
+    }
+  }
 }
 
 async function viewRefundItems(id) {
@@ -146,11 +161,14 @@ async function downloadRefundPdf(id) {
   try {
     showToast(t('PDF tayyorlanmoqda...'), 'info');
 
-    const [refundItems, clients, refund] = await Promise.all([
+    const businesses = await api.get('/businesses/my').catch(() => []);
+    const [refundItems, clientsResults, refund] = await Promise.all([
       api.get(`/refunds/${id}/items`),
-      api.get(`/clients?businessId=${bid}`),
+      Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => []))),
       Promise.resolve(allRefundsList.find(r => r.id === id))
     ]);
+
+    const clients = clientsResults.flat();
 
     const doc = new jsPDF();
     let fontName = 'helvetica';

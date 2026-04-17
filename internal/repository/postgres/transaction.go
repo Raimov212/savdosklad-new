@@ -125,10 +125,12 @@ func (r *TransactionRepo) GetTransactionsByTotalID(totalID int) ([]entity.Transa
 
 func (r *TransactionRepo) GetTotalTransactionsByPeriod(bid int, start, end time.Time) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."createdAt", COALESCE(c."fullName", '')
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		        COALESCE(c."fullName", ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
-		 WHERE t."businessId" = $1 AND t."createdAt" >= $2 AND t."createdAt" <= $3`,
+		 LEFT JOIN users u ON t."createdBy" = u.id
+		 WHERE t."businessId" = $1 AND t."createdAt" >= $2 AND t."createdAt" <= $3 ORDER BY t.id DESC`,
 		bid, start, end,
 	)
 	if err != nil {
@@ -136,15 +138,15 @@ func (r *TransactionRepo) GetTotalTransactionsByPeriod(bid int, start, end time.
 	}
 	defer rows.Close()
 
-	var results []entity.TotalTransaction
+	var list []entity.TotalTransaction
 	for rows.Next() {
-		var t entity.TotalTransaction
-		if err := rows.Scan(&t.ID, &t.Total, &t.Cash, &t.Card, &t.Click, &t.Debt, &t.CreatedAt, &t.ClientName); err != nil {
+		var tt entity.TotalTransaction
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
-		results = append(results, t)
+		list = append(list, tt)
 	}
-	return results, nil
+	return list, nil
 }
 
 func (r *TransactionRepo) GetStats(bid int, start, end *time.Time) (entity.TransactionStats, error) {
