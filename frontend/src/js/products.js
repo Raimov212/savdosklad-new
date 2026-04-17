@@ -53,23 +53,22 @@ async function renderProducts() {
 window.productPage = 1;
 let currentProducts = [];
 
-function renderProductsTable(list) {
+function renderProductsTable(list, isAppend = false) {
   if (list) {
+    if (!isAppend) window.productPage = 1;
     currentProducts = list;
-    window.productPage = 1;
   }
 
   const limit = 15;
   const totalPages = Math.ceil(currentProducts.length / limit);
-  if (window.productPage > totalPages) window.productPage = totalPages || 1;
-  const start = (window.productPage - 1) * limit;
-  const paginated = currentProducts.slice(start, start + limit);
+  // Infinite scroll: slice from 0 to current page * limit
+  const end = window.productPage * limit;
+  const paginated = currentProducts.slice(end - limit, end);
 
   const content = document.getElementById('page-content');
-
   const avatarColors = ['acc-avatar-indigo', 'acc-avatar-green', 'acc-avatar-blue', 'acc-avatar-orange'];
 
-  const items = paginated.length === 0
+  const items = paginated.length === 0 && !isAppend
     ? `<div class="empty-state"><div class="icon">📦</div><h4>${t("Mahsulotlar yo'q")}</h4></div>`
     : paginated.map((p, i) => {
       const cat = allCategories.find(c => c.id === p.categoryId && (p._businessId ? c._businessId === p._businessId : true));
@@ -139,20 +138,34 @@ function renderProductsTable(list) {
         </div>`;
     }).join('');
 
-  content.innerHTML = `
-    <div class="acc-list">${items}</div>
-    ${renderPageControls('productPage', totalPages, 'renderProductsTable()')}
-    <div class="page-bottom-bar">
-      <div class="search-box" style="flex:1; max-width:none;">
-        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-        <input type="text" placeholder="${t("Qidirish...")}" id="product-search"
-          value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
-          oninput="filterProducts(this.value)"
-          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+  if (!isAppend) {
+    content.innerHTML = `
+      <div class="acc-list" id="product-acc-list">${items}</div>
+      <div id="product-pagination-area">
+        ${renderPageControls('productPage', totalPages, 'renderProductsTable')}
       </div>
-      ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
-    </div>
-  `;
+      <div class="page-bottom-bar">
+        <div class="search-box" style="flex:1; max-width:none;">
+          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <input type="text" placeholder="${t("Qidirish...")}" id="product-search"
+            value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
+            oninput="filterProducts(this.value)"
+            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+        </div>
+        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+        ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
+      </div>
+    `;
+  } else {
+    const listContainer = document.getElementById('product-acc-list');
+    if (listContainer) {
+      listContainer.insertAdjacentHTML('beforeend', items);
+    }
+    const pagArea = document.getElementById('product-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls('productPage', totalPages, 'renderProductsTable');
+    }
+  }
 }
 
 function filterProducts(query) {

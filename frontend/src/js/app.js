@@ -300,16 +300,18 @@ async function renderDashboard() {
         return;
       }
       // Barcha bizneslar bo'yicha parallel so'rovlar
+      const query = getDateQuery();
       const allProducts = await Promise.all(businesses.map(b => api.get(`/products?businessId=${b.id}`).catch(() => [])));
-      const allTransactions = await Promise.all(businesses.map(b => api.get(`/transactions?businessId=${b.id}`).catch(() => [])));
+      const allTransactions = await Promise.all(businesses.map(b => api.get(`/transactions?businessId=${b.id}${query}`).catch(() => [])));
       const allClients = await Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])));
       products = allProducts.flat();
       transactions = allTransactions.flat();
       clients = allClients.flat();
     } else {
+      const query = getDateQuery();
       [products, transactions, clients] = await Promise.all([
         api.get(`/products?businessId=${bid}`).catch(() => []),
-        api.get(`/transactions?businessId=${bid}`).catch(() => []),
+        api.get(`/transactions?businessId=${bid}${query}`).catch(() => []),
         api.get(`/clients?businessId=${bid}`).catch(() => [])
       ]);
     }
@@ -805,26 +807,39 @@ function renderDashboardTransactions() {
 
 // ==================== AUTH & ROUTING ====================
 function renderPageControls(pageVarName, totalPages, renderFnName) {
-  let currentPage = window[pageVarName] || 1;
-
-  const effectiveTotal = Math.max(1, totalPages);
-
-  let html = '<div class="pagination" style="display:flex; gap:5px; justify-content:center; align-items:center; margin-top:15px;">';
-  html += `<button class="btn btn-sm" ${currentPage <= 1 ? 'disabled' : ''} onclick="${pageVarName} = ${currentPage - 1}; ${renderFnName}">${t("Oldingi")}</button>`;
-
-  for (let i = 1; i <= effectiveTotal; i++) {
-    if (i === 1 || i === effectiveTotal || (i >= currentPage - 2 && i <= currentPage + 2)) {
-      const active = i === currentPage ? 'btn-primary active' : 'btn-secondary';
-      html += `<button class="btn btn-sm ${active}" onclick="${pageVarName} = ${i}; ${renderFnName}">${i}</button>`;
-    } else if (i === currentPage - 3 || i === currentPage + 3) {
-      html += '<span style="color:var(--text-muted);">...</span>';
+  // We now return an empty sentinel instead of pagination buttons
+  // The observer will handle the rest.
+  if (window[pageVarName] >= totalPages) return ''; // No more data
+  
+  const fnCall = renderFnName.includes('(') ? renderFnName : `${renderFnName}()`;
+  
+  return `<div id="${pageVarName}-sentinel" style="height:40px; margin:20px 0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:13px; font-weight:500;">
+    <div class="spinner-small" style="margin-right:10px;"></div> ${t("Yuklanmoqda...")}
+  </div>
+  <script>
+    if (window.initInfiniteScroll) {
+       window.initInfiniteScroll('${pageVarName}', ${totalPages}, ${renderFnName.split('(')[0]});
     }
-  }
-
-  html += `<button class="btn btn-sm" ${currentPage >= effectiveTotal ? 'disabled' : ''} onclick="${pageVarName} = ${currentPage + 1}; ${renderFnName}">${t("Keyingi")}</button>`;
-  html += '</div>';
-  return html;
+  </script>`;
 }
+
+window.initInfiniteScroll = function(pageVarName, totalPages, renderFn) {
+  // Small delay to ensure DOM is ready
+  setTimeout(() => {
+    const sentinel = document.getElementById(`${pageVarName}-sentinel`);
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && window[pageVarName] < totalPages) {
+        window[pageVarName]++;
+        renderFn(true); // Pass 'true' for appending
+        observer.disconnect();
+      }
+    }, { threshold: 0.1, rootMargin: '100px' });
+
+    observer.observe(sentinel);
+  }, 50);
+};
 
 // ==================== MODAL UTILS ====================
 let isCurrentModalMandatory = false;
@@ -1373,3 +1388,41 @@ document.addEventListener('DOMContentLoaded', () => {
     rows.forEach(row => tbody.appendChild(row));
   });
 });
+
+window.openDateFilterModal = function() {
+  const period = getDatePeriod();
+  openModal(`
+    <div class="modal-header">
+      <h3>${t("Sana bo'yicha filter")}</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body-wrapper" style="padding: 20px;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
+        <div class="form-group">
+          <label>${t("Boshlang'ich sana")}</label>
+          <input type="date" class="form-control" id="filter-start-date" value="${period.start}">
+        </div>
+        <div class="form-group">
+          <label>${t("Oxirgi sana")}</label>
+          <input type="date" class="form-control" id="filter-end-date" value="${period.end}">
+        </div>
+      </div>
+      <div class="modal-footer" style="padding-top:15px; border-top:1px solid var(--border);">
+        <button class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
+        <button class="btn btn-primary" onclick="applyDateFilter()">${t("Qo'llash")}</button>
+      </div>
+    </div>
+  `);
+};
+
+window.applyDateFilter = function() {
+  const start = document.getElementById('filter-start-date').value;
+  const end = document.getElementById('filter-end-date').value;
+  if (!start || !end) {
+    showToast(t("Sanalarni to'liq tanlang"), 'warning');
+    return;
+  }
+  setDatePeriod(start, end);
+  closeModal();
+  navigateTo(window.currentPage);
+};

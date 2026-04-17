@@ -23,7 +23,7 @@ async function renderExpenses() {
 
   try {
     const [expenses, fixedCosts] = await Promise.all([
-      api.get(`/expenses?businessId=${bid}`),
+      api.get(`/expenses?businessId=${bid}${getDateQuery()}`),
       api.get(`/fixed-costs?businessId=${bid}`)
     ]);
 
@@ -80,7 +80,10 @@ function filterExpensesByPeriod(list, period) {
   return list; 
 }
 
-function renderExpenseTable(list) {
+function renderExpenseTable(list, isAppend = false) {
+  if (list) {
+    if (!isAppend) window.expensePage = 1;
+  }
   // Use allExpensesList filtered by search query
   const query = document.getElementById('expense-search')?.value.toLowerCase() || '';
   let filteredRaw = allExpensesList.filter(e => 
@@ -89,7 +92,7 @@ function renderExpenseTable(list) {
   );
 
   if (window.expensePeriod === 'monthly') {
-    // Group by Day for all time (since we removed current month filter to avoid empty results)
+    // Group by Day for all time
     const groups = {};
     filteredRaw.forEach(e => {
       const date = new Date(e.createdAt);
@@ -126,11 +129,10 @@ function renderExpenseTable(list) {
     currentExpenses = filteredRaw;
   }
 
-  const limit = 10;
+  const limit = 15;
   const totalPages = Math.ceil(currentExpenses.length / limit);
-  if (window.expensePage > totalPages) window.expensePage = totalPages || 1;
-  const start = (window.expensePage - 1) * limit;
-  const paginated = currentExpenses.slice(start, start + limit);
+  const end = window.expensePage * limit;
+  const paginated = currentExpenses.slice(end - limit, end);
 
   const section = document.getElementById('expense-section');
   if (!section) return;
@@ -141,66 +143,80 @@ function renderExpenseTable(list) {
 
   const isAggregated = window.expensePeriod !== 'daily';
 
-  section.innerHTML = `
-      <div class="card">
-        <div class="card-header">
-           <h3 style="margin:0; font-size:16px;">${title}</h3>
-           <div class="toolbar">
-             <div class="search-box">
-               <span class="search-icon">🔍</span>
-               <input type="text" placeholder="${t("Qidirish...")}" id="expense-search" value="${escapeHtml(document.getElementById('expense-search')?.value || '')}" oninput="renderExpenseTable()">
+  const rows = paginated.map((e, i) => {
+    const startIdx = (window.expensePage - 1) * limit;
+    return `
+      <tr>
+        <td style="text-align:center">${startIdx + i + 1}</td>
+        <td class="price price-negative" style="text-align:center; font-weight:700;">-${formatPrice(e.total)} ${t("so'm")}</td>
+        <td style="text-align:center">
+          <div style="font-size:11px; display:flex; flex-direction:column; gap:2px; align-items:center;">
+            ${e.cash > 0 ? `<span class="badge" style="background:#4CAF5020; color:#4CAF50; border:1px solid #4CAF5040;">${t("Naqd")}: ${formatPrice(e.cash)}</span>` : ''}
+            ${e.card > 0 ? `<span class="badge" style="background:var(--accent)20; color:var(--accent); border:1px solid var(--accent)40;">${t("Karta")}: ${formatPrice(e.card)}</span>` : ''}
+          </div>
+        </td>
+        ${!isAggregated ? `<td style="text-align:center">${escapeHtml(e.description) || '<span style="opacity:0.3">—</span>'}</td>` : ''}
+        <td style="text-align:center; font-weight:600; font-size:12px;">${escapeHtml(e.createdByName || t("Tizim"))}</td>
+        <td style="text-align:center; font-size:12px; opacity:0.7;">
+            ${isAggregated ? (
+            window.expensePeriod === 'yearly' ? 
+            (() => {
+                const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
+                const [y, m] = e.date.split('-');
+                return `${t(months[parseInt(m) - 1])} ${y}`;
+            })() : 
+            (() => {
+                const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
+                const [y, m, d] = e.date.split('-');
+                return `${parseInt(d)} ${t(months[parseInt(m) - 1])}`;
+            })()
+          ) : formatDateTime(e.createdAt)}
+        </td>
+      </tr>`;
+  }).join('');
+
+  if (!isAppend) {
+    section.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+             <h3 style="margin:0; font-size:16px;">${title}</h3>
+             <div class="toolbar">
+               <div class="search-box">
+                 <span class="search-icon">🔍</span>
+                 <input type="text" placeholder="${t("Qidirish...")}" id="expense-search" value="${escapeHtml(document.getElementById('expense-search')?.value || '')}" oninput="renderExpenseTable()">
+               </div>
+               <button class="btn btn-ghost" onclick="openDateFilterModal()" title="${t("Sana bo'yicha filter")}">📅</button>
+               <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">${t("Qo'shish")}</button>
              </div>
-             <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">${t("Qo'shish")}</button>
-           </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="text-align:center">№</th>
+                  <th style="text-align:center">${t("Summa")}</th>
+                  <th style="text-align:center">${t("To'lov turi")}</th>
+                  ${!isAggregated ? `<th style="text-align:center">${t("Tavsifi")}</th>` : ''}
+                  <th style="text-align:center">${t("Mas'ul")}</th>
+                  <th style="text-align:center">${t("Sana")}</th>
+                </tr>
+              </thead>
+              <tbody id="expense-tbody">
+                ${paginated.length === 0 ? `<tr><td colspan="${isAggregated ? 5 : 6}" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Xarajatlar mavjud emas")}</td></tr>` : rows}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th style="text-align:center">№</th>
-                <th style="text-align:center">${t("Summa")}</th>
-                <th style="text-align:center">${t("To'lov turi")}</th>
-                ${!isAggregated ? `<th style="text-align:center">${t("Tavsifi")}</th>` : ''}
-                <th style="text-align:center">${t("Mas'ul")}</th>
-                <th style="text-align:center">${t("Sana")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${paginated.length === 0 ? `<tr><td colspan="${isAggregated ? 5 : 6}" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Xarajatlar mavjud emas")}</td></tr>` :
-      paginated.map((e, i) => `
-                  <tr>
-                    <td style="text-align:center">${start + i + 1}</td>
-                    <td class="price price-negative" style="text-align:center; font-weight:700;">-${formatPrice(e.total)} ${t("so'm")}</td>
-                    <td style="text-align:center">
-                      <div style="font-size:11px; display:flex; flex-direction:column; gap:2px; align-items:center;">
-                        ${e.cash > 0 ? `<span class="badge" style="background:#4CAF5020; color:#4CAF50; border:1px solid #4CAF5040;">${t("Naqd")}: ${formatPrice(e.cash)}</span>` : ''}
-                        ${e.card > 0 ? `<span class="badge" style="background:var(--accent)20; color:var(--accent); border:1px solid var(--accent)40;">${t("Karta")}: ${formatPrice(e.card)}</span>` : ''}
-                      </div>
-                    </td>
-                    ${!isAggregated ? `<td style="text-align:center">${escapeHtml(e.description) || '<span style="opacity:0.3">—</span>'}</td>` : ''}
-                    <td style="text-align:center; font-weight:600; font-size:12px;">${escapeHtml(e.createdByName || t("Tizim"))}</td>
-                    <td style="text-align:center; font-size:12px; opacity:0.7;">
-                       ${isAggregated ? (
-                        window.expensePeriod === 'yearly' ? 
-                        (() => {
-                           const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
-                           const [y, m] = e.date.split('-');
-                           return `${t(months[parseInt(m) - 1])} ${y}`;
-                        })() : 
-                        (() => {
-                           const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
-                           const [y, m, d] = e.date.split('-');
-                           return `${parseInt(d)} ${t(months[parseInt(m) - 1])}`;
-                        })()
-                      ) : formatDateTime(e.createdAt)}
-                    </td>
-                  </tr>`).join('')}
-            </tbody>
-          </table>
+        <div id="expense-pagination-area">
+          ${renderPageControls('expensePage', totalPages, 'renderExpenseTable')}
         </div>
-      </div>
-      ${renderPageControls('expensePage', totalPages, 'renderExpenseTable()')}
-    `;
+      `;
+  } else {
+    const tbody = document.getElementById('expense-tbody');
+    if (tbody) tbody.insertAdjacentHTML('beforeend', rows);
+    const pagArea = document.getElementById('expense-pagination-area');
+    if (pagArea) pagArea.innerHTML = renderPageControls('expensePage', totalPages, 'renderExpenseTable');
+  }
 }
 
 function renderFixedTable(list) {

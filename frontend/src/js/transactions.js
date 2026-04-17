@@ -26,16 +26,30 @@ async function renderTransactions() {
   }
 
   try {
-    const transactions = await api.get(`/transactions?businessId=${bid}`);
+    const transactions = await api.get(`/transactions?businessId=${bid}${getDateQuery()}`);
     allTransactionsList = transactions || [];
     renderTransactionsTable(allTransactionsList);
+    
+    const listContainer = document.getElementById('transaction-acc-list');
+    if (listContainer) {
+      listContainer.onscroll = () => {
+        if (listContainer.scrollTop + listContainer.clientHeight >= listContainer.scrollHeight - 50) {
+          const totalPages = Math.ceil(currentTransactions.length / 15);
+          if (window.transactionPage < totalPages) {
+            window.transactionPage++;
+            renderTransactionsTable(null, true);
+          }
+        }
+      };
+    }
   } catch (err) {
     content.innerHTML = `<div class="empty-state"><h4>${t("Xatolik")}</h4><p>${escapeHtml(err.message)}</p></div>`;
   }
 }
 
-function renderTransactionsTable(list) {
+function renderTransactionsTable(list, isAppend = false) {
   if (list) {
+    if (!isAppend) window.transactionPage = 1;
     // Group transactions by Client ID/Number and Date
     const groupedMap = new Map();
     list.forEach(trans => {
@@ -65,14 +79,12 @@ function renderTransactionsTable(list) {
     });
 
     currentTransactions = Array.from(groupedMap.values());
-    window.transactionPage = 1;
+    if (!isAppend) window.transactionPage = 1;
   }
 
   const limit = 15;
-  const totalPages = Math.ceil(currentTransactions.length / limit);
-  if (window.transactionPage > totalPages) window.transactionPage = totalPages || 1;
   const start = (window.transactionPage - 1) * limit;
-  const paginated = currentTransactions.slice(start, start + limit);
+  const paginated = currentTransactions.slice(0, start + limit);
 
   const content = document.getElementById('page-content');
 
@@ -87,7 +99,7 @@ function renderTransactionsTable(list) {
             <div class="acc-header-left">
               <div class="acc-avatar acc-avatar-indigo" style="${hasDebt ? 'background:linear-gradient(135deg,#EF4444,#DC2626)' : ''}">🛒</div>
               <div>
-                <div class="acc-title">№ ${start + i + 1} — ${formatDateTime(trans.createdAt)}</div>
+                <div class="acc-title">№ ${i + 1} — ${formatDateTime(trans.createdAt)}</div>
                 <div class="acc-subtitle">
                   ${trans.clientName ? `<strong>${escapeHtml(trans.clientName)}</strong>` : (trans.clientNumber ? escapeHtml(trans.clientNumber) : t('Begona xaridor'))}
                   <span style="opacity:0.6; margin-left:8px;">№: ${trans.ids.join(',')}</span>
@@ -135,20 +147,34 @@ function renderTransactionsTable(list) {
         </div>`;
     }).join('');
 
-  content.innerHTML = `
-    <div class="acc-list">${items}</div>
-    ${renderPageControls('transactionPage', totalPages, 'renderTransactionsTable()')}
-    <div class="page-bottom-bar">
-      <div class="search-box" style="flex:1; max-width:none;">
-        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-        <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
-          value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
-          oninput="filterTransactions(this.value)"
-          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+  if (!isAppend) {
+    content.innerHTML = `
+      <div class="acc-list" id="transaction-acc-list">${items}</div>
+      <div id="transaction-pagination-area">
+        ${renderPageControls('transactionPage', totalPages, 'renderTransactionsTable')}
       </div>
-      <button class="btn btn-primary" onclick="openSaleModal()">${t("Qo'shish")}</button>
-    </div>
-  `;
+      <div class="page-bottom-bar">
+        <div class="search-box" style="flex:1; max-width:none;">
+          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
+            value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
+            oninput="filterTransactions(this.value)"
+            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+        </div>
+        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+        <button class="btn btn-primary" onclick="openSaleModal()">${t("Qo'shish")}</button>
+      </div>
+    `;
+  } else {
+    const listContainer = document.getElementById('transaction-acc-list');
+    if (listContainer) {
+      listContainer.insertAdjacentHTML('beforeend', items);
+    }
+    const pagArea = document.getElementById('transaction-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls('transactionPage', totalPages, 'renderTransactionsTable');
+    }
+  }
 }
 
 function filterTransactions(query) {

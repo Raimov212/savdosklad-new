@@ -158,6 +158,39 @@ export function setSelectedBusinessId(id) {
     localStorage.setItem('selectedBusinessId', id);
 }
 
+// ==================== DATE PERIOD HELPERS ====================
+export function getDatePeriod() {
+    const page = window.currentPage || 'dashboard';
+    const key = `datePeriod_${page}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {}
+    }
+
+    // Default: Last 7 days
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 7);
+
+    return {
+        start: start.toISOString().split('T')[0],
+        end: end.toISOString().split('T')[0]
+    };
+}
+
+export function setDatePeriod(start, end) {
+    const page = window.currentPage || 'dashboard';
+    const key = `datePeriod_${page}`;
+    localStorage.setItem(key, JSON.stringify({ start, end }));
+}
+
+export function getDateQuery() {
+    const period = getDatePeriod();
+    return `&startDate=${period.start}&endDate=${period.end}`;
+}
+
 
 export function escapeHtml(str) {
     if (!str) return '';
@@ -211,6 +244,9 @@ window.formatDate = formatDate;
 window.formatDateTime = formatDateTime;
 window.getSelectedBusinessId = getSelectedBusinessId;
 window.setSelectedBusinessId = setSelectedBusinessId;
+window.getDatePeriod = getDatePeriod;
+window.setDatePeriod = setDatePeriod;
+window.getDateQuery = getDateQuery;
 window.escapeHtml = escapeHtml;
 window.toggleTheme = toggleTheme;
 window.updateThemeIcon = updateThemeIcon;

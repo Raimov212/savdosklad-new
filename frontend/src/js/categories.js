@@ -110,10 +110,7 @@ function openCategoryModal(c = null) {
   openModal(`
     <div class="modal-header">
       <h3>${isEdit ? t('Kategoriyani tahrirlash') : t('Yangi kategoriya')}</h3>
-      <div style="display:flex; gap:10px; align-items:center;">
-        ${!isEdit ? `<button class="btn btn-icon" style="font-size:20px; font-weight:bold; color:var(--primary);" onclick="resetCategoryForm()" title="${t("Tozalash")}">+</button>` : ''}
-        <button class="modal-close" onclick="closeModal()">✕</button>
-      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body-wrapper">
       ${!isEdit ? `
