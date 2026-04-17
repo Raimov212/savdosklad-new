@@ -755,11 +755,27 @@ function renderDashboardTransactions() {
   const container = document.getElementById('dashboard-transactions-container');
   if (!container) return;
 
-  const limit = 10;
-  const totalPages = Math.ceil(currentDashboardTransactions.length / limit);
-  if (window.dashboardPage > totalPages) window.dashboardPage = totalPages || 1;
-  const start = (window.dashboardPage - 1) * limit;
-  const paginated = currentDashboardTransactions.slice(start, start + limit);
+  // Static: Only show top 10 recent transactions
+  const paginated = currentDashboardTransactions.slice(0, 10);
+
+  const rows = paginated.map((tItem, i) => {
+    return `
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="color:var(--text-muted); text-align:center; padding:12px 10px;">${i + 1}</td>
+        <td style="font-weight:700; color:#10b981; text-align:center; padding:12px 10px;">${formatPrice(tItem.total)} ${t("so'm")}</td>
+        <td style="text-align:center; padding:12px 10px;">
+           <div style="display:flex; justify-content:center; gap:12px; font-size:13px; font-weight:500;">
+             ${tItem.cash > 0 ? `<span style="color:#10b981">💵 ${t("Naqd")}</span>` : ''}
+             ${tItem.card > 0 ? `<span style="color:#3b82f6">💳 ${t("Karta")}</span>` : ''}
+             ${tItem.click > 0 ? `<span style="color:#8b5cf6">📱 ${t("Click")}</span>` : ''}
+           </div>
+        </td>
+        <td style="text-align:center; padding:12px 10px; font-size:12px; font-weight:600; color:var(--text-primary); text-transform:uppercase;">
+           ${escapeHtml(tItem.createdByName || t("Tizim"))}
+        </td>
+        <td style="font-size:12px; color:var(--text-muted); text-align:center; padding:12px 10px;">${formatDateTime(tItem.createdAt)}</td>
+      </tr>`;
+  }).join('');
 
   container.innerHTML = `
     <div class="table-container" style="border:none; box-shadow:none;">
@@ -769,37 +785,14 @@ function renderDashboardTransactions() {
             <th style="text-align:center; padding:15px 10px;">№</th>
             <th style="text-align:center; padding:15px 10px;">${t("SUMMA")}</th>
             <th style="text-align:center; padding:15px 10px;">${t("TO'LOV TURI")}</th>
-            <th style="text-align:center; padding:15px 10px;">${t("QARZ")}</th>
             <th style="text-align:center; padding:15px 10px;">${t("Mas'ul")}</th>
             <th style="text-align:center; padding:15px 10px;">${t("SANA")}</th>
           </tr>
         </thead>
-        <tbody>
-          ${currentDashboardTransactions.length === 0 ? `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Sotuvlar hali yo'q")}</td></tr>` :
-      paginated.map((tItem, i) => `
-              <tr style="border-bottom: 1px solid var(--border);">
-                <td style="color:var(--text-muted); text-align:center; padding:12px 10px;">${start + i + 1}</td>
-                <td style="font-weight:700; color:#10b981; text-align:center; padding:12px 10px;">${formatPrice(tItem.total)} ${t("so'm")}</td>
-                <td style="text-align:center; padding:12px 10px;">
-                   <div style="display:flex; justify-content:center; gap:12px; font-size:13px; font-weight:500;">
-                     ${tItem.cash > 0 ? `<span style="color:#10b981">💵 ${t("Naqd")}</span>` : ''}
-                     ${tItem.card > 0 ? `<span style="color:#3b82f6">💳 ${t("Karta")}</span>` : ''}
-                     ${tItem.click > 0 ? `<span style="color:#8b5cf6">📱 ${t("Click")}</span>` : ''}
-                   </div>
-                </td>
-                <td style="text-align:center; padding:12px 10px;">
-                  ${tItem.debt > 0 ? `<span style="color:#ef4444; font-weight:800; font-size:14px;">${formatPrice(tItem.debt)}</span>` : '<span style="color:var(--text-muted); opacity:0.5;">—</span>'}
-                </td>
-                <td style="text-align:center; padding:12px 10px; font-size:12px; font-weight:600; color:var(--text-primary); text-transform:uppercase;">
-                   ${escapeHtml(tItem.createdByName || t("Tizim"))}
-                </td>
-                <td style="font-size:12px; color:var(--text-muted); text-align:center; padding:12px 10px;">${formatDateTime(tItem.createdAt)}</td>
-              </tr>`).join('')}
+        <tbody id="dashboard-tbody">
+          ${paginated.length === 0 ? `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Sotuvlar hali yo'q")}</td></tr>` : rows}
         </tbody>
       </table>
-    </div>
-    <div style="padding: 10px 24px 24px 24px;">
-       ${renderPageControls('dashboardPage', totalPages, 'renderDashboardTransactions()')}
     </div>
   `;
 }

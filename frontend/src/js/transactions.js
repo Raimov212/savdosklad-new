@@ -29,19 +29,6 @@ async function renderTransactions() {
     const transactions = await api.get(`/transactions?businessId=${bid}${getDateQuery()}`);
     allTransactionsList = transactions || [];
     renderTransactionsTable(allTransactionsList);
-    
-    const listContainer = document.getElementById('transaction-acc-list');
-    if (listContainer) {
-      listContainer.onscroll = () => {
-        if (listContainer.scrollTop + listContainer.clientHeight >= listContainer.scrollHeight - 50) {
-          const totalPages = Math.ceil(currentTransactions.length / 15);
-          if (window.transactionPage < totalPages) {
-            window.transactionPage++;
-            renderTransactionsTable(null, true);
-          }
-        }
-      };
-    }
   } catch (err) {
     content.innerHTML = `<div class="empty-state"><h4>${t("Xatolik")}</h4><p>${escapeHtml(err.message)}</p></div>`;
   }
@@ -83,14 +70,16 @@ function renderTransactionsTable(list, isAppend = false) {
   }
 
   const limit = 15;
-  const start = (window.transactionPage - 1) * limit;
-  const paginated = currentTransactions.slice(0, start + limit);
+  const totalPages = Math.ceil(currentTransactions.length / limit);
+  const end = window.transactionPage * limit;
+  const paginated = currentTransactions.slice(end - limit, end);
 
   const content = document.getElementById('page-content');
 
   const items = paginated.length === 0
     ? `<div class="empty-state"><div class="icon">🛒</div><h4>${t("Sotuvlar yo'q")}</h4></div>`
     : paginated.map((trans, i) => {
+      const absoluteIndex = ((window.transactionPage - 1) * limit) + i + 1;
       const hasDebt = trans.debt > 0;
       const idsJson = JSON.stringify(trans.ids);
       return `
@@ -99,7 +88,7 @@ function renderTransactionsTable(list, isAppend = false) {
             <div class="acc-header-left">
               <div class="acc-avatar acc-avatar-indigo" style="${hasDebt ? 'background:linear-gradient(135deg,#EF4444,#DC2626)' : ''}">🛒</div>
               <div>
-                <div class="acc-title">№ ${i + 1} — ${formatDateTime(trans.createdAt)}</div>
+                <div class="acc-title">№ ${absoluteIndex} — ${formatDateTime(trans.createdAt)}</div>
                 <div class="acc-subtitle">
                   ${trans.clientName ? `<strong>${escapeHtml(trans.clientName)}</strong>` : (trans.clientNumber ? escapeHtml(trans.clientNumber) : t('Begona xaridor'))}
                   <span style="opacity:0.6; margin-left:8px;">№: ${trans.ids.join(',')}</span>

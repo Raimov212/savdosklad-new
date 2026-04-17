@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -476,6 +477,25 @@ func (h *TransactionHandler) Create(c *gin.Context) {
 // @Router /transactions [get]
 func (h *TransactionHandler) GetByBusinessID(c *gin.Context) {
 	bid, _ := strconv.Atoi(c.Query("businessId"))
+	startStr := c.Query("startDate")
+	endStr := c.Query("endDate")
+
+	if startStr != "" && endStr != "" {
+		start, errS := time.Parse("2006-01-02", startStr)
+		end, errE := time.Parse("2006-01-02", endStr)
+		if errS == nil && errE == nil {
+			// Set end to end of day
+			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 0, end.Location())
+			list, err := h.uc.GetByPeriod(bid, start, end)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, list)
+			return
+		}
+	}
+
 	list, err := h.uc.GetByBusinessID(bid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -617,6 +637,24 @@ func (h *RefundHandler) Create(c *gin.Context) {
 // @Router /refunds [get]
 func (h *RefundHandler) GetByBusinessID(c *gin.Context) {
 	bid, _ := strconv.Atoi(c.Query("businessId"))
+	startStr := c.Query("startDate")
+	endStr := c.Query("endDate")
+
+	if startStr != "" && endStr != "" {
+		start, errS := time.Parse("2006-01-02", startStr)
+		end, errE := time.Parse("2006-01-02", endStr)
+		if errS == nil && errE == nil {
+			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 0, end.Location())
+			list, err := h.uc.GetByPeriod(bid, start, end)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, list)
+			return
+		}
+	}
+
 	list, err := h.uc.GetByBusinessID(bid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -675,6 +713,24 @@ func (h *ExpenseHandler) Create(c *gin.Context) {
 // @Router /expenses [get]
 func (h *ExpenseHandler) GetByBusinessID(c *gin.Context) {
 	bid, _ := strconv.Atoi(c.Query("businessId"))
+	startStr := c.Query("startDate")
+	endStr := c.Query("endDate")
+
+	if startStr != "" && endStr != "" {
+		start, errS := time.Parse("2006-01-02", startStr)
+		end, errE := time.Parse("2006-01-02", endStr)
+		if errS == nil && errE == nil {
+			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 0, end.Location())
+			list, err := h.uc.GetByPeriod(bid, start, end)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, list)
+			return
+		}
+	}
+
 	list, err := h.uc.GetTotalExpensesByBusinessID(bid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

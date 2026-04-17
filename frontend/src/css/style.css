@@ -64,6 +64,31 @@
   --transition-smooth: 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+/* ==================== SPINNER & SENTINEL ==================== */
+.spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+[id$="-sentinel"] {
+  animation: fadeInOut 2s ease-in-out infinite;
+  color: var(--text-primary) !important;
+  opacity: 0.8;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+
 /* ==================== LIGHT THEME OVERRIDES ==================== */
 [data-theme="light"] {
   --bg-primary: #f8fafc;

@@ -85,7 +85,7 @@ func (r *ExpenseRepo) GetTotalExpensesByPeriod(bid int, start, end time.Time) ([
 		        COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_expenses t
 		 LEFT JOIN users u ON t."createdBy" = u.id
-		 WHERE t."businessId" = $1 AND t."createdAt" >= $2 AND t."createdAt" <= $3`,
+		 WHERE t."businessId" = $1 AND t."createdAt" >= $2 AND t."createdAt" <= $3 ORDER BY t.id DESC`,
 		bid, start, end,
 	)
 	if err != nil {
