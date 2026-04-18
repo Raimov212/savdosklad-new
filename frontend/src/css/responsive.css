@@ -1,23 +1,6 @@
 
-/* ==================== RESPONSIVE DESIGN (MOBILE & TABLET) ==================== */
-
-/* Tablet (up to 1024px) */
+/* Consolidated Tablet & Mobile (up to 1024px) */
 @media (max-width: 1024px) {
-  :root {
-    --sidebar-width: 200px;
-  }
-  
-  .analytics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .dashboard-main-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Mobile (up to 768px) */
-@media (max-width: 768px) {
   :root {
     --sidebar-width: 260px;
     --topbar-height: 56px;
@@ -26,12 +9,20 @@
   .sidebar {
     left: calc(var(--sidebar-width) * -1);
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
-    display: none; /* Strictly hide sidebar unless mobile-open */
+    display: none !important; /* Hidden by default on tablets and mobile */
+    z-index: 1000;
   }
 
   .sidebar.mobile-open {
-    display: flex;
+    display: flex !important;
     left: 0;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+  }
+
+  .sidebar.mobile-open .mobile-close-btn {
+    display: flex !important;
   }
 
   .main-content {
@@ -39,17 +30,35 @@
     width: 100%;
   }
 
+  .dashboard.sidebar-collapsed .main-content {
+    margin-left: 0 !important;
+  }
+
   .topbar {
     padding: 0 16px;
   }
 
-  /* Adjust Topbar elements on mobile */
+  /* Adjust Topbar elements */
   .topbar-center {
-    display: none !important; /* Hide date/centered title on phones */
+    display: none !important;
+  }
+
+  .topbar-right .user-badge {
+    display: flex !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-right: 2px !important;
   }
 
   .topbar-right .user-name {
-    display: none !important; /* Hide username strictly */
+    display: none !important;
+  }
+
+  .topbar-right .user-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
   }
 
   /* Hide potential points/coin icon next to avatar on mobile if it exists */
@@ -71,18 +80,31 @@
 
   /* Dashboard Grid Adjustments (Image 2) */
   .stats-grid {
-    grid-template-columns: 1fr !important; /* Top cards stacked in a grid */
-    gap: 16px !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* Forces 2-column grid on all mobile/tablet widths */
+    gap: 10px !important;
+    padding: 10px !important;
+  }
+
+  .stats-grid .stat-card {
+    padding: 12px !important;
+  }
+
+  .stats-grid .stat-value {
+    font-size: 18px !important;
+  }
+
+  .stats-grid .stat-label {
+    font-size: 10px !important;
   }
 
   .dashboard-main-grid {
     grid-template-columns: 1fr !important; /* Middle cards (charts) stacked */
-    gap: 20px !important;
+    gap: 16px !important;
   }
 
   .dashboard-bottom-grid {
     grid-template-columns: 1fr !important; /* Bottom sections (inventory, top products) stacked */
-    gap: 20px !important;
+    gap: 16px !important;
   }
 
   /* Recent Orders Table: Hide QARZ column on mobile */
@@ -91,107 +113,17 @@
     display: none !important;
   }
 
-  /* General mobile hiding utility */
-  .mobile-hide {
-    display: none !important;
+  #page-content {
+      padding: 12px !important;
   }
 
-  /* Table responsiveness */
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .premium-table {
-    min-width: auto; /* Allow shrink on mobile if columns hidden */
-  }
-
-  .premium-table th, .premium-table td {
-    padding: 10px 8px;
-    font-size: 13px;
-  }
-
-  /* Modal responsiveness */
   .modal {
-    width: 98% !important; /* Slightly larger width */
+    width: 98% !important;
     margin: 4px;
-    max-height: 96vh !important; /* More height */
+    max-height: 96vh !important;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
-  }
-
-  .modal-header {
-    padding: 16px 20px !important;
-  }
-
-  .modal-header h3 {
-    font-size: 16px;
-  }
-
-  /* Form and Excel alignment fixes */
-  .excel-actions-row {
-    flex-direction: column !important;
-    padding: 12px !important;
-  }
-
-  .excel-actions-row > div {
-    flex-direction: column !important;
-    gap: 8px !important;
-    align-items: flex-start !important;
-  }
-
-  .excel-actions-row a {
-    align-self: flex-start;
-    margin-top: 4px;
-  }
-
-  .excel-actions-row .btn-sm {
-    width: 100%; /* Full width buttons on mobile */
-    justify-content: center;
-  }
-
-  .form-row {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .form-group {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
-
-  input, select, textarea {
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
-
-  /* Pull footer to edges */
-  .modal > *:not(.modal-header):not(.modal-footer):not(.modal-close) {
-    padding: 16px 20px !important;
-  }
-
-  /* Footer responsiveness */
-  .modal-footer {
-    padding: 16px 20px !important;
-    gap: 10px !important;
-    flex-direction: row !important; /* Keep buttons next to each other if possible, or stack if tiny */
-  }
-
-  /* Dashboard Adjustments */
-  .stats-grid {
-    padding: 16px !important;
-  }
-
-  .page-bottom-bar {
-    flex-direction: column;
-    margin: 0 -16px -16px -16px;
-    gap: 10px;
-  }
-
-  #page-content {
-      padding: 12px !important;
   }
 }
 
@@ -200,21 +132,14 @@
   .topbar-left h3 {
       display: none !important;
   }
-}
+  
+  /* Keep 2-column grid as requested */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
 
-/* Sidebar overlay for mobile */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 95;
-}
-
-.sidebar-overlay.active {
-  display: block;
+  .stats-grid .stat-card {
+    padding: 10px !important;
+  }
 }

@@ -762,9 +762,9 @@ function renderDashboardTransactions() {
     return `
       <tr style="border-bottom: 1px solid var(--border);">
         <td style="color:var(--text-muted); text-align:center; padding:12px 10px;">${i + 1}</td>
-        <td style="font-weight:700; color:#10b981; text-align:center; padding:12px 10px;">${formatPrice(tItem.total)} ${t("so'm")}</td>
+        <td style="font-weight:700; color:#10b981; text-align:center; padding:12px 10px; min-width:120px;">${formatPrice(tItem.total)}</td>
         <td style="text-align:center; padding:12px 10px;">
-           <div style="display:flex; justify-content:center; gap:12px; font-size:13px; font-weight:500;">
+           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:12px; font-weight:500;">
              ${tItem.cash > 0 ? `<span style="color:#10b981">💵 ${t("Naqd")}</span>` : ''}
              ${tItem.card > 0 ? `<span style="color:#3b82f6">💳 ${t("Karta")}</span>` : ''}
              ${tItem.click > 0 ? `<span style="color:#8b5cf6">📱 ${t("Click")}</span>` : ''}
@@ -1267,6 +1267,15 @@ window.toggleSidebar = function () {
   const dashboard = document.querySelector('.dashboard');
   const toggleBtnIcon = document.querySelector('.sidebar-logo .btn-icon .icon');
 
+  if (!sidebar) return;
+
+  // Handle mobile viewpoint (tablet/mobile)
+  if (window.innerWidth <= 1024) {
+    sidebar.classList.toggle('mobile-open');
+    return;
+  }
+
+  // Handle desktop viewpoint
   if (sidebar && dashboard) {
     sidebar.classList.toggle('collapsed');
     dashboard.classList.toggle('sidebar-collapsed');
