@@ -57,7 +57,23 @@ func (n *TelegramNotifier) NotifySale(bizID int, total float64, itemsCount int) 
 		bizName = *biz.Name
 	}
 
-	text := fmt.Sprintf(i18n.T(lang, i18n.MsgBotNotifySale), bizName, i18n.FormatMoney(total, lang), itemsCount)
+	text := ""
+	if itemsCount > 0 {
+		text = fmt.Sprintf(i18n.T(lang, i18n.MsgBotNotifySale), bizName, i18n.FormatMoney(total, lang), itemsCount)
+	} else {
+		// Update notification: omitting items count line and using a different header
+		header := "✅ Sotuv yangilandi"
+		if lang == "uz-cyrl" {
+			header = "✅ Сотув янгиланди"
+		} else if lang == "ru" {
+			header = "✅ Продажа обновлена"
+		} else if lang == "en" {
+			header = "✅ Sale updated"
+		}
+		
+		text = fmt.Sprintf("%s!\n🏢 %s\n💰 Summa: %s", 
+			header, bizName, i18n.FormatMoney(total, lang))
+	}
 	n.send(user.TelegramUserID, text)
 }
 

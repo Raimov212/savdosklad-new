@@ -110,8 +110,9 @@ func (b *Bot) SendDailyReports() {
 		if u.TelegramUserID != 0 {
 			lang := b.getLang(u.TelegramUserID)
 			// Yesterday/Today stats
-			start := time.Now().Truncate(24 * time.Hour)
-			end := time.Now()
+			now := time.Now()
+			start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+			end := now
 
 			businesses, err := b.businessUC.GetByUserID(u.ID)
 			if err != nil {
@@ -130,6 +131,7 @@ func (b *Bot) SendDailyReports() {
 					total += t.Total
 				}
 			}
+			log.Printf("[Bot] Daily report for user %d: total=%f", u.ID, total)
 
 			text := fmt.Sprintf(i18n.T(lang, i18n.MsgBotDailyStatHeader), time.Now().Format("02.01.2006"))
 			text += fmt.Sprintf("\n💰 %s", i18n.FormatMoney(total, lang))

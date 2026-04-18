@@ -584,6 +584,16 @@ async function addToSaleBatch() {
   }
 
   try {
+    let bid = getSelectedBusinessId();
+    if (!bid && validItems.length > 0) {
+        bid = validItems[0].businessId;
+    }
+
+    if (!bid) {
+        showToast(t("Iltimos, avval biznesni tanlang"), 'error');
+        return;
+    }
+
     const total = validItems.reduce((s, i) => s + (i.price * i.quantity), 0);
     const clientId = document.getElementById('sale-client').value;
     const cash = parseFloat(document.getElementById('sale-cash').value) || 0;
@@ -714,7 +724,20 @@ async function finalizeSale(e) {
 
   try {
     showToast(t("Yakunlanmoqda..."), 'info');
-    const bid = getSelectedBusinessId();
+    let bid = getSelectedBusinessId();
+
+    // Fallback: If no business is selected in the UI (e.g., "All" is selected),
+    // use the business of the first item in the sale.
+    if (!bid) {
+        if (saleItems.length > 0) bid = saleItems[0].businessId;
+        else if (savedBatchItems.length > 0) bid = savedBatchItems[0].businessId;
+    }
+
+    if (!bid) {
+        showToast(t("Iltimos, avval biznesni tanlang"), 'error');
+        return;
+    }
+
     const clientId = document.getElementById('sale-client').value;
     const desc = document.getElementById('sale-desc').value.trim();
     const debt = Math.max(0, overallTotal - (overallPaidSoFar + cash + card + click));
