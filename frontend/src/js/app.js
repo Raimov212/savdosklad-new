@@ -17,6 +17,7 @@ let dashboardTransactions = [];
 let dashboardProducts = [];
 let salesTrendChartType = 'line';
 let currentTrendChart = null;
+let currentSourceChart = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -714,7 +715,8 @@ function renderDashboardCharts(transactions, products) {
     const sourceLabels = [t('Naqd'), t('Karta'), t('Qarz')];
     const sourceColors = ['#10b981', '#3b82f6', '#ef4444'];
 
-    new Chart(ctxSource, {
+    if (currentSourceChart) currentSourceChart.destroy();
+    currentSourceChart = new Chart(ctxSource, {
       type: 'doughnut',
       data: {
         labels: sourceLabels,

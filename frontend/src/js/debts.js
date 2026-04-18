@@ -19,7 +19,7 @@ async function renderDebts() {
   }
 
   try {
-    const transactions = await api.get(`/transactions?businessId=${bid}${getDateQuery()}`);
+    const transactions = await api.get(`/transactions?businessId=${bid}`);
     allDebtsSource = transactions || [];
 
     // Process and segment debts
@@ -31,8 +31,10 @@ async function renderDebts() {
       if (trans.debt > 0) {
         activeDebtsList.push(trans);
       }
-      // It's a paid debt if debtLimitDate exists (was created as debt) but debt is now 0 (paid)
-      else if (trans.debtLimitDate) {
+      // It's a paid debt if:
+      // 1. It has a debtLimitDate (explicitly marked as debt)
+      // 2. OR it has a clientId and was updated after creation (likely a debt that was paid later)
+      else if (trans.debtLimitDate || (trans.clientId && new Date(trans.updatedAt) > new Date(new Date(trans.createdAt).getTime() + 1000))) {
         paidDebtsList.push(trans);
       }
     });
@@ -99,8 +101,14 @@ function renderDebtsTable(tab, filter = '', isAppend = false) {
   const pageVar = tab === 'active' ? 'activeDebtPage' : 'paidDebtPage';
   if (!isAppend) window[pageVar] = 1;
 
+  const period = getDatePeriod();
   let fullList = tab === 'active' ? activeDebtsList : paidDebtsList;
   let list = fullList.filter(d => {
+    // Local date filter
+    const transDate = d.createdAt.substring(0, 10);
+    const isInRange = transDate >= period.start && transDate <= period.end;
+    if (!isInRange) return false;
+
     const name = (d.clientName || d.clientNumber || t('Begona xaridor')).toLowerCase();
     return !filter || name.includes(filter) || d.id.toString().includes(filter);
   });

@@ -93,7 +93,14 @@ export const api = {
 
 // Global error handler for Webview debugging
 window.onerror = function (message, source, lineno, colno, error) {
-    showToast(`JS Error: ${message} | ${source} ${lineno}:${colno}`, 'error');
+    if (message === "Script error.") {
+        console.error("CORS Script Error: Details hidden by browser. Check network tab or use 'crossorigin' attribute.");
+        return false;
+    }
+    const stack = error?.stack ? `\nStack: ${error.stack.split('\n').slice(0, 2).join('\n')}` : '';
+    const fullMsg = `JS Error: ${message} | ${source?.split('/').pop()} ${lineno}:${colno}${stack}`;
+    console.error(fullMsg, error);
+    showToast(`Xatolik: ${message}`, 'error');
     return false;
 };
 
