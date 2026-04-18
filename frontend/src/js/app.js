@@ -316,9 +316,9 @@ async function renderDashboard() {
       ]);
     }
 
-    const productList = (products || []).filter(p => !p.isDeleted);
-    const transactionList = (transactions || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    const clientList = clients || [];
+    const productList = (products || []).filter(p => p && !p.isDeleted);
+    const transactionList = (transactions || []).filter(t => t).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const clientList = (clients || []).filter(c => c);
 
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
@@ -354,7 +354,7 @@ async function renderDashboard() {
     const monthNames = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
     const currentMonthLabel = t(monthNames[thisMonth]);
     const transactionsToday = transactionList.filter(t => t.createdAt.startsWith(todayStr)).length;
-    const lowStock = productList.filter(p => !p.isDeleted && (p.quantity || 0) <= (p.minQuantity || 5)).length;
+    const lowStock = productList.filter(p => (p.quantity || 0) <= (p.minQuantity || 5)).length;
     const inventoryLevel = productList.length > 0 ? Math.round(((productList.length - lowStock) / productList.length) * 100) : 100;
     const totalInventoryValue = productList.reduce((s, p) => s + ((p.quantity || 0) * (p.price || 0)), 0);
     const totalProductsCount = productList.reduce((s, p) => s + (p.quantity || 0), 0);
