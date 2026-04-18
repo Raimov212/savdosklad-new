@@ -33,6 +33,10 @@ async function renderCalculations() {
 }
 
 function renderCalculationsTable(list, isAppend = false) {
+  if (typeof list === 'boolean') {
+    isAppend = list;
+    list = null;
+  }
   if (list) {
     if (!isAppend) window.calculationPage = 1;
     currentCalculations = list;
@@ -100,7 +104,7 @@ function renderCalculationsTable(list, isAppend = false) {
       </div>
 
       <div class="stats-grid" id="calculations-grid">
-           ${paginated.length === 0 ? `<div class="empty-state"><div class="icon">📊</div><h4>${t("Hisob-kitoblar yo'q")}</h4><p>${t("Yangi hisob-kitob yarating.")}</p></div>` : cards}
+           ${paginated.length === 0 && !isAppend ? `<div class="empty-state"><div class="icon">📊</div><h4>${t("Hisob-kitoblar yo'q")}</h4><p>${t("Yangi hisob-kitob yarating.")}</p></div>` : cards}
       </div>
       <div id="calculations-pagination-area">
         ${renderPageControls('calculationPage', totalPages, 'renderCalculationsTable')}
@@ -116,6 +120,7 @@ function renderCalculationsTable(list, isAppend = false) {
         <button class="btn btn-primary" onclick="openCalculationModal()">${t("Qo'shish")}</button>
       </div>
     `;
+    attachInfiniteScroll('calculationPage', totalPages, 'renderCalculationsTable');
   } else {
     const grid = document.getElementById('calculations-grid');
     if (grid) {
@@ -125,6 +130,7 @@ function renderCalculationsTable(list, isAppend = false) {
     if (pagArea) {
       pagArea.innerHTML = renderPageControls('calculationPage', totalPages, 'renderCalculationsTable');
     }
+    attachInfiniteScroll('calculationPage', totalPages, 'renderCalculationsTable');
   }
 }
 

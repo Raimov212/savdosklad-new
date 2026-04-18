@@ -24,6 +24,11 @@ async function renderRefunds() {
 }
 
 function renderRefundsTable(list, isAppend = false) {
+  if (typeof list === 'boolean') {
+    isAppend = list;
+    list = null;
+  }
+
   if (list) {
     if (!isAppend) window.refundPage = 1;
     currentRefunds = list;
@@ -96,6 +101,7 @@ function renderRefundsTable(list, isAppend = false) {
         <button class="btn btn-primary" onclick="openRefundModal()">${t("Qo'shish")}</button>
       </div>
     `;
+    attachInfiniteScroll('refundPage', totalPages, 'renderRefundsTable');
   } else {
     const listContainer = document.getElementById('refund-acc-list');
     if (listContainer) {
@@ -105,6 +111,7 @@ function renderRefundsTable(list, isAppend = false) {
     if (pagArea) {
       pagArea.innerHTML = renderPageControls('refundPage', totalPages, 'renderRefundsTable');
     }
+    attachInfiniteScroll('refundPage', totalPages, 'renderRefundsTable');
   }
 }
 

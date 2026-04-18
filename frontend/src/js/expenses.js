@@ -81,6 +81,10 @@ function filterExpensesByPeriod(list, period) {
 }
 
 function renderExpenseTable(list, isAppend = false) {
+  if (typeof list === 'boolean') {
+    isAppend = list;
+    list = null;
+  }
   if (list) {
     if (!isAppend) window.expensePage = 1;
   }
@@ -202,7 +206,7 @@ function renderExpenseTable(list, isAppend = false) {
                 </tr>
               </thead>
               <tbody id="expense-tbody">
-                ${paginated.length === 0 ? `<tr><td colspan="${isAggregated ? 5 : 6}" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Xarajatlar mavjud emas")}</td></tr>` : rows}
+                ${paginated.length === 0 && !isAppend ? `<tr><td colspan="${isAggregated ? 5 : 6}" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Xarajatlar mavjud emas")}</td></tr>` : rows}
               </tbody>
             </table>
           </div>
@@ -211,15 +215,21 @@ function renderExpenseTable(list, isAppend = false) {
           ${renderPageControls('expensePage', totalPages, 'renderExpenseTable')}
         </div>
       `;
+      attachInfiniteScroll('expensePage', totalPages, 'renderExpenseTable');
   } else {
     const tbody = document.getElementById('expense-tbody');
     if (tbody) tbody.insertAdjacentHTML('beforeend', rows);
     const pagArea = document.getElementById('expense-pagination-area');
     if (pagArea) pagArea.innerHTML = renderPageControls('expensePage', totalPages, 'renderExpenseTable');
+    attachInfiniteScroll('expensePage', totalPages, 'renderExpenseTable');
   }
 }
 
-function renderFixedTable(list) {
+function renderFixedTable(list, isAppend = false) {
+  if (typeof list === 'boolean') {
+    isAppend = list;
+    list = null;
+  }
   if (list) {
     currentFixed = list;
     window.fixedPage = 1;
@@ -234,7 +244,24 @@ function renderFixedTable(list) {
   const section = document.getElementById('fixed-section');
   if (!section) return;
 
-  section.innerHTML = `
+  const rows = paginated.map((f, i) => `
+    <tr>
+      <td style="text-align:center">${start + i + 1}</td>
+      <td style="text-align:center"><strong style="color:var(--text-primary)">${escapeHtml(f.name)}</strong></td>
+      <td class="price" style="text-align:center; font-weight:700;">${formatPrice(f.amount)} ${t("so'm")}</td>
+      <td style="text-align:center">
+        <span class="badge" style="background:var(--bg-glass); border:1px solid var(--border); color:var(--text-secondary);">
+          ${f.type === 1 ? t('Oylik') : f.type === 2 ? t('Yillik') : t('Boshqa')}
+        </span>
+      </td>
+      <td style="text-align:center"><span style="font-size:13px; color:var(--text-muted)">${escapeHtml(f.description) || '—'}</span></td>
+      <td class="actions" style="justify-content:center">
+        <button class="btn-icon" onclick='openFixedCostModal(${JSON.stringify(f).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
+      </td>
+    </tr>`).join('');
+
+  if (!isAppend) {
+    section.innerHTML = `
       <div class="card">
         <div class="card-header">
            <h3 style="margin:0; font-size:16px;">${t("Doimiy xarajatlar")}</h3>
@@ -258,29 +285,24 @@ function renderFixedTable(list) {
                 <th style="text-align:center">${t("Amallar")}</th>
               </tr>
             </thead>
-            <tbody>
-              ${paginated.length === 0 ? `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Doimiy xarajatlar mavjud emas")}</td></tr>` :
-      paginated.map((f, i) => `
-                  <tr>
-                    <td style="text-align:center">${start + i + 1}</td>
-                    <td style="text-align:center"><strong style="color:var(--text-primary)">${escapeHtml(f.name)}</strong></td>
-                    <td class="price" style="text-align:center; font-weight:700;">${formatPrice(f.amount)} ${t("so'm")}</td>
-                    <td style="text-align:center">
-                      <span class="badge" style="background:var(--bg-glass); border:1px solid var(--border); color:var(--text-secondary);">
-                        ${f.type === 1 ? t('Oylik') : f.type === 2 ? t('Yillik') : t('Boshqa')}
-                      </span>
-                    </td>
-                    <td style="text-align:center"><span style="font-size:13px; color:var(--text-muted)">${escapeHtml(f.description) || '—'}</span></td>
-                    <td class="actions" style="justify-content:center">
-                      <button class="btn-icon" onclick='openFixedCostModal(${JSON.stringify(f).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
-                    </td>
-                  </tr>`).join('')}
+            <tbody id="fixed-tbody">
+              ${paginated.length === 0 ? `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Doimiy xarajatlar mavjud emas")}</td></tr>` : rows}
             </tbody>
           </table>
         </div>
       </div>
-      ${renderPageControls('fixedPage', totalPages, 'renderFixedTable()')}
+      <div id="fixed-pagination-area">
+        ${renderPageControls('fixedPage', totalPages, 'renderFixedTable')}
+      </div>
     `;
+    attachInfiniteScroll('fixedPage', totalPages, 'renderFixedTable');
+  } else {
+    const tbody = document.getElementById('fixed-tbody');
+    if (tbody) tbody.insertAdjacentHTML('beforeend', rows);
+    const pagArea = document.getElementById('fixed-pagination-area');
+    if (pagArea) pagArea.innerHTML = renderPageControls('fixedPage', totalPages, 'renderFixedTable');
+    attachInfiniteScroll('fixedPage', totalPages, 'renderFixedTable');
+  }
 }
 
 function filterExpenses(query) {

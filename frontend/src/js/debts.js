@@ -95,6 +95,12 @@ window.switchDebtTab = function (tab) {
 }
 
 function renderDebtsTable(tab, filter = '', isAppend = false) {
+  // If called from infinite scroll: fn('active', true) or fn('paid', true)
+  if (typeof filter === 'boolean') {
+    isAppend = filter;
+    filter = '';
+  }
+
   const container = document.getElementById('debts-table-container');
   if (!container) return;
 
@@ -176,9 +182,10 @@ function renderDebtsTable(tab, filter = '', isAppend = false) {
     container.innerHTML = `
       <div class="acc-list" id="debts-acc-list">${items}</div>
       <div id="debts-pagination-area">
-        ${renderPageControls(`${pageVar}`, totalPages, `renderDebtsTable('${tab}')`)}
+        ${renderPageControls(pageVar, totalPages, 'renderDebtsTable')}
       </div>
     `;
+    attachInfiniteScroll(pageVar, totalPages, 'renderDebtsTable', tab);
   } else {
     const listContainer = document.getElementById('debts-acc-list');
     if (listContainer) {
@@ -186,8 +193,9 @@ function renderDebtsTable(tab, filter = '', isAppend = false) {
     }
     const pagArea = document.getElementById('debts-pagination-area');
     if (pagArea) {
-      pagArea.innerHTML = renderPageControls(`${pageVar}`, totalPages, `renderDebtsTable('${tab}')`);
+      pagArea.innerHTML = renderPageControls(pageVar, totalPages, 'renderDebtsTable');
     }
+    attachInfiniteScroll(pageVar, totalPages, 'renderDebtsTable', tab);
   }
 }
 

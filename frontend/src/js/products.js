@@ -54,6 +54,10 @@ window.productPage = 1;
 let currentProducts = [];
 
 function renderProductsTable(list, isAppend = false) {
+  if (typeof list === 'boolean') {
+    isAppend = list;
+    list = null;
+  }
   if (list) {
     if (!isAppend) window.productPage = 1;
     currentProducts = list;
@@ -156,6 +160,7 @@ function renderProductsTable(list, isAppend = false) {
         ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
       </div>
     `;
+    attachInfiniteScroll('productPage', totalPages, 'renderProductsTable');
   } else {
     const listContainer = document.getElementById('product-acc-list');
     if (listContainer) {
@@ -165,6 +170,7 @@ function renderProductsTable(list, isAppend = false) {
     if (pagArea) {
       pagArea.innerHTML = renderPageControls('productPage', totalPages, 'renderProductsTable');
     }
+    attachInfiniteScroll('productPage', totalPages, 'renderProductsTable');
   }
 }
 

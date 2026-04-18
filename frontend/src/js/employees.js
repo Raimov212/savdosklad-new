@@ -54,12 +54,16 @@ export async function renderEmployees() {
     }
 }
 
-function renderEmployeesTable() {
+function renderEmployeesTable(isAppend = false) {
+    if (typeof isAppend !== 'boolean') isAppend = false; // it receives `true` from observer
+
     const tbody = document.getElementById('employees-table-body');
     const pag = document.getElementById('employees-pagination');
     if (!tbody) return;
 
-    if (allEmployees.length === 0) {
+    if (!isAppend) employeesPage = 1;
+
+    if (allEmployees.length === 0 && !isAppend) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Sizda hali xodimlar yo'q")}</td></tr>`;
         pag.innerHTML = '';
         return;
@@ -67,10 +71,10 @@ function renderEmployeesTable() {
 
     const totalPages = Math.ceil(allEmployees.length / employeesPerPage);
     if (employeesPage > totalPages) employeesPage = totalPages;
-    const start = (employeesPage - 1) * employeesPerPage;
-    const paginated = allEmployees.slice(start, start + employeesPerPage);
+    const end = employeesPage * employeesPerPage;
+    const paginated = allEmployees.slice(end - employeesPerPage, end);
 
-    tbody.innerHTML = paginated.map((emp, i) => {
+    const rows = paginated.map((emp, i) => {
         const empBids = emp.businessIds || [];
         const linkedBizNames = allBusinesses
             .filter(b => empBids.includes(b.id))
@@ -79,7 +83,7 @@ function renderEmployeesTable() {
 
         return `
             <tr>
-                <td style="text-align:center; color:var(--text-muted);">${start + i + 1}</td>
+                <td style="text-align:center; color:var(--text-muted);">${(employeesPage - 1) * employeesPerPage + i + 1}</td>
                 <td style="font-weight:600;">${escapeHtml(emp.firstName)} ${escapeHtml(emp.lastName)}</td>
                 <td>@${escapeHtml(emp.userName)}</td>
                 <td><span class="badge" style="background:var(--primary-glow); color:var(--primary-color);">${escapeHtml(linkedBizNames || t("Biriktirilmagan"))}</span></td>
@@ -97,7 +101,16 @@ function renderEmployeesTable() {
         `;
     }).join('');
 
-    pag.innerHTML = window.renderPageControls('employeesPage', totalPages, 'window.renderEmployeesTable()');
+    if (!isAppend) {
+        tbody.innerHTML = rows;
+        pag.innerHTML = window.renderPageControls('employeesPage', totalPages, 'renderEmployeesTable');
+        window.attachInfiniteScroll('employeesPage', totalPages, 'renderEmployeesTable');
+    } else {
+        tbody.insertAdjacentHTML('beforeend', rows);
+        pag.innerHTML = window.renderPageControls('employeesPage', totalPages, 'renderEmployeesTable');
+        window.attachInfiniteScroll('employeesPage', totalPages, 'renderEmployeesTable');
+    }
+
     lucide.createIcons();
 }
 

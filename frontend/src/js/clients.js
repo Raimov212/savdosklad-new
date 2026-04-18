@@ -41,23 +41,27 @@ async function renderClients() {
   }
 }
 
-function renderClientsTable(list) {
+function renderClientsTable(list, isAppend = false) {
+  if (typeof list === 'boolean') {
+    isAppend = list;
+    list = null;
+  }
   if (list) {
     currentClients = list;
-    window.clientPage = 1;
+    if (!isAppend) window.clientPage = 1;
   }
 
   const limit = 15;
   const totalPages = Math.ceil(currentClients.length / limit);
-  if (window.clientPage > totalPages) window.clientPage = totalPages || 1;
-  const start = (window.clientPage - 1) * limit;
-  const paginated = currentClients.slice(start, start + limit);
+  // Infinite scroll: slice from 0 to current page * limit
+  const end = window.clientPage * limit;
+  const paginated = currentClients.slice(end - limit, end);
 
   const content = document.getElementById('page-content');
 
   const avatarColors = ['acc-avatar-indigo', 'acc-avatar-green', 'acc-avatar-blue', 'acc-avatar-orange'];
 
-  const items = paginated.length === 0
+  const items = paginated.length === 0 && !isAppend
     ? `<div class="empty-state"><div class="icon">👥</div><h4>${t("Mijozlar yo'q")}</h4></div>`
     : paginated.map((c, i) => {
       const colorClass = avatarColors[i % avatarColors.length];
@@ -101,20 +105,35 @@ function renderClientsTable(list) {
         </div>`;
     }).join('');
 
-  content.innerHTML = `
-    <div class="acc-list">${items}</div>
-    ${renderPageControls('clientPage', totalPages, 'renderClientsTable()')}
-    <div class="page-bottom-bar">
-      <div class="search-box" style="flex:1; max-width:none;">
-        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-        <input type="text" placeholder="${t("Qidirish...")}" id="client-search"
-          value="${escapeHtml(document.getElementById('client-search')?.value || '')}"
-          oninput="filterClients(this.value)"
-          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+  if (!isAppend) {
+    content.innerHTML = `
+      <div class="acc-list" id="client-acc-list">${items}</div>
+      <div id="client-pagination-area">
+        ${renderPageControls('clientPage', totalPages, 'renderClientsTable')}
       </div>
-      ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>` : ''}
-    </div>
-  `;
+      <div class="page-bottom-bar">
+        <div class="search-box" style="flex:1; max-width:none;">
+          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <input type="text" placeholder="${t("Qidirish...")}" id="client-search"
+            value="${escapeHtml(document.getElementById('client-search')?.value || '')}"
+            oninput="filterClients(this.value)"
+            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+        </div>
+        ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>` : ''}
+      </div>
+    `;
+    attachInfiniteScroll('clientPage', totalPages, 'renderClientsTable');
+  } else {
+    const listContainer = document.getElementById('client-acc-list');
+    if (listContainer) {
+      listContainer.insertAdjacentHTML('beforeend', items);
+    }
+    const pagArea = document.getElementById('client-pagination-area');
+    if (pagArea) {
+      pagArea.innerHTML = renderPageControls('clientPage', totalPages, 'renderClientsTable');
+    }
+    attachInfiniteScroll('clientPage', totalPages, 'renderClientsTable');
+  }
 }
 
 function filterClients(query) {

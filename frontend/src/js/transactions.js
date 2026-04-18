@@ -35,7 +35,13 @@ async function renderTransactions() {
 }
 
 function renderTransactionsTable(list, isAppend = false) {
-  if (list) {
+  // Handle case where it's called from infinite scroll trigger: fn(true)
+  if (list === true) {
+    isAppend = true;
+    list = null;
+  }
+
+  if (Array.isArray(list)) {
     if (!isAppend) window.transactionPage = 1;
     // Group transactions by Client ID/Number and Date
     const groupedMap = new Map();
@@ -154,6 +160,7 @@ function renderTransactionsTable(list, isAppend = false) {
         <button class="btn btn-primary" onclick="openSaleModal()">${t("Qo'shish")}</button>
       </div>
     `;
+    attachInfiniteScroll('transactionPage', totalPages, 'renderTransactionsTable');
   } else {
     const listContainer = document.getElementById('transaction-acc-list');
     if (listContainer) {
@@ -163,6 +170,7 @@ function renderTransactionsTable(list, isAppend = false) {
     if (pagArea) {
       pagArea.innerHTML = renderPageControls('transactionPage', totalPages, 'renderTransactionsTable');
     }
+    attachInfiniteScroll('transactionPage', totalPages, 'renderTransactionsTable');
   }
 }
 

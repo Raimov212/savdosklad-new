@@ -802,38 +802,29 @@ function renderDashboardTransactions() {
 
 // ==================== AUTH & ROUTING ====================
 function renderPageControls(pageVarName, totalPages, renderFnName) {
-  // We now return an empty sentinel instead of pagination buttons
-  // The observer will handle the rest.
-  if (window[pageVarName] >= totalPages) return ''; // No more data
-  
-  const fnCall = renderFnName.includes('(') ? renderFnName : `${renderFnName}()`;
-  
+  if (window[pageVarName] >= totalPages) return '';
   return `<div id="${pageVarName}-sentinel" style="height:40px; margin:20px 0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:13px; font-weight:500;">
     <div class="spinner-small" style="margin-right:10px;"></div> ${t("Yuklanmoqda...")}
-  </div>
-  <script>
-    if (window.initInfiniteScroll) {
-       window.initInfiniteScroll('${pageVarName}', ${totalPages}, ${renderFnName.split('(')[0]});
-    }
-  </script>`;
+  </div>`;
 }
 
-window.initInfiniteScroll = function(pageVarName, totalPages, renderFn) {
-  // Small delay to ensure DOM is ready
-  setTimeout(() => {
-    const sentinel = document.getElementById(`${pageVarName}-sentinel`);
-    if (!sentinel) return;
+window.attachInfiniteScroll = function(pageVarName, totalPages, renderFnName, ...args) {
+  const sentinelId = `${pageVarName}-sentinel`;
+  const sentinel = document.getElementById(sentinelId);
+  if (!sentinel) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && window[pageVarName] < totalPages) {
-        window[pageVarName]++;
-        renderFn(true); // Pass 'true' for appending
-        observer.disconnect();
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && window[pageVarName] < totalPages) {
+      window[pageVarName]++;
+      const fn = window[renderFnName];
+      if (typeof fn === 'function') {
+        fn.apply(null, [...args, true]);
       }
-    }, { threshold: 0.1, rootMargin: '100px' });
+      observer.disconnect();
+    }
+  }, { threshold: 0.1, rootMargin: '150px' });
 
-    observer.observe(sentinel);
-  }, 50);
+  observer.observe(sentinel);
 };
 
 // ==================== MODAL UTILS ====================
