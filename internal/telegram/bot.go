@@ -6,6 +6,7 @@ import (
 	"savdosklad/config"
 	"savdosklad/internal/entity"
 	"savdosklad/internal/usecase"
+	"savdosklad/pkg/cache"
 	"savdosklad/pkg/i18n"
 	"strconv"
 	"strings"
@@ -59,6 +60,8 @@ func NewBot(cfg config.TelegramConfig,
 
 func (b *Bot) Start() {
 	log.Printf("Bot authorized on account %s", b.api.Self.UserName)
+	// Store bot username so the web API can build t.me links
+	cache.TgAuthCache.Store("__bot_username__", b.api.Self.UserName)
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	// Channels (Kanallar): Telegram API orqali kelayotgan xabarlar oqimini (stream)
@@ -223,6 +226,12 @@ func (b *Bot) handleCommand(msg *tgbotapi.Message) {
 	lang := b.getLang(msg.From.ID)
 	switch msg.Command() {
 	case "start":
+		arg := msg.CommandArguments()
+		if arg != "" {
+			// Token-based linking: /start <token>
+			b.handleStartWithToken(msg, arg, lang)
+			return
+		}
 		b.sendLanguageSelection(msg.Chat.ID)
 	case "login":
 		b.sendLoginPrompt(msg.Chat.ID, lang)
@@ -1176,5 +1185,49 @@ func (b *Bot) sendExpenseBusinessSelection(chatID int64, businesses []entity.Bus
 func (b *Bot) handleExpenseBizSelection(msg *tgbotapi.Message, user *entity.User, lang string) {
 	// Fallback for non-callback message if any
 	b.sendMessage(msg.Chat.ID, i18n.T(lang, i18n.MsgBadRequest))
+	b.sendMainMenu(msg.Chat.ID, lang)
+}
+
+// handleStartWithToken links a Telegram account to a web user via a one-time token.
+// The flow is: web app generates token -> user clicks link -> bot verifies token -> links tgID to userID.
+func (b *Bot) handleStartWithToken(msg *tgbotapi.Message, token string, lang string) {
+	val, ok := cache.TgAuthCache.Load(token)
+	if !ok {
+		// Token not found or already used
+		b.sendMessage(msg.Chat.ID, i18n.T(lang, i18n.MsgBotLoginError))
+		return
+	}
+
+	userID, ok := val.(int)
+	if !ok || userID == 0 {
+		b.sendMessage(msg.Chat.ID, i18n.T(lang, i18n.MsgBotLoginError))
+		return
+	}
+
+	// Delete token immediately (one-time use)
+	cache.TgAuthCache.Delete(token)
+
+	// Link tgID to the web user account by updating TelegramUserID
+	user, err := b.userUC.GetByID(userID)
+	if err != nil || user == nil {
+		b.sendMessage(msg.Chat.ID, i18n.T(lang, i18n.MsgBotLoginError))
+		return
+	}
+
+	// Update telegram user ID in DB
+	if err := b.userUC.LinkTelegramByID(userID, msg.From.ID); err != nil {
+		log.Printf("[Bot] Failed to link TG ID %d to user %d: %v", msg.From.ID, userID, err)
+		b.sendMessage(msg.Chat.ID, i18n.T(lang, i18n.MsgBotLoginError))
+		return
+	}
+
+	// Cache the lang if user has it
+	if user.Language != "" {
+		b.userLangs[msg.From.ID] = user.Language
+		lang = user.Language
+	}
+
+	log.Printf("[Bot] Linked TG ID %d to user %d (%s %s) via token", msg.From.ID, userID, user.FirstName, user.LastName)
+	b.sendMessage(msg.Chat.ID, i18n.T(lang, i18n.MsgBotLoginSuccess))
 	b.sendMainMenu(msg.Chat.ID, lang)
 }

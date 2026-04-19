@@ -280,3 +280,9 @@ func (uc *UserUseCase) ExtendSubscription(req entity.ExtendSubscriptionRequest) 
 
 	return uc.repo.Update(user.ID, updateReq)
 }
+
+// LinkTelegramByID directly links a telegram ID to a user by userID (no phone needed).
+// Used by the token-based Telegram linking flow.
+func (uc *UserUseCase) LinkTelegramByID(userID int, tgID int64) error {
+	return uc.repo.UpdateTelegramID(userID, tgID)
+}

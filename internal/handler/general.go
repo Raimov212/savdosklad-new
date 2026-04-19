@@ -897,6 +897,7 @@ func RegisterRoutes(
 	r.GET("/users", userH.GetAll)
 	r.GET("/users/my-employees", userH.GetMyEmployees)
 	r.POST("/users/employees", userH.CreateEmployee)
+	r.POST("/users/telegram-link", userH.GenerateTelegramLink)
 	r.GET("/users/:id", userH.GetByID)
 	r.PUT("/users/:id", userH.Update)
 	r.DELETE("/users/:id", userH.Delete)

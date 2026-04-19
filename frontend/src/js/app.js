@@ -1035,6 +1035,17 @@ function showEditProfileModal() {
             </div>
             ` : ''}
             
+            
+            <div style="margin-top:16px; padding:14px; border-radius:12px; background:var(--bg-input); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <div>
+                    <p style="margin:0; font-weight:600; font-size:13px;">${t("Telegramni ulash")}</p>
+                    <p style="margin:4px 0 0; font-size:11px; color:var(--text-muted);">${user.telegramUserId ? '✅ Telegram ulangan (ID: ' + user.telegramUserId + ')' : t("Telegram hisobingizni ulab, bot orqali boshqaring")}</p>
+                </div>
+                <button type="button" class="btn btn-ghost" style="white-space:nowrap; padding:8px 16px; font-size:12px; border-color:var(--primary-color); color:var(--primary-color);" onclick="window.generateTelegramLink()">
+                    🔗 ${t("Ulash")}
+                </button>
+            </div>
+
             <div class="modal-footer" style="padding-top: 15px;">
                 <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
                 <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">${t("Saqlash")}</button>
@@ -1051,6 +1062,36 @@ window.clearProfileImage = function() {
 window.clearBrandImage = function() {
     document.getElementById('edit-brandImage-url').value = '';
     document.getElementById('brand-image-preview').innerHTML = `<span style="font-size:24px; opacity:0.3;">🖼️</span>`;
+};
+
+window.generateTelegramLink = async function() {
+    try {
+        showToast(t("Havola yaratilmoqda..."), 'info');
+        const res = await api.post('/users/telegram-link', {});
+        if (res && res.link) {
+            const botUsername = res.botUsername || 'savdosklad_bot';
+            const url = `https://t.me/${botUsername}?start=${res.link}`;
+            const box = document.createElement('div');
+            box.id = 'tg-link-popup';
+            box.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center;`;
+            box.innerHTML = `
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:30px; max-width:400px; width:90%; text-align:center;">
+                    <p style="font-size:32px; margin:0 0 12px;">🔗</p>
+                    <h3 style="margin:0 0 8px;">${t("Telegramni ulash")}</h3>
+                    <p style="color:var(--text-muted); font-size:13px; margin:0 0 20px;">${t("Quyidagi tugmani bosib Telegram botini oching va ulang")}</p>
+                    <a href="${url}" target="_blank" class="btn btn-primary" style="display:inline-block; padding:12px 28px; text-decoration:none; border-radius:12px; margin-bottom:12px;">
+                        📱 Telegram orqali ulash
+                    </a>
+                    <br>
+                    <p style="font-size:11px; color:var(--text-muted); margin:8px 0 16px;">${t("Bu havola bir marta ishlaydi")}</p>
+                    <button onclick="document.getElementById('tg-link-popup').remove()" class="btn btn-ghost" style="width:100%;">${t("Yopish")}</button>
+                </div>
+            `;
+            document.body.appendChild(box);
+        }
+    } catch(e) {
+        showToast(e.message || t("Xatolik"), 'error');
+    }
 };
 
 async function previewProfileImage(input) {

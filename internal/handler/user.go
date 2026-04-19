@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
 	"strconv"
 
@@ -8,6 +10,7 @@ import (
 
 	"savdosklad/internal/entity"
 	"savdosklad/internal/usecase"
+	"savdosklad/pkg/cache"
 	"savdosklad/pkg/i18n"
 )
 
@@ -188,4 +191,43 @@ func (h *UserHandler) CreateEmployee(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, user)
+}
+
+// GenerateTelegramLink godoc
+// @Summary      Generate Telegram Link Token
+// @Tags         Users
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200 {object} map[string]string
+// @Router       /users/telegram-link [post]
+func (h *UserHandler) GenerateTelegramLink(c *gin.Context) {
+	if c.GetInt("role") < 0 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+		return
+	}
+	userID := c.GetInt("userID")
+	
+	bytes := make([]byte, 16)
+	if _, err := rand.Read(bytes); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+	
+	token := hex.EncodeToString(bytes)
+	
+	// Store in cache: token -> userID
+	cache.TgAuthCache.Store(token, userID)
+	
+	// Also retrieve the bot username (stored when bot started)
+	botUsername := "savdosklad_bot"
+	if val, ok := cache.TgAuthCache.Load("__bot_username__"); ok {
+		if name, ok := val.(string); ok && name != "" {
+			botUsername = name
+		}
+	}
+	
+	c.JSON(http.StatusOK, gin.H{
+		"link":        token,
+		"botUsername": botUsername,
+	})
 }
