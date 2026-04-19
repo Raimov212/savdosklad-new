@@ -62,32 +62,30 @@
             <span data-i18n="Telegram bot orqali boshqarish">Telegram bot orqali boshqarish</span>
           </div>
         </div>
-
-        <a href="#" class="contact-sidebar-btn" onclick="toggleContactModal(); return false;">
-          <i data-lucide="mail"></i>
-          <span data-i18n="Bog'lanish">Bog'lanish</span>
-        </a>
       </div>
     </div>
 
     <!-- Right Main Area (Auth Card) -->
-    <div class="auth-main">
+    <div class="auth-main" style="padding-top: 80px; padding-bottom: 80px;">
+      
+      <!-- Top Actions (Lang & Theme) -->
+      <div class="auth-top-actions floating-top-actions">
+        <select id="lang-selector-auth" class="auth-lang-select" onchange="setAppLang(this.value)">
+          <option value="uz">O'zb</option>
+          <option value="uz-cyrl">Ўзб</option>
+          <option value="ru">Рус</option>
+          <option value="en">Eng</option>
+        </select>
+        <button id="theme-btn" class="theme-toggle-btn theme-toggle" onclick="toggleTheme()" title="Mavzuni o'zgartirish">
+           <i data-lucide="moon"></i>
+        </button>
+      </div>
+
       <div class="auth-card" id="auth-card">
-        <div class="auth-card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; gap:15px; flex-wrap:wrap;">
-          <div class="auth-tabs" style="margin-bottom:0; flex:1;">
+        <div class="auth-card-header" style="margin-bottom:30px;">
+          <div class="auth-tabs" style="margin-bottom:0;">
             <button class="auth-tab active" id="tab-login" onclick="switchMode('login')" data-i18n="Kirish">Kirish</button>
             <button class="auth-tab" id="tab-register" onclick="switchMode('register')" data-i18n="Ro'yxatdan o'tish">Ro'yxatdan o'tish</button>
-          </div>
-          <div class="auth-top-actions" style="position:static; margin-bottom:0;">
-            <select id="lang-selector-auth" class="auth-lang-select" onchange="setAppLang(this.value)">
-              <option value="uz">O'zb</option>
-              <option value="uz-cyrl">Ўзб</option>
-              <option value="ru">Рус</option>
-              <option value="en">Eng</option>
-            </select>
-            <button id="theme-btn" class="theme-toggle-btn theme-toggle" onclick="toggleTheme()" title="Mavzuni o'zgartirish">
-               <i data-lucide="moon"></i>
-            </button>
           </div>
         </div>
 
@@ -186,6 +184,12 @@
             o'tish</button>
         </form>
       </div>
+      
+      <!-- Floating Contact Button -->
+      <a href="#" class="contact-floating-btn" onclick="toggleContactModal(); return false;">
+        <i data-lucide="mail"></i>
+        <span data-i18n="Bog'lanish">Bog'lanish</span>
+      </a>
     </div>
   </div>
 

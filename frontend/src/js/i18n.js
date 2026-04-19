@@ -70,7 +70,8 @@ export const translations = {
         "To'langan summasi": "To'langan summasi",
         "Ism Familiya": "Ism Familiya",
         "Qarz muvaffaqiyatli to'landi!": "Qarz muvaffaqiyatli to'landi!",
-        "ta mahsulot kam qolgan": "ta mahsulot kam qolgan"
+        "ta mahsulot kam qolgan": "ta mahsulot kam qolgan",
+        "Rasmni o'chirish": "Rasmni o'chirish"
     },
     'uz-cyrl': {
         "Admin panel": "Админ панел",
@@ -563,7 +564,8 @@ export const translations = {
         "To'langan summasi": "Тўланган сумма",
         "Ism Familiya": "Исm Фамилия",
         "Qarz muvaffaqiyatli to'landi!": "Қарз муваффақиятли тўланди!",
-        "ta mahsulot kam qolgan": "та маҳсулот кам қолган"
+        "ta mahsulot kam qolgan": "та маҳсулот кам қолган",
+        "Rasmni o'chirish": "Расмни ўчириш"
     },
     ru: {
         "Admin panel": "Админ панель",
@@ -778,6 +780,7 @@ export const translations = {
         "Rasm URLi": "URL изображения",
         "Rasm URLini kiriting": "Введите URL-адрес изображения",
         "Rasm": "Изображение",
+        "Rasmni o'chirish": "Удалить изображение",
         "Rol": "Роль",
         "Rollar": "Роли",
         "Ro'yxatdan o'tdingiz! Endi kiring.": "Вы зарегистрированы! Теперь войдите.",
@@ -1076,6 +1079,7 @@ export const translations = {
         "Brend nomini kiriting": "Enter brand name",
         "Brend logotipi": "Brand logo",
         "Biznes logotipi": "Business logo",
+        "Rasmni o'chirish": "Delete Image",
         "Balans": "Balance",
         "Barcode": "Barcode",
         "Biznes tanlang": "Choose a business",

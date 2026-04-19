@@ -106,15 +106,14 @@ function loadUserInfo() {
     const brandNameEl = document.querySelector('.sidebar-logo .brand-name');
     if (brandNameEl) brandNameEl.textContent = user.brandName || 'SavdoSklad';
     document.title = `${user.brandName || 'SavdoSklad'} — Biznes Boshqaruv Tizimi`;
-
     if (user.brandImage) {
-      const brandLogoEl = document.querySelector('.sidebar-logo .brand-logo-glow');
+      const brandLogoEl = document.getElementById('sidebar-brand-icon');
       if (brandLogoEl) {
-        brandLogoEl.style.width = '32px';
-        brandLogoEl.style.height = '32px';
+        brandLogoEl.style.width = '36px';
+        brandLogoEl.style.height = '36px';
         brandLogoEl.style.background = 'none';
         brandLogoEl.style.boxShadow = 'none';
-        brandLogoEl.innerHTML = `<img src="${user.brandImage}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
+        brandLogoEl.innerHTML = `<img src="${user.brandImage}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">`;
       }
     }
   }
@@ -986,10 +985,13 @@ function showEditProfileModal() {
                     <div id="profile-image-preview" style="width:80px; height:80px; border-radius:20px; background:var(--bg-input); border:2px dashed var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                         ${user.image ? `<img src="${user.image}" style="width:100%; height:100%; object-fit:cover;">` : `<span style="font-size:24px; opacity:0.3;">🖼️</span>`}
                     </div>
-                    <div style="flex:1">
+                    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
                         <input type="file" class="form-control" accept="image/*" onchange="previewProfileImage(this)">
                         <input type="hidden" id="edit-image-url" value="${escapeHtml(user.image || '')}">
-                        <p style="font-size:11px; color:var(--text-muted); margin-top:5px;">JPEG, PNG formatlar, maksimal 2MB.</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <p style="font-size:11px; color:var(--text-muted); margin:0;">JPEG, PNG formatlar, maksimal 2MB.</p>
+                            <button type="button" class="btn btn-sm btn-ghost" onclick="window.clearProfileImage()" style="color:var(--danger); border-color:var(--danger-bg); padding:4px 8px; font-size:11px;">${t("Rasmni o'chirish")}</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1021,9 +1023,12 @@ function showEditProfileModal() {
                         <div id="brand-image-preview" style="width:120px; height:70px; border-radius:12px; background:var(--bg-input); border:2px dashed var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                             ${user.brandImage ? `<img src="${user.brandImage}" style="width:100%; height:100%; object-fit:cover;">` : `<span style="font-size:24px; opacity:0.3;">🖼️</span>`}
                         </div>
-                        <div style="flex:1">
+                        <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
                             <input type="file" class="form-control" accept="image/*" onchange="previewBrandImage(this)">
                             <input type="hidden" id="edit-brandImage-url" value="${escapeHtml(user.brandImage || '')}">
+                            <div style="display:flex; justify-content:flex-end; align-items:center;">
+                                <button type="button" class="btn btn-sm btn-ghost" onclick="window.clearBrandImage()" style="color:var(--danger); border-color:var(--danger-bg); padding:4px 8px; font-size:11px;">${t("Rasmni o'chirish")}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1037,6 +1042,16 @@ function showEditProfileModal() {
         </form>
     `);
 }
+
+window.clearProfileImage = function() {
+    document.getElementById('edit-image-url').value = '';
+    document.getElementById('profile-image-preview').innerHTML = `<span style="font-size:24px; opacity:0.3;">🖼️</span>`;
+};
+
+window.clearBrandImage = function() {
+    document.getElementById('edit-brandImage-url').value = '';
+    document.getElementById('brand-image-preview').innerHTML = `<span style="font-size:24px; opacity:0.3;">🖼️</span>`;
+};
 
 async function previewProfileImage(input) {
   if (input.files && input.files[0]) {

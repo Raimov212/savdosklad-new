@@ -27,7 +27,9 @@
         <aside class="sidebar">
             <div class="sidebar-logo">
                 <div class="brand-container">
-                    <div class="brand-logo-glow"></div>
+                    <div class="sidebar-brand-icon" id="sidebar-brand-icon">
+                        <i data-lucide="layers" style="width:20px; height:20px; color:white;"></i>
+                    </div>
                     <h2 class="brand-name">SavdoSklad</h2>
                 </div>
                 <button class="mobile-close-btn" onclick="toggleSidebar()">✕</button>
@@ -191,6 +193,9 @@
             // Initialize theme icon based on current root dataset
             if (typeof updateThemeIcon === 'function') {
                 updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'dark');
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         });
     </script>
