@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/lib/pq"
+
 	"savdosklad/internal/entity"
 )
 
@@ -162,6 +164,24 @@ func (r *ProductRepo) Delete(id int) error {
 	return err
 }
 
+func (r *ProductRepo) BulkDelete(bid int, categoryId *int, productIds []int) error {
+	if len(productIds) > 0 {
+		_, err := r.db.Exec(`UPDATE products SET "isDeleted" = true, "updatedAt" = $1 WHERE "businessId" = $2 AND id = ANY($3)`, time.Now(), bid, pq.Array(productIds))
+		return err
+	}
+
+	query := `UPDATE products SET "isDeleted" = true, "updatedAt" = $1 WHERE "businessId" = $2 AND "isDeleted" = false`
+	args := []interface{}{time.Now(), bid}
+
+	if categoryId != nil && *categoryId > 0 {
+		query += ` AND "categoryId" = $3`
+		args = append(args, *categoryId)
+	}
+
+	_, err := r.db.Exec(query, args...)
+	return err
+}
+
 func (r *ProductRepo) Search(bid int, query string) ([]entity.Product, error) {
 	rows, err := r.db.Query(
 		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
@@ -187,6 +207,7 @@ func (r *ProductRepo) Search(bid int, query string) ([]entity.Product, error) {
 	}
 	return list, nil
 }
+
 func (r *ProductRepo) GetByUserID(userID int) ([]entity.Product, error) {
 	rows, err := r.db.Query(
 		`SELECT p.id, p.name, p."lokalCode", p."shortDescription", p."fullDescription", p.price, p.discount, p.quantity, p.images, p.barcode, p.country, p."categoryId", p."businessId", p."isDeleted", p."createdAt", p."updatedAt"

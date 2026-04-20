@@ -22,6 +22,7 @@
   --accent-glow: rgba(16, 185, 129, 0.15);
   --accent-gradient: linear-gradient(135deg, #10b981, #059669);
   --accent-gradient-hover: linear-gradient(135deg, #34d399, #10b981);
+  --danger-gradient: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
   --sidebar-gradient: linear-gradient(180deg, #0b1120 0%, #020617 100%);
   --header-gradient: linear-gradient(90deg, rgba(15, 23, 42, 0.8) 0%, rgba(2, 6, 23, 0.9) 100%);
 
@@ -2110,4 +2111,44 @@ body.is-owner .nav-section-title,
 body.is-admin .nav-section-title {
     display: block !important;
     padding: 20px 14px 10px !important;
-}
+}
+
+/* ==================== BULK DELETE PAGE ==================== */
+.card-danger {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.warning-box {
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid var(--danger);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+[data-theme="light"] .warning-box {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.bulk-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+@media (max-width: 600px) {
+  .bulk-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bulk-actions-grid .btn {
+    height: 55px !important;
+    font-size: 15px !important;
+    white-space: normal !important;
+    text-align: center;
+    line-height: 1.2;
+    padding: 10px !important;
+  }
+}
+

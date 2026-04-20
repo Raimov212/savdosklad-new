@@ -348,6 +348,46 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
 }
 
+// @Summary Bulk delete products
+// @Tags Products
+// @Security BearerAuth
+// @Param businessId query int true "Business ID"
+// @Param categoryId query int false "Category ID"
+// @Success 200 {object} map[string]string
+// @Router /products/bulk [delete]
+func (h *ProductHandler) BulkDelete(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	if bid == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "businessId is required"})
+		return
+	}
+
+	var cidPtr *int
+	cidStr := c.Query("categoryId")
+	if cidStr != "" {
+		cid, _ := strconv.Atoi(cidStr)
+		cidPtr = &cid
+	}
+
+	var pIds []int
+	idsStr := c.Query("ids")
+	if idsStr != "" {
+		for _, s := range strings.Split(idsStr, ",") {
+			id, _ := strconv.Atoi(s)
+			if id > 0 {
+				pIds = append(pIds, id)
+			}
+		}
+	}
+
+	if err := h.uc.BulkDelete(bid, cidPtr, pIds); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
+
 // ---- Client Handler ----
 type ClientHandler struct{ uc *usecase.ClientUseCase }
 
@@ -924,6 +964,7 @@ func RegisterRoutes(
 	r.GET("/products/:id", productH.GetByID)
 	r.PUT("/products/:id", productH.Update)
 	r.DELETE("/products/:id", productH.Delete)
+	r.DELETE("/products/bulk", productH.BulkDelete)
 
 	// Client Handlers
 	r.POST("/clients", clientH.Create)

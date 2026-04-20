@@ -167,7 +167,7 @@ function navigateTo(page) {
   const role = user ? parseInt(user.role) : 0;
 
   // RBAC for navigation
-  const ownerPages = ['employees', 'expenses', 'businesses', 'calculations'];
+  const ownerPages = ['employees', 'expenses', 'businesses', 'calculations', 'bulk-delete'];
   const adminPages = ['admin', 'mp-stats', 'mp-categories', 'mp-products', 'mp-sales'];
 
   if (role < 1 && (ownerPages.includes(page) || adminPages.includes(page))) {
@@ -203,6 +203,7 @@ function navigateTo(page) {
     calculations: 'Hisobotlar',
     admin: 'Admin panel',
     profile: 'Shaxsiy kabinet',
+    'bulk-delete': 'Ommaviy o\'chirish',
     'mp-stats': 'Marketplace: Statistika',
     'mp-categories': 'Marketplace: Kategoriyalar',
     'mp-products': 'Marketplace: Mahsulotlar',
@@ -270,6 +271,7 @@ function navigateTo(page) {
     case 'calculations': renderCalculations(); break;
     case 'admin': renderAdmin(); break;
     case 'profile': renderProfile(); break;
+    case 'bulk-delete': renderBulkDelete(); break;
     case 'mp-stats': renderMpStats(); break;
     case 'mp-categories': renderMpCategories(); break;
     case 'mp-products': renderMpProducts(); break;
@@ -1483,3 +1485,164 @@ window.applyDateFilter = function() {
   closeModal();
   navigateTo(window.currentPage);
 };
+
+window.renderBulkDelete = async function() {
+    const bid = getSelectedBusinessId();
+    if (!bid) {
+        document.getElementById('page-content').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🏢</div>
+                <p>${t("Avval biznes tanlang")}</p>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById('page-content').innerHTML = `
+        <div class="container-fluid" style="max-width: 800px; margin: 20px auto;">
+            <div class="card card-danger">
+                <div class="card-header" style="background: var(--danger-gradient); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+                    <h3 style="margin:0; display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="alert-triangle"></i> ${t("Ommaviy o'chirish")}
+                    </h3>
+                </div>
+                <div class="card-body" style="padding: 30px;">
+                    <p style="font-size: 16px; line-height: 1.6; margin-bottom: 25px; color: var(--text-secondary);">
+                        ${t("Ushbu sahifa orqali barcha mahsulotlarni yoki ma'lum bir kategoriya mahsulotlarini ommaviy o'chirib tashlashingiz mumkin.")}
+                    </p>
+                    
+                    <div class="form-group mb-4">
+                        <label style="display:block; margin-bottom:10px; font-weight:600;">${t("Kategoriya bo'yicha saralash")}</label>
+                        <select class="form-control" id="bulk-category-selector" onchange="loadBulkProducts()" style="height: 45px; font-size: 16px;">
+                            <option value="">-- ${t("Barcha mahsulotlar")} --</option>
+                        </select>
+                    </div>
+
+                    <div id="bulk-products-list" class="mb-4" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h4 style="margin:0">${t("Mahsulotlar")}</h4>
+                            <label style="cursor:pointer; font-size:14px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                                <input type="checkbox" id="bulk-select-all" onclick="toggleAllBulkProducts(this)" style="width:16px; height:16px;"> ${t("Hammasini tanlash")}
+                            </label>
+                        </div>
+                        <div id="bulk-products-container" style="max-height: 350px; overflow-y: auto; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-input);">
+                            <!-- Products will be here -->
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(var(--danger-rgb), 0.1); border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                        <p style="margin:0; color: var(--danger); font-weight: 500;">
+                            <strong>${t("Diqqat")}!</strong> ${t("Bu amalni ortga qaytarib bo'lmaydi!")}
+                        </p>
+                    </div>
+
+                    <div class="bulk-actions-grid" style="margin-top:20px;">
+                        <button class="btn btn-danger btn-lg" onclick="handleBulkDelete()" style="height: 50px; font-weight: 600; font-size: 16px; border-radius: 10px;">
+                            <span class="icon">🗑️</span> ${t("Ommaviy o'chirishni tasdiqlash")}
+                        </button>
+                        <button class="btn btn-success btn-lg" onclick="navigateTo('products')" style="height: 50px; font-weight: 600; font-size: 16px; border-radius: 10px;">
+                            <span class="icon">↩️</span> ${t("Bekor qilish")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Load categories
+    try {
+        const categories = await api.get(`/categories?businessId=${bid}`);
+        const selector = document.getElementById('bulk-category-selector');
+        if (selector) {
+            categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                selector.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+window.loadBulkProducts = async function() {
+    const bid = getSelectedBusinessId();
+    const cid = document.getElementById('bulk-category-selector').value;
+    const listDiv = document.getElementById('bulk-products-list');
+    const container = document.getElementById('bulk-products-container');
+
+    if (!cid) {
+        listDiv.style.display = 'none';
+        return;
+    }
+
+    listDiv.style.display = 'block';
+    container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted)"><div class="spinner" style="margin: 0 auto 10px auto;"></div>${t("Yuklanmoqda...")}</div>`;
+
+    try {
+        const products = await api.get(`/products?businessId=${bid}&categoryId=${cid}`);
+        if (products.length === 0) {
+            container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted)">${t("Mahsulotlar topilmadi")}</div>`;
+            return;
+        }
+
+        container.innerHTML = products.map(p => `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="bulk-product-checkbox" value="${p.id}" style="width:18px; height:18px; cursor:pointer;">
+                <span style="font-size:15px; font-weight:500;">${escapeHtml(p.name)}</span>
+                <span style="margin-left:auto; font-size:14px; font-weight:600; color:var(--accent)">${formatPrice(p.price)}</span>
+            </div>
+        `).join('');
+        
+        const selectAll = document.getElementById('bulk-select-all');
+        if (selectAll) selectAll.checked = false;
+        
+    } catch (e) {
+        container.innerHTML = `<div style="padding:20px; color:var(--danger); text-align:center;">${e.message}</div>`;
+    }
+};
+
+window.toggleAllBulkProducts = function(master) {
+    document.querySelectorAll('.bulk-product-checkbox').forEach(cb => cb.checked = master.checked);
+};
+
+window.handleBulkDelete = async function() {
+    const bid = getSelectedBusinessId();
+    const selector = document.getElementById('bulk-category-selector');
+    const cid = selector ? selector.value : '';
+    
+    // Collect selected product IDs
+    const checkedBoxes = document.querySelectorAll('.bulk-product-checkbox:checked');
+    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (cid && selectedIds.length === 0) {
+        showToast(t("Kamida bitta mahsulotni tanlang"), 'warning');
+        return;
+    }
+
+    const confirmMsg = t("Haqiqatan ham tanlangan mahsulotlarni o'chirmoqchimisiz?");
+    if (!confirm(confirmMsg)) return;
+
+    const finalConfirm = t("Bu amalni ortga qaytarib bo'lmaydi! Davom etasizmi?");
+    if (!confirm(finalConfirm)) return;
+
+    try {
+        let url = `/products/bulk?businessId=${bid}`;
+        if (selectedIds.length > 0) {
+            url += `&ids=${selectedIds.join(',')}`;
+        } else if (cid) {
+            url += `&categoryId=${cid}`;
+        }
+        
+        await api.delete(url);
+        showToast(t("Mahsulotlar muvaffaqiyatli o'chirildi"), 'success');
+        navigateTo('products');
+    } catch (e) {
+        showToast(e.message || t("Xatolik"), 'error');
+    }
+};
+
+
