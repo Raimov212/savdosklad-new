@@ -119,6 +119,28 @@
     display: flex;
     flex-direction: column;
   }
+
+  .modal-header,
+  .modal-footer,
+  .modal > *:not(.modal-header):not(.modal-footer):not(.modal-close) {
+    padding: 16px 20px !important;
+  }
+
+  .modal-header h3 {
+    font-size: 15px !important;
+  }
+  
+  .profile-actions {
+    flex-direction: column !important;
+  }
+  
+  .profile-actions .btn {
+    width: 100% !important;
+  }
+
+  .profile-content {
+    padding: 20px !important;
+  }
 }
 
 /* Very small devices (up to 480px) */

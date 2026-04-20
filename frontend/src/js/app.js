@@ -914,9 +914,9 @@ async function renderProfile() {
                 </div>
             </div>
             
-            <div style="padding: 40px;">
+            <div class="profile-content" style="padding: 40px;">
                 <!-- Action Buttons -->
-                <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                <div class="profile-actions" style="display: flex; gap: 10px; margin-bottom: 30px;">
                     <button class="btn btn-outline" style="flex:1; border-radius: 12px; height: 45px; font-weight: 600; border-color: #e2e8f0;" onclick="showChangePasswordModal()">
                         <span class="icon">🔑</span> ${t("Parolni o'zgartirish")}
                     </button>
@@ -942,6 +942,20 @@ async function renderProfile() {
                     <div class="info-card" style="padding: 15px 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
                         <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Obuna muddati")}</label>
                         <div style="font-size:15px; font-weight:600; color: var(--primary-color);">${formatDateTime(u.expirationDate) || '—'}</div>
+                    </div>
+                    <div class="info-card" style="padding: 15px 20px; background: white; border-radius: 16px; border: 2px solid ${u.telegramUserId ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.1)'}; box-shadow: 0 4px 12px rgba(0,0,0,0.03); grid-column: span 1;">
+                        <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Telegram")}</label>
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="font-size:15px; font-weight:700; color: ${u.telegramUserId ? '#10b981' : '#ef4444'};">
+                                ${u.telegramUserId ? '✅ ' + t("Telegram ulangan") : '❌ ' + t("Telegram ulanmagan")}
+                            </span>
+                            ${!u.telegramUserId ? `
+                            <button class="btn btn-sm btn-outline" 
+                                    style="padding: 4px 10px; border-radius: 8px; font-size: 11px; color:var(--primary-color); border-color:var(--primary-color);" 
+                                    onclick="window.generateTelegramLink()">
+                                🔗 ${t("Ulash")}
+                            </button>` : ''}
+                        </div>
                     </div>
                     <div class="info-card" style="padding: 15px 20px; background: white; border-radius: 16px; border: 2px solid rgba(var(--primary-rgb), 0.15); box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.08); grid-column: span 1;">
                         <label style="display:block; font-size:11px; color:var(--primary-color); text-transform:uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Taklif kodi (Promo)")}</label>
@@ -973,12 +987,8 @@ async function renderProfile() {
 
 function showEditProfileModal() {
   const user = api.getUser();
-  openModal(`
-        <div class="modal-header">
-            <h3>${t("Profilni tahrirlash")}</h3>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <form onsubmit="handleUpdateProfile(event)" style="min-width: 450px;">
+  openModal(t("Profilni tahrirlash"), `
+        <form onsubmit="handleUpdateProfile(event)" style="width: 100%; max-width: 450px;">
             <div class="form-group" style="margin-bottom: 20px;">
                 <label style="display:block; margin-bottom: 10px;">${t("Profil rasmi")}</label>
                 <div style="display:flex; gap:20px; align-items: center;">
@@ -989,7 +999,7 @@ function showEditProfileModal() {
                         <input type="file" class="form-control" accept="image/*" onchange="previewProfileImage(this)">
                         <input type="hidden" id="edit-image-url" value="${escapeHtml(user.image || '')}">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <p style="font-size:11px; color:var(--text-muted); margin:0;">JPEG, PNG formatlar, maksimal 2MB.</p>
+                            <p style="font-size:11px; color:var(--text-muted); margin:0;">${t("JPEG, PNG formatlar, maksimal 2MB.")}</p>
                             <button type="button" class="btn btn-sm btn-ghost" onclick="window.clearProfileImage()" style="color:var(--danger); border-color:var(--danger-bg); padding:4px 8px; font-size:11px;">${t("Rasmni o'chirish")}</button>
                         </div>
                     </div>
@@ -1039,14 +1049,14 @@ function showEditProfileModal() {
             <div style="margin-top:16px; padding:14px; border-radius:12px; background:var(--bg-input); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px;">
                 <div>
                     <p style="margin:0; font-weight:600; font-size:13px;">${t("Telegramni ulash")}</p>
-                    <p style="margin:4px 0 0; font-size:11px; color:var(--text-muted);">${user.telegramUserId ? '✅ Telegram ulangan (ID: ' + user.telegramUserId + ')' : t("Telegram hisobingizni ulab, bot orqali boshqaring")}</p>
+                    <p style="margin:4px 0 0; font-size:11px; color:var(--text-muted);">${user.telegramUserId ? '✅ ' + t("Telegram ulangan") + ' (ID: ' + user.telegramUserId + ')' : t("Telegram hisobingizni ulab, bot orqali boshqaring")}</p>
                 </div>
                 <button type="button" class="btn btn-ghost" style="white-space:nowrap; padding:8px 16px; font-size:12px; border-color:var(--primary-color); color:var(--primary-color);" onclick="window.generateTelegramLink()">
                     🔗 ${t("Ulash")}
                 </button>
             </div>
 
-            <div class="modal-footer" style="padding-top: 15px;">
+            <div class="modal-footer" style="padding-top: 15px; margin-top: 20px; border-top: 1px solid var(--border);">
                 <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
                 <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">${t("Saqlash")}</button>
             </div>
@@ -1080,7 +1090,7 @@ window.generateTelegramLink = async function() {
                     <h3 style="margin:0 0 8px;">${t("Telegramni ulash")}</h3>
                     <p style="color:var(--text-muted); font-size:13px; margin:0 0 20px;">${t("Quyidagi tugmani bosib Telegram botini oching va ulang")}</p>
                     <a href="${url}" target="_blank" class="btn btn-primary" style="display:inline-block; padding:12px 28px; text-decoration:none; border-radius:12px; margin-bottom:12px;">
-                        📱 Telegram orqali ulash
+                        📱 ${t("Telegram orqali ulash")}
                     </a>
                     <br>
                     <p style="font-size:11px; color:var(--text-muted); margin:8px 0 16px;">${t("Bu havola bir marta ishlaydi")}</p>
@@ -1164,12 +1174,8 @@ async function handleUpdateProfile(e) {
 }
 
 function showChangePasswordModal() {
-  openModal(`
-        <div class="modal-header">
-            <h3>${t("Parolni o'zgartirish")}</h3>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <form onsubmit="handleChangePassword(event)" style="min-width: 350px;">
+  openModal(t("Parolni o'zgartirish"), `
+        <form onsubmit="handleChangePassword(event)" style="width: 100%; max-width: 400px;">
             <div class="form-group">
                 <label>${t("Yangi parol")}</label>
                 <input type="password" class="form-control" id="new-password" placeholder="••••••••" required>
@@ -1179,7 +1185,7 @@ function showChangePasswordModal() {
                 <input type="password" class="form-control" id="confirm-password" placeholder="••••••••" required>
             </div>
             
-            <div class="modal-footer" style="padding-top: 15px;">
+            <div class="modal-footer" style="padding-top: 15px; margin-top: 20px; border-top: 1px solid var(--border);">
                 <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
                 <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">${t("Yangilash")}</button>
             </div>

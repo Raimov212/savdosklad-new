@@ -71,7 +71,18 @@ export const translations = {
         "Ism Familiya": "Ism Familiya",
         "Qarz muvaffaqiyatli to'landi!": "Qarz muvaffaqiyatli to'landi!",
         "ta mahsulot kam qolgan": "ta mahsulot kam qolgan",
-        "Rasmni o'chirish": "Rasmni o'chirish"
+        "Rasmni o'chirish": "Rasmni o'chirish",
+        "Telegramni ulash": "Telegramni ulash",
+        "Telegram hisobingizni ulab, bot orqali boshqaring": "Telegram hisobingizni ulab, bot orqali boshqaring",
+        "Havola yaratilmoqda...": "Havola yaratilmoqda...",
+        "Quyidagi tugmani bosib Telegram botini oching va ulang": "Quyidagi tugmani bosib Telegram botini oching va ulang",
+        "Bu havola bir marta ishlaydi": "Bu havola bir marta ishlaydi",
+        "Ulash": "Ulash",
+        "Telegram orqali ulash": "Telegram orqali ulash",
+        "Brend ma'lumotlari": "Brend ma'lumotlari",
+        "Telegram ulangan": "Telegram ulangan",
+        "Telegram ulanmagan": "Telegram ulanmagan",
+        "Xatolik": "Xatolik"
     },
     'uz-cyrl': {
         "Admin panel": "Админ панел",
@@ -256,7 +267,7 @@ export const translations = {
         "Mijozlar bilan ishlash (CRM)": "Мижозлар билан ишлаш (CRM)",
         "Mijozlar mavjud emas": "Мижозлар мавжуд эмас",
         "Mijozlar yo'q": "Мижозлар йўқ",
-        "Mijozlar": "Клиентлар",
+        "Mijozlar": "Мижозлар",
         "Muvaffaqiyatli": "Муваффақиятли",
         "Mijozni tahrirlash": "Мижозни таҳрирлаш",
         "Mijozning manzilini kiriting": "Мижознинг манзилини киритинг",
@@ -565,7 +576,18 @@ export const translations = {
         "Ism Familiya": "Исm Фамилия",
         "Qarz muvaffaqiyatli to'landi!": "Қарз муваффақиятли тўланди!",
         "ta mahsulot kam qolgan": "та маҳсулот кам қолган",
-        "Rasmni o'chirish": "Расмни ўчириш"
+        "Rasmni o'chirish": "Расмни ўчириш",
+        "Telegramni ulash": "Телеграмни улаш",
+        "Telegram hisobingizni ulab, bot orqali boshqaring": "Телеграм ҳисобингизни улаб, бот орқали бошқаринг",
+        "Havola yaratilmoqda...": "Ҳавола яратилмоқда...",
+        "Quyidagi tugmani bosib Telegram botini oching va ulang": "Қуйидаги тугмани босиб Телеграм ботини очинг ва уланг",
+        "Bu havola bir marta ishlaydi": "Бу ҳавола бир марта ишлайди",
+        "Ulash": "Улаш",
+        "Telegram orqali ulash": "Телеграм орқали улаш",
+        "Brend ma'lumotlari": "Бренд маълумотлари",
+        "Telegram ulangan": "Телеграм уланган",
+        "Telegram ulanmagan": "Телеграм уланмаган",
+        "Xatolik": "Хатолик"
     },
     ru: {
         "Admin panel": "Админ панель",
@@ -1054,7 +1076,17 @@ export const translations = {
         "Muddati": "Срок",
         "Ism Familiya": "Имя Фамилия",
         "Hozircha bizneslar yo'q": "Пока нет бизнесов",
-        "ta mahsulot kam qolgan": "товаров мало осталось"
+        "ta mahsulot kam qolgan": "товаров мало осталось",
+        "Brend ma'lumotlari": "Данные бренда",
+        "Telegramni ulash": "Подключить Telegram",
+        "Telegram hisobingizni ulab, bot orqali boshqaring": "Подключите свой аккаунт Telegram и управляйте через бота",
+        "Havola yaratilmoqda...": "Создание ссылки...",
+        "Quyidagi tugmani bosib Telegram botini oching va ulang": "Нажмите кнопку ниже, чтобы открыть и подключить Telegram бота",
+        "Bu havola bir marta ishlaydi": "Эта ссылка работает только один раз",
+        "Ulash": "Подключить",
+        "Telegram orqali ulash": "Подключить через Telegram",
+        "Telegram ulangan": "Telegram подключен",
+        "Telegram ulanmagan": "Telegram не подключен",
     },
     en: {
         "Admin panel": "Admin panel",
@@ -1541,7 +1573,17 @@ export const translations = {
         "To'lov summasi qarzdan ko'p bo'lishi mumkin emas!": "Payment amount cannot exceed the debt!",
         "Ism Familiya": "Name Surname",
         "Qarz muvaffaqiyatli to'landi!": "Debt successfully paid!",
-        "ta mahsulot kam qolgan": "low stock items"
+        "ta mahsulot kam qolgan": "low stock items",
+        "Brend ma'lumotlari": "Brand Info",
+        "Telegramni ulash": "Connect Telegram",
+        "Telegram hisobingizni ulab, bot orqali boshqaring": "Connect your Telegram account and manage via bot",
+        "Havola yaratilmoqda...": "Creating link...",
+        "Quyidagi tugmani bosib Telegram botini oching va ulang": "Click the button below to open and connect the Telegram bot",
+        "Bu havola bir marta ishlaydi": "This link works only once",
+        "Ulash": "Connect",
+        "Telegram orqali ulash": "Connect via Telegram",
+        "Telegram ulangan": "Telegram connected",
+        "Telegram ulanmagan": "Telegram not connected",
     }
 };
 
@@ -1567,7 +1609,7 @@ export function t(key) {
     const dict = translations[lang];
     if (dict) {
         if (dict[key]) return dict[key];
-        
+
         const upper = key.toUpperCase();
         if (dict[upper]) return dict[upper];
 
