@@ -172,7 +172,7 @@ function renderDebtsTable(tab, filter = '', isAppend = false) {
               </div>
             </div>
             <div class="acc-actions">
-              ${tab === 'active' ? `<button class="btn btn-success btn-sm" onclick='openDebtPayModal(${JSON.stringify(trans)})'>💵 ${t("To'lash")}</button>` : ''}
+              ${tab === 'active' && window.hasPermission('edit') ? `<button class="btn btn-success btn-sm" onclick='openDebtPayModal(${JSON.stringify(trans)})'>💵 ${t("To'lash")}</button>` : ''}
             </div>
           </div>
         </div>`;

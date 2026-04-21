@@ -77,6 +77,9 @@ func main() {
 		business_id INTEGER REFERENCES businesses(id) ON DELETE CASCADE,
 		PRIMARY KEY (user_id, business_id)
 	);`)
+	_, _ = db.Exec(`ALTER TABLE user_businesses ADD COLUMN IF NOT EXISTS can_add BOOLEAN DEFAULT FALSE;`)
+	_, _ = db.Exec(`ALTER TABLE user_businesses ADD COLUMN IF NOT EXISTS can_edit BOOLEAN DEFAULT FALSE;`)
+	_, _ = db.Exec(`ALTER TABLE user_businesses ADD COLUMN IF NOT EXISTS can_delete BOOLEAN DEFAULT FALSE;`)
 
 	// Migrate existing marketId to user_businesses if not exists
 	_, _ = db.Exec(`INSERT INTO user_businesses (user_id, business_id) 
@@ -162,12 +165,12 @@ func main() {
 	// Handlers
 	userH := handler.NewUserHandler(userUC)
 	businessH := handler.NewBusinessHandler(businessUC)
-	categoryH := handler.NewCategoryHandler(categoryUC)
-	productH := handler.NewProductHandler(productUC)
-	clientH := handler.NewClientHandler(clientUC)
-	transactionH := handler.NewTransactionHandler(transactionUC)
-	refundH := handler.NewRefundHandler(refundUC)
-	expenseH := handler.NewExpenseHandler(expenseUC)
+	categoryH := handler.NewCategoryHandler(categoryUC, userUC)
+	productH := handler.NewProductHandler(productUC, userUC)
+	clientH := handler.NewClientHandler(clientUC, userUC)
+	transactionH := handler.NewTransactionHandler(transactionUC, userUC)
+	refundH := handler.NewRefundHandler(refundUC, userUC)
+	expenseH := handler.NewExpenseHandler(expenseUC, userUC)
 	moneyH := handler.NewMoneyHandler(moneyUC)
 	calculationH := handler.NewCalculationHandler(calculationUC)
 	organizationH := handler.NewOrganizationHandler(organizationUC)

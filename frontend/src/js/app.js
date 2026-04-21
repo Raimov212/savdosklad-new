@@ -167,7 +167,7 @@ function navigateTo(page) {
   const role = user ? parseInt(user.role) : 0;
 
   // RBAC for navigation
-  const ownerPages = ['employees', 'expenses', 'businesses', 'calculations'];
+  const ownerPages = ['employees', 'expenses', 'businesses', 'calculations', 'bulk-delete'];
   const adminPages = ['admin', 'mp-stats', 'mp-categories', 'mp-products', 'mp-sales'];
 
   if (role < 1 && (ownerPages.includes(page) || adminPages.includes(page))) {
@@ -203,6 +203,7 @@ function navigateTo(page) {
     calculations: 'Hisobotlar',
     admin: 'Admin panel',
     profile: 'Shaxsiy kabinet',
+    'bulk-delete': 'Ommaviy o\'chirish',
     'mp-stats': 'Marketplace: Statistika',
     'mp-categories': 'Marketplace: Kategoriyalar',
     'mp-products': 'Marketplace: Mahsulotlar',
@@ -270,6 +271,7 @@ function navigateTo(page) {
     case 'calculations': renderCalculations(); break;
     case 'admin': renderAdmin(); break;
     case 'profile': renderProfile(); break;
+    case 'bulk-delete': renderBulkDelete(); break;
     case 'mp-stats': renderMpStats(); break;
     case 'mp-categories': renderMpCategories(); break;
     case 'mp-products': renderMpProducts(); break;
@@ -627,9 +629,15 @@ function renderTopProductsList(products) {
   // Mock sparklines
   setTimeout(() => {
     products.forEach((p, i) => {
-      const ctx = document.getElementById(`mini-sparkline-${i}`)?.getContext('2d');
-      if (ctx) {
-        new Chart(ctx, {
+      const canvas = document.getElementById(`mini-sparkline-${i}`);
+      if (canvas) {
+        // Destroy existing chart if it exists on this canvas
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+          existingChart.destroy();
+        }
+
+        new Chart(canvas, {
           type: 'line',
           data: {
             labels: [1, 2, 3, 4, 5],
@@ -655,17 +663,20 @@ function renderTopProductsList(products) {
 
 function renderDashboardCharts(transactions, products) {
   // 1. Sales Trend Chart
-  const ctxTrend = document.getElementById('salesTrendChart')?.getContext('2d');
-  if (ctxTrend) {
+  const canvasTrend = document.getElementById('salesTrendChart');
+  if (canvasTrend) {
+    const ctxTrend = canvasTrend.getContext('2d');
     const labels = [t('Dush'), t('Sesh'), t('Chor'), t('Pay'), t('Jum'), t('Shan'), t('Yak')];
-    const data = [12, 19, 15, 25, 22, 30, 20]; // Mock data - can be improved with real grouping
+    const data = [12, 19, 15, 25, 22, 30, 20]; // Mock data
 
     const gradient = ctxTrend.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-    if (currentTrendChart) currentTrendChart.destroy();
-    currentTrendChart = new Chart(ctxTrend, {
+    const existingChart = Chart.getChart(canvasTrend);
+    if (existingChart) existingChart.destroy();
+
+    currentTrendChart = new Chart(canvasTrend, {
       type: salesTrendChartType,
       data: {
         labels: labels,
@@ -704,8 +715,8 @@ function renderDashboardCharts(transactions, products) {
   }
 
   // 2. Sales Source Chart (Doughnut)
-  const ctxSource = document.getElementById('salesSourceChart')?.getContext('2d');
-  if (ctxSource) {
+  const canvasSource = document.getElementById('salesSourceChart');
+  if (canvasSource) {
     const totalCash = transactions.reduce((s, t) => s + (t.cash || 0), 0);
     const totalCard = transactions.reduce((s, t) => s + (t.card || 0), 0);
     const totalDebt = transactions.reduce((s, t) => s + (t.debt || 0), 0);
@@ -714,8 +725,10 @@ function renderDashboardCharts(transactions, products) {
     const sourceLabels = [t('Naqd'), t('Karta'), t('Qarz')];
     const sourceColors = ['#10b981', '#3b82f6', '#ef4444'];
 
-    if (currentSourceChart) currentSourceChart.destroy();
-    currentSourceChart = new Chart(ctxSource, {
+    const existingChart = Chart.getChart(canvasSource);
+    if (existingChart) existingChart.destroy();
+
+    currentSourceChart = new Chart(canvasSource, {
       type: 'doughnut',
       data: {
         labels: sourceLabels,
@@ -914,9 +927,9 @@ async function renderProfile() {
                 </div>
             </div>
             
-            <div style="padding: 40px;">
+            <div class="profile-content" style="padding: 40px;">
                 <!-- Action Buttons -->
-                <div style="display: flex; gap: 10px; margin-bottom: 30px;">
+                <div class="profile-actions" style="display: flex; gap: 10px; margin-bottom: 30px;">
                     <button class="btn btn-outline" style="flex:1; border-radius: 12px; height: 45px; font-weight: 600; border-color: #e2e8f0;" onclick="showChangePasswordModal()">
                         <span class="icon">🔑</span> ${t("Parolni o'zgartirish")}
                     </button>
@@ -942,6 +955,20 @@ async function renderProfile() {
                     <div class="info-card" style="padding: 15px 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
                         <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Obuna muddati")}</label>
                         <div style="font-size:15px; font-weight:600; color: var(--primary-color);">${formatDateTime(u.expirationDate) || '—'}</div>
+                    </div>
+                    <div class="info-card" style="padding: 15px 20px; background: white; border-radius: 16px; border: 2px solid ${u.telegramUserId ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.1)'}; box-shadow: 0 4px 12px rgba(0,0,0,0.03); grid-column: span 1;">
+                        <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Telegram")}</label>
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="font-size:15px; font-weight:700; color: ${u.telegramUserId ? '#10b981' : '#ef4444'};">
+                                ${u.telegramUserId ? '✅ ' + t("Telegram ulangan") : '❌ ' + t("Telegram ulanmagan")}
+                            </span>
+                            ${!u.telegramUserId ? `
+                            <button class="btn btn-sm btn-outline" 
+                                    style="padding: 4px 10px; border-radius: 8px; font-size: 11px; color:var(--primary-color); border-color:var(--primary-color);" 
+                                    onclick="window.generateTelegramLink()">
+                                🔗 ${t("Ulash")}
+                            </button>` : ''}
+                        </div>
                     </div>
                     <div class="info-card" style="padding: 15px 20px; background: white; border-radius: 16px; border: 2px solid rgba(var(--primary-rgb), 0.15); box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.08); grid-column: span 1;">
                         <label style="display:block; font-size:11px; color:var(--primary-color); text-transform:uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Taklif kodi (Promo)")}</label>
@@ -973,12 +1000,8 @@ async function renderProfile() {
 
 function showEditProfileModal() {
   const user = api.getUser();
-  openModal(`
-        <div class="modal-header">
-            <h3>${t("Profilni tahrirlash")}</h3>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <form onsubmit="handleUpdateProfile(event)" style="min-width: 450px;">
+  openModal(t("Profilni tahrirlash"), `
+        <form onsubmit="handleUpdateProfile(event)" style="width: 100%; max-width: 450px;">
             <div class="form-group" style="margin-bottom: 20px;">
                 <label style="display:block; margin-bottom: 10px;">${t("Profil rasmi")}</label>
                 <div style="display:flex; gap:20px; align-items: center;">
@@ -989,7 +1012,7 @@ function showEditProfileModal() {
                         <input type="file" class="form-control" accept="image/*" onchange="previewProfileImage(this)">
                         <input type="hidden" id="edit-image-url" value="${escapeHtml(user.image || '')}">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <p style="font-size:11px; color:var(--text-muted); margin:0;">JPEG, PNG formatlar, maksimal 2MB.</p>
+                            <p style="font-size:11px; color:var(--text-muted); margin:0;">${t("JPEG, PNG formatlar, maksimal 2MB.")}</p>
                             <button type="button" class="btn btn-sm btn-ghost" onclick="window.clearProfileImage()" style="color:var(--danger); border-color:var(--danger-bg); padding:4px 8px; font-size:11px;">${t("Rasmni o'chirish")}</button>
                         </div>
                     </div>
@@ -1039,14 +1062,14 @@ function showEditProfileModal() {
             <div style="margin-top:16px; padding:14px; border-radius:12px; background:var(--bg-input); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px;">
                 <div>
                     <p style="margin:0; font-weight:600; font-size:13px;">${t("Telegramni ulash")}</p>
-                    <p style="margin:4px 0 0; font-size:11px; color:var(--text-muted);">${user.telegramUserId ? '✅ Telegram ulangan (ID: ' + user.telegramUserId + ')' : t("Telegram hisobingizni ulab, bot orqali boshqaring")}</p>
+                    <p style="margin:4px 0 0; font-size:11px; color:var(--text-muted);">${user.telegramUserId ? '✅ ' + t("Telegram ulangan") + ' (ID: ' + user.telegramUserId + ')' : t("Telegram hisobingizni ulab, bot orqali boshqaring")}</p>
                 </div>
                 <button type="button" class="btn btn-ghost" style="white-space:nowrap; padding:8px 16px; font-size:12px; border-color:var(--primary-color); color:var(--primary-color);" onclick="window.generateTelegramLink()">
                     🔗 ${t("Ulash")}
                 </button>
             </div>
 
-            <div class="modal-footer" style="padding-top: 15px;">
+            <div class="modal-footer" style="padding-top: 15px; margin-top: 20px; border-top: 1px solid var(--border);">
                 <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
                 <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">${t("Saqlash")}</button>
             </div>
@@ -1080,7 +1103,7 @@ window.generateTelegramLink = async function() {
                     <h3 style="margin:0 0 8px;">${t("Telegramni ulash")}</h3>
                     <p style="color:var(--text-muted); font-size:13px; margin:0 0 20px;">${t("Quyidagi tugmani bosib Telegram botini oching va ulang")}</p>
                     <a href="${url}" target="_blank" class="btn btn-primary" style="display:inline-block; padding:12px 28px; text-decoration:none; border-radius:12px; margin-bottom:12px;">
-                        📱 Telegram orqali ulash
+                        📱 ${t("Telegram orqali ulash")}
                     </a>
                     <br>
                     <p style="font-size:11px; color:var(--text-muted); margin:8px 0 16px;">${t("Bu havola bir marta ishlaydi")}</p>
@@ -1164,12 +1187,8 @@ async function handleUpdateProfile(e) {
 }
 
 function showChangePasswordModal() {
-  openModal(`
-        <div class="modal-header">
-            <h3>${t("Parolni o'zgartirish")}</h3>
-            <button class="modal-close" onclick="closeModal()">✕</button>
-        </div>
-        <form onsubmit="handleChangePassword(event)" style="min-width: 350px;">
+  openModal(t("Parolni o'zgartirish"), `
+        <form onsubmit="handleChangePassword(event)" style="width: 100%; max-width: 400px;">
             <div class="form-group">
                 <label>${t("Yangi parol")}</label>
                 <input type="password" class="form-control" id="new-password" placeholder="••••••••" required>
@@ -1179,7 +1198,7 @@ function showChangePasswordModal() {
                 <input type="password" class="form-control" id="confirm-password" placeholder="••••••••" required>
             </div>
             
-            <div class="modal-footer" style="padding-top: 15px;">
+            <div class="modal-footer" style="padding-top: 15px; margin-top: 20px; border-top: 1px solid var(--border);">
                 <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
                 <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">${t("Yangilash")}</button>
             </div>
@@ -1477,3 +1496,347 @@ window.applyDateFilter = function() {
   closeModal();
   navigateTo(window.currentPage);
 };
+
+window.renderBulkDelete = async function() {
+    const bid = getSelectedBusinessId();
+    const user = api.getUser();
+    const role = user ? parseInt(user.role) : 0;
+    const isSuperAdmin = role >= 2;
+
+    if (!isSuperAdmin && !bid) {
+        document.getElementById('page-content').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🏢</div>
+                <p>${t("Avval biznes tanlang")}</p>
+            </div>
+        `;
+        return;
+    }
+
+    if (isSuperAdmin) {
+        renderSuperAdminRequests();
+    } else {
+        renderAdminBulkDeleteForm();
+    }
+};
+
+async function renderSuperAdminRequests() {
+    const content = document.getElementById('page-content');
+    content.innerHTML = `
+        <div class="container-fluid" style="max-width: 1000px; margin: 20px auto;">
+            <div class="card card-dark">
+                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; background: var(--bg-secondary); border-bottom: 1px solid var(--border);">
+                    <h3 style="margin:0; font-size:18px;"><i data-lucide="list-checks" style="vertical-align:middle; margin-right:8px;"></i> ${t("O'chirish so'rovlari")}</h3>
+                    <button class="btn btn-sm btn-ghost" onclick="renderBulkDelete()" title="${t("Yangilash")}">
+                        <i data-lucide="refresh-cw" style="width:16px; height:16px;"></i>
+                    </button>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div id="bulk-requests-list">
+                        <div style="padding:60px; text-align:center;"><div class="spinner" style="margin:0 auto;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    try {
+        const requests = await api.get('/products/bulk/requests');
+        const container = document.getElementById('bulk-requests-list');
+        if (!requests || requests.length === 0) {
+            container.innerHTML = `<div style="padding:60px; text-align:center; color:var(--text-muted);">
+                <div style="font-size:40px; margin-bottom:15px;">📥</div>
+                <p>${t("Hozircha so'rovlar yo'q")}</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="table-responsive" style="border:1px solid var(--border); border-radius:12px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table class="table bulk-requests-table" style="width: 100%; min-width: 700px; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px; text-align:center;">ID</th>
+                            <th>${t("Sana")}</th>
+                            <th>${t("Kategoriya")}</th>
+                            <th>${t("Biznes")}</th>
+                            <th style="width: 130px; text-align:right;">${t("Amal")}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${requests.map(r => `
+                            <tr class="hover-row">
+                                <td style="text-align:center; font-weight:600; color:var(--text-secondary);">${r.id}</td>
+                                <td style="white-space:nowrap;">${formatDateTime(r.createdAt)}</td>
+                                <td>
+                                    <span style="color: var(--text-secondary); font-size:13px; font-weight:500;">
+                                        ${r.categoryName || '--'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge" style="font-size:12px; font-weight:600; padding:4px 10px; background: rgba(99, 102, 241, 0.1); color: var(--accent); border: 1px solid rgba(99, 102, 241, 0.2);">
+                                        ${r.businessName || r.businessId}
+                                    </span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <button class="btn btn-sm btn-primary" onclick="viewBulkRequest(${r.id}, '${r.productIds}', ${r.businessId})" style="height:32px; padding:0 15px; border-radius:8px;">
+                                        <i data-lucide="eye" style="width:14px; height:14px; margin-right:6px; vertical-align:middle;"></i> ${t("Ko'rish")}
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+window.viewBulkRequest = async function(reqId, productIds, bid) {
+    const content = document.getElementById('page-content');
+    content.innerHTML = `
+        <div class="container-fluid" style="max-width: 800px; margin: 20px auto;">
+            <div class="card card-danger">
+                <div class="card-header" style="background: var(--danger-gradient); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+                    <h3 style="margin:0; display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="alert-triangle"></i> ${t("O'chirish so'rovini ko'rib chiqish")} (#${reqId})
+                    </h3>
+                </div>
+                <div class="card-body" style="padding: 30px;">
+                    <div id="bulk-products-list" class="mb-4">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h4 style="margin:0">${t("Tanlangan mahsulotlar")}</h4>
+                            <label style="cursor:pointer; font-size:14px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                                <input type="checkbox" id="bulk-select-all" onclick="toggleAllBulkProducts(this)" checked style="width:16px; height:16px;"> ${t("Hammasini tanlash")}
+                            </label>
+                        </div>
+                        <div id="bulk-products-container" style="max-height: 400px; overflow-y: auto; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-input);">
+                            <div style="padding:40px; text-align:center;"><div class="spinner" style="margin:0 auto;"></div></div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(var(--danger-rgb), 0.1); border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                        <p style="margin:0; color: var(--danger); font-weight: 500;">
+                            <strong>${t("Diqqat")}!</strong> ${t("Tasdiqlangan mahsulotlar o'chiriladi va buni ortga qaytarib bo'lmaydi!")}
+                        </p>
+                    </div>
+
+                    <div class="bulk-actions-grid">
+                        <button class="btn btn-danger btn-lg" onclick="handleBulkDeleteFinal(${reqId}, ${bid})">
+                            <span class="icon">🗑️</span> ${t("Tasdiqlash va o'chirish")}
+                        </button>
+                        <button class="btn btn-warning btn-lg" onclick="handleBulkDeleteReject(${reqId})">
+                            <span class="icon">✖️</span> ${t("Rad etish")}
+                        </button>
+                        <button class="btn btn-success btn-lg" onclick="renderBulkDelete()">
+                            <span class="icon">↩️</span> ${t("Orqaga")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    console.log("Viewing bulk request with productIds:", productIds);
+    document.getElementById('bulk-products-container').innerHTML = `<div style="padding:40px; text-align:center;"><div class="spinner" style="margin:0 auto;"></div><div style="margin-top:10px; color:var(--text-muted);">${t("Yuklanmoqda...")} (${productIds})</div></div>`;
+
+    try {
+        const products = await api.get(`/products?ids=${productIds}`);
+        const container = document.getElementById('bulk-products-container');
+        if (!products || products.length === 0) {
+            container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted);">${t("Mahsulotlar topilmadi (ehtimol allaqachon o'chirilgan)")}</div>`;
+            return;
+        }
+        container.innerHTML = products.map(p => `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="bulk-product-checkbox" value="${p.id}" checked style="width:18px; height:18px; cursor:pointer;">
+                <span style="font-size:15px; font-weight:500;">${escapeHtml(p.name)}</span>
+                <span style="margin-left:auto; font-size:14px; font-weight:600; color:var(--accent)">${formatPrice(p.price)}</span>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error("Error fetching products for review:", e);
+        document.getElementById('bulk-products-container').innerHTML = `<div style="padding:40px; text-align:center; color:var(--danger); font-weight:500;">${t("Xatolik")}: ${e.message}</div>`;
+        showToast(e.message, 'error');
+    }
+};
+
+window.handleBulkDeleteFinal = async function(reqId, bid) {
+    const checkedBoxes = document.querySelectorAll('.bulk-product-checkbox:checked');
+    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showToast(t("Kamida bitta mahsulotni tanlang"), 'warning');
+        return;
+    }
+
+    if (!confirm(t("Haqiqatan ham tanlangan mahsulotlarni o'chirmoqchimisiz?"))) return;
+
+    try {
+        await api.delete(`/products/bulk?businessId=${bid}&ids=${selectedIds.join(',')}`);
+        await api.post(`/products/bulk/requests/${reqId}/status?status=approved`);
+        showToast(t("Mahsulotlar muvaffaqiyatli o'chirildi"), 'success');
+        renderBulkDelete();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+};
+
+window.handleBulkDeleteReject = async function(reqId) {
+    if (!confirm(t("Ushbu so'rovni rad etmoqchimisiz?"))) return;
+    try {
+        await api.post(`/products/bulk/requests/${reqId}/status?status=rejected`);
+        showToast(t("So'rov rad etildi"), 'success');
+        renderBulkDelete();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+};
+
+function renderAdminBulkDeleteForm() {
+    const bid = getSelectedBusinessId();
+    document.getElementById('page-content').innerHTML = `
+        <div class="container-fluid" style="max-width: 800px; margin: 20px auto;">
+            <div class="card card-danger">
+                <div class="card-header" style="background: var(--danger-gradient); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+                    <h3 style="margin:0; display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="alert-triangle"></i> ${t("Ommaviy o'chirish")}
+                    </h3>
+                </div>
+                <div class="card-body" style="padding: 30px;">
+                    <p style="font-size: 16px; line-height: 1.6; margin-bottom: 25px; color: var(--text-secondary);">
+                        ${t("Ushbu sahifa orqali barcha mahsulotlarni yoki ma'lum bir kategoriya mahsulotlarini ommaviy o'chirib tashlashingiz mumkin.")}
+                    </p>
+                    
+                    <div class="form-group mb-4">
+                        <label style="display:block; margin-bottom:10px; font-weight:600;">${t("Kategoriya bo'yicha saralash")}</label>
+                        <select class="form-control" id="bulk-category-selector" onchange="loadBulkProducts()" style="height: 45px; font-size: 16px;">
+                            <option value="">-- ${t("Barcha mahsulotlar")} --</option>
+                        </select>
+                    </div>
+
+                    <div id="bulk-products-list" class="mb-4" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h4 style="margin:0">${t("Mahsulotlar")}</h4>
+                            <label style="cursor:pointer; font-size:14px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                                <input type="checkbox" id="bulk-select-all" onclick="toggleAllBulkProducts(this)" style="width:16px; height:16px;"> ${t("Hammasini tanlash")}
+                            </label>
+                        </div>
+                        <div id="bulk-products-container" style="max-height: 350px; overflow-y: auto; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-input);">
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(var(--danger-rgb), 0.1); border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                        <p style="margin:0; color: var(--danger); font-weight: 500;">
+                            <strong>${t("Diqqat")}!</strong> ${t("Bu amalni ortga qaytarib bo'lmaydi!")}
+                        </p>
+                    </div>
+
+                    <div class="bulk-actions-grid" style="margin-top:20px;">
+                        <button class="btn btn-warning btn-lg" onclick="handleBulkDelete()" style="height: 50px; font-weight: 600; font-size: 16px; border-radius: 10px;">
+                            <span class="icon">📤</span> ${t("Ommaviy o'chirishi tasdiqlashga yuborish")}
+                        </button>
+                        <button class="btn btn-success btn-lg" onclick="navigateTo('products')" style="height: 50px; font-weight: 600; font-size: 16px; border-radius: 10px;">
+                            <span class="icon">↩️</span> ${t("Bekor qilish")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Load categories
+    api.get(`/categories?businessId=${bid}`).then(categories => {
+        const selector = document.getElementById('bulk-category-selector');
+        if (selector) {
+            categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                selector.appendChild(opt);
+            });
+        }
+    }).catch(console.error);
+}
+
+window.loadBulkProducts = async function() {
+    const bid = getSelectedBusinessId();
+    const cid = document.getElementById('bulk-category-selector').value;
+    const listDiv = document.getElementById('bulk-products-list');
+    const container = document.getElementById('bulk-products-container');
+
+    if (!cid) {
+        listDiv.style.display = 'none';
+        return;
+    }
+
+    listDiv.style.display = 'block';
+    container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted)"><div class="spinner" style="margin: 0 auto 10px auto;"></div>${t("Yuklanmoqda...")}</div>`;
+
+    try {
+        const products = await api.get(`/products?businessId=${bid}&categoryId=${cid}`);
+        if (!products || products.length === 0) {
+            container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted)">${t("Mahsulotlar topilmadi")}</div>`;
+            return;
+        }
+
+        container.innerHTML = products.map(p => `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="bulk-product-checkbox" value="${p.id}" style="width:18px; height:18px; cursor:pointer;">
+                <span style="font-size:15px; font-weight:500;">${escapeHtml(p.name)}</span>
+                <span style="margin-left:auto; font-size:14px; font-weight:600; color:var(--accent)">${formatPrice(p.price)}</span>
+            </div>
+        `).join('');
+        
+        const selectAll = document.getElementById('bulk-select-all');
+        if (selectAll) selectAll.checked = false;
+        
+    } catch (e) {
+        container.innerHTML = `<div style="padding:20px; color:var(--danger); text-align:center;">${e.message}</div>`;
+    }
+};
+
+window.toggleAllBulkProducts = function(master) {
+    document.querySelectorAll('.bulk-product-checkbox').forEach(cb => cb.checked = master.checked);
+};
+
+window.handleBulkDelete = async function() {
+    const bid = getSelectedBusinessId();
+    const selector = document.getElementById('bulk-category-selector');
+    const cid = selector ? selector.value : '';
+    
+    // Collect selected product IDs
+    const checkedBoxes = document.querySelectorAll('.bulk-product-checkbox:checked');
+    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showToast(t("Kamida bitta mahsulotni tanlang"), 'warning');
+        return;
+    }
+
+    const confirmReq = t("O'chirish so'rovini tasdiqlashga yubormoqchimisiz?");
+    if (!confirm(confirmReq)) return;
+
+    try {
+        await api.post('/products/bulk/request', {
+            businessId: parseInt(bid),
+            categoryId: cid ? parseInt(cid) : null,
+            productIds: selectedIds.join(',')
+        });
+        showToast(t("So'rov muvaffaqiyatli yuborildi"), 'success');
+        navigateTo('products');
+    } catch (e) {
+        showToast(e.message || t("Xatolik"), 'error');
+    }
+};
+
+
+
+

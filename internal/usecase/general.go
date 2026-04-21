@@ -88,6 +88,21 @@ func (uc *ProductUseCase) GetByUserID(uid int) ([]entity.Product, error) {
 func (uc *ProductUseCase) SearchByUserID(uid int, query string) ([]entity.Product, error) {
 	return uc.repo.SearchByUserID(uid, query)
 }
+func (uc *ProductUseCase) BulkDelete(bid int, categoryId *int, productIds []int) error {
+	return uc.repo.BulkDelete(bid, categoryId, productIds)
+}
+func (uc *ProductUseCase) GetByIDs(ids []int) ([]entity.Product, error) {
+	return uc.repo.GetByIDs(ids)
+}
+func (uc *ProductUseCase) CreateBulkDeleteRequest(req *entity.BulkDeleteRequest) (int, error) {
+	return uc.repo.CreateBulkDeleteRequest(req)
+}
+func (uc *ProductUseCase) GetBulkDeleteRequests() ([]entity.BulkDeleteRequest, error) {
+	return uc.repo.GetBulkDeleteRequests()
+}
+func (uc *ProductUseCase) UpdateBulkDeleteRequestStatus(id int, status string) error {
+	return uc.repo.UpdateBulkDeleteRequestStatus(id, status)
+}
 
 type ClientUseCase struct {
 	repo     repository.ClientRepository

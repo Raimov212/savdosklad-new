@@ -64,3 +64,16 @@ type ProductChange struct {
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
+
+type BulkDeleteRequest struct {
+	ID         int       `json:"id"`
+	BusinessID int       `json:"businessId"`
+	CategoryID *int      `json:"categoryId"`
+	ProductIDs string    `json:"productIds"` // Comma separated IDs
+	CreatedBy  int       `json:"createdBy"`
+	Status     string    `json:"status"` // pending, approved, rejected
+	BusinessName string    `json:"businessName,omitempty"`
+	CategoryName string    `json:"categoryName,omitempty"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
+}

@@ -63,6 +63,8 @@ func (uc *UserUseCase) CreateEmployee(req entity.RegisterRequest, adminID int) (
 		MarketID:       req.MarketID,
 		OfferCode:      &selfOfferCode,
 		ExpirationDate: time.Now().AddDate(100, 0, 0),
+		BusinessIDs:    req.BusinessIDs,
+		BusinessPermissions: req.BusinessPermissions,
 	}
 	if req.ExpirationDate != nil {
 		user.ExpirationDate = *req.ExpirationDate
@@ -285,4 +287,7 @@ func (uc *UserUseCase) ExtendSubscription(req entity.ExtendSubscriptionRequest) 
 // Used by the token-based Telegram linking flow.
 func (uc *UserUseCase) LinkTelegramByID(userID int, tgID int64) error {
 	return uc.repo.UpdateTelegramID(userID, tgID)
+}
+func (uc *UserUseCase) HasPermission(userID, businessID int, action string) (bool, error) {
+	return uc.repo.HasPermission(userID, businessID, action)
 }
