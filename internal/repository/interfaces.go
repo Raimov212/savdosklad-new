@@ -47,6 +47,10 @@ type ProductRepository interface {
 	Search(bid int, query string) ([]entity.Product, error)
 	SearchByUserID(userID int, query string) ([]entity.Product, error)
 	BulkDelete(bid int, categoryId *int, productIds []int) error
+	GetByIDs(ids []int) ([]entity.Product, error)
+	CreateBulkDeleteRequest(req *entity.BulkDeleteRequest) (int, error)
+	GetBulkDeleteRequests() ([]entity.BulkDeleteRequest, error)
+	UpdateBulkDeleteRequestStatus(id int, status string) error
 }
 
 type ClientRepository interface {

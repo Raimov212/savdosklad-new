@@ -266,3 +266,72 @@ func (r *ProductRepo) SearchByUserID(userID int, query string) ([]entity.Product
 	}
 	return list, nil
 }
+
+func (r *ProductRepo) GetByIDs(ids []int) ([]entity.Product, error) {
+	fmt.Printf("GetByIDs query with: %v\n", ids)
+	rows, err := r.db.Query(
+		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
+		FROM products WHERE id = ANY($1) AND "isDeleted" = false ORDER BY id`, pq.Array(ids),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []entity.Product
+	for rows.Next() {
+		var p entity.Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+			&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			return nil, err
+		}
+		list = append(list, p)
+	}
+	return list, nil
+}
+
+func (r *ProductRepo) CreateBulkDeleteRequest(req *entity.BulkDeleteRequest) (int, error) {
+	var id int
+	err := r.db.QueryRow(
+		`INSERT INTO bulk_delete_requests (business_id, category_id, product_ids, created_by, status, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+		req.BusinessID, req.CategoryID, req.ProductIDs, req.CreatedBy, "pending", time.Now(), time.Now(),
+	).Scan(&id)
+	return id, err
+}
+
+func (r *ProductRepo) GetBulkDeleteRequests() ([]entity.BulkDeleteRequest, error) {
+	rows, err := r.db.Query(`
+		SELECT 
+			r.id, r.business_id, r.category_id, r.product_ids, r.created_by, r.status, r.created_at, r.updated_at,
+			COALESCE(b.name, ''),
+			COALESCE(c.name, '--')
+		FROM bulk_delete_requests r
+		LEFT JOIN businesses b ON r.business_id = b.id
+		LEFT JOIN categories c ON r.category_id = c.id
+		WHERE r.status = 'pending' 
+		ORDER BY r.id DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []entity.BulkDeleteRequest
+	for rows.Next() {
+		var req entity.BulkDeleteRequest
+		if err := rows.Scan(
+			&req.ID, &req.BusinessID, &req.CategoryID, &req.ProductIDs, &req.CreatedBy, &req.Status, &req.CreatedAt, &req.UpdatedAt,
+			&req.BusinessName, &req.CategoryName,
+		); err != nil {
+			return nil, err
+		}
+		list = append(list, req)
+	}
+	return list, nil
+}
+
+func (r *ProductRepo) UpdateBulkDeleteRequestStatus(id int, status string) error {
+	_, err := r.db.Exec(`UPDATE bulk_delete_requests SET status = $1, updated_at = $2 WHERE id = $3`, status, time.Now(), id)
+	return err
+}

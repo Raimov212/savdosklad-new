@@ -1488,7 +1488,11 @@ window.applyDateFilter = function() {
 
 window.renderBulkDelete = async function() {
     const bid = getSelectedBusinessId();
-    if (!bid) {
+    const user = api.getUser();
+    const role = user ? parseInt(user.role) : 0;
+    const isSuperAdmin = role >= 2;
+
+    if (!isSuperAdmin && !bid) {
         document.getElementById('page-content').innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon">🏢</div>
@@ -1498,6 +1502,193 @@ window.renderBulkDelete = async function() {
         return;
     }
 
+    if (isSuperAdmin) {
+        renderSuperAdminRequests();
+    } else {
+        renderAdminBulkDeleteForm();
+    }
+};
+
+async function renderSuperAdminRequests() {
+    const content = document.getElementById('page-content');
+    content.innerHTML = `
+        <div class="container-fluid" style="max-width: 1000px; margin: 20px auto;">
+            <div class="card card-dark">
+                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; background: var(--bg-secondary); border-bottom: 1px solid var(--border);">
+                    <h3 style="margin:0; font-size:18px;"><i data-lucide="list-checks" style="vertical-align:middle; margin-right:8px;"></i> ${t("O'chirish so'rovlari")}</h3>
+                    <button class="btn btn-sm btn-ghost" onclick="renderBulkDelete()" title="${t("Yangilash")}">
+                        <i data-lucide="refresh-cw" style="width:16px; height:16px;"></i>
+                    </button>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div id="bulk-requests-list">
+                        <div style="padding:60px; text-align:center;"><div class="spinner" style="margin:0 auto;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    try {
+        const requests = await api.get('/products/bulk/requests');
+        const container = document.getElementById('bulk-requests-list');
+        if (!requests || requests.length === 0) {
+            container.innerHTML = `<div style="padding:60px; text-align:center; color:var(--text-muted);">
+                <div style="font-size:40px; margin-bottom:15px;">📥</div>
+                <p>${t("Hozircha so'rovlar yo'q")}</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="table-responsive" style="border:1px solid var(--border); border-radius:12px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table class="table bulk-requests-table" style="width: 100%; min-width: 700px; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px; text-align:center;">ID</th>
+                            <th>${t("Sana")}</th>
+                            <th>${t("Kategoriya")}</th>
+                            <th>${t("Biznes")}</th>
+                            <th style="width: 130px; text-align:right;">${t("Amal")}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${requests.map(r => `
+                            <tr class="hover-row">
+                                <td style="text-align:center; font-weight:600; color:var(--text-secondary);">${r.id}</td>
+                                <td style="white-space:nowrap;">${formatDateTime(r.createdAt)}</td>
+                                <td>
+                                    <span style="color: var(--text-secondary); font-size:13px; font-weight:500;">
+                                        ${r.categoryName || '--'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge" style="font-size:12px; font-weight:600; padding:4px 10px; background: rgba(99, 102, 241, 0.1); color: var(--accent); border: 1px solid rgba(99, 102, 241, 0.2);">
+                                        ${r.businessName || r.businessId}
+                                    </span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <button class="btn btn-sm btn-primary" onclick="viewBulkRequest(${r.id}, '${r.productIds}', ${r.businessId})" style="height:32px; padding:0 15px; border-radius:8px;">
+                                        <i data-lucide="eye" style="width:14px; height:14px; margin-right:6px; vertical-align:middle;"></i> ${t("Ko'rish")}
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+window.viewBulkRequest = async function(reqId, productIds, bid) {
+    const content = document.getElementById('page-content');
+    content.innerHTML = `
+        <div class="container-fluid" style="max-width: 800px; margin: 20px auto;">
+            <div class="card card-danger">
+                <div class="card-header" style="background: var(--danger-gradient); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+                    <h3 style="margin:0; display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="alert-triangle"></i> ${t("O'chirish so'rovini ko'rib chiqish")} (#${reqId})
+                    </h3>
+                </div>
+                <div class="card-body" style="padding: 30px;">
+                    <div id="bulk-products-list" class="mb-4">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h4 style="margin:0">${t("Tanlangan mahsulotlar")}</h4>
+                            <label style="cursor:pointer; font-size:14px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                                <input type="checkbox" id="bulk-select-all" onclick="toggleAllBulkProducts(this)" checked style="width:16px; height:16px;"> ${t("Hammasini tanlash")}
+                            </label>
+                        </div>
+                        <div id="bulk-products-container" style="max-height: 400px; overflow-y: auto; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-input);">
+                            <div style="padding:40px; text-align:center;"><div class="spinner" style="margin:0 auto;"></div></div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(var(--danger-rgb), 0.1); border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                        <p style="margin:0; color: var(--danger); font-weight: 500;">
+                            <strong>${t("Diqqat")}!</strong> ${t("Tasdiqlangan mahsulotlar o'chiriladi va buni ortga qaytarib bo'lmaydi!")}
+                        </p>
+                    </div>
+
+                    <div class="bulk-actions-grid">
+                        <button class="btn btn-danger btn-lg" onclick="handleBulkDeleteFinal(${reqId}, ${bid})">
+                            <span class="icon">🗑️</span> ${t("Tasdiqlash va o'chirish")}
+                        </button>
+                        <button class="btn btn-warning btn-lg" onclick="handleBulkDeleteReject(${reqId})">
+                            <span class="icon">✖️</span> ${t("Rad etish")}
+                        </button>
+                        <button class="btn btn-success btn-lg" onclick="renderBulkDelete()">
+                            <span class="icon">↩️</span> ${t("Orqaga")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    console.log("Viewing bulk request with productIds:", productIds);
+    document.getElementById('bulk-products-container').innerHTML = `<div style="padding:40px; text-align:center;"><div class="spinner" style="margin:0 auto;"></div><div style="margin-top:10px; color:var(--text-muted);">${t("Yuklanmoqda...")} (${productIds})</div></div>`;
+
+    try {
+        const products = await api.get(`/products?ids=${productIds}`);
+        const container = document.getElementById('bulk-products-container');
+        if (!products || products.length === 0) {
+            container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted);">${t("Mahsulotlar topilmadi (ehtimol allaqachon o'chirilgan)")}</div>`;
+            return;
+        }
+        container.innerHTML = products.map(p => `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="bulk-product-checkbox" value="${p.id}" checked style="width:18px; height:18px; cursor:pointer;">
+                <span style="font-size:15px; font-weight:500;">${escapeHtml(p.name)}</span>
+                <span style="margin-left:auto; font-size:14px; font-weight:600; color:var(--accent)">${formatPrice(p.price)}</span>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error("Error fetching products for review:", e);
+        document.getElementById('bulk-products-container').innerHTML = `<div style="padding:40px; text-align:center; color:var(--danger); font-weight:500;">${t("Xatolik")}: ${e.message}</div>`;
+        showToast(e.message, 'error');
+    }
+};
+
+window.handleBulkDeleteFinal = async function(reqId, bid) {
+    const checkedBoxes = document.querySelectorAll('.bulk-product-checkbox:checked');
+    const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showToast(t("Kamida bitta mahsulotni tanlang"), 'warning');
+        return;
+    }
+
+    if (!confirm(t("Haqiqatan ham tanlangan mahsulotlarni o'chirmoqchimisiz?"))) return;
+
+    try {
+        await api.delete(`/products/bulk?businessId=${bid}&ids=${selectedIds.join(',')}`);
+        await api.post(`/products/bulk/requests/${reqId}/status?status=approved`);
+        showToast(t("Mahsulotlar muvaffaqiyatli o'chirildi"), 'success');
+        renderBulkDelete();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+};
+
+window.handleBulkDeleteReject = async function(reqId) {
+    if (!confirm(t("Ushbu so'rovni rad etmoqchimisiz?"))) return;
+    try {
+        await api.post(`/products/bulk/requests/${reqId}/status?status=rejected`);
+        showToast(t("So'rov rad etildi"), 'success');
+        renderBulkDelete();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+};
+
+function renderAdminBulkDeleteForm() {
+    const bid = getSelectedBusinessId();
     document.getElementById('page-content').innerHTML = `
         <div class="container-fluid" style="max-width: 800px; margin: 20px auto;">
             <div class="card card-danger">
@@ -1526,7 +1717,6 @@ window.renderBulkDelete = async function() {
                             </label>
                         </div>
                         <div id="bulk-products-container" style="max-height: 350px; overflow-y: auto; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-input);">
-                            <!-- Products will be here -->
                         </div>
                     </div>
 
@@ -1537,8 +1727,8 @@ window.renderBulkDelete = async function() {
                     </div>
 
                     <div class="bulk-actions-grid" style="margin-top:20px;">
-                        <button class="btn btn-danger btn-lg" onclick="handleBulkDelete()" style="height: 50px; font-weight: 600; font-size: 16px; border-radius: 10px;">
-                            <span class="icon">🗑️</span> ${t("Ommaviy o'chirishni tasdiqlash")}
+                        <button class="btn btn-warning btn-lg" onclick="handleBulkDelete()" style="height: 50px; font-weight: 600; font-size: 16px; border-radius: 10px;">
+                            <span class="icon">📤</span> ${t("Ommaviy o'chirishi tasdiqlashga yuborish")}
                         </button>
                         <button class="btn btn-success btn-lg" onclick="navigateTo('products')" style="height: 50px; font-weight: 600; font-size: 16px; border-radius: 10px;">
                             <span class="icon">↩️</span> ${t("Bekor qilish")}
@@ -1552,8 +1742,7 @@ window.renderBulkDelete = async function() {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
     // Load categories
-    try {
-        const categories = await api.get(`/categories?businessId=${bid}`);
+    api.get(`/categories?businessId=${bid}`).then(categories => {
         const selector = document.getElementById('bulk-category-selector');
         if (selector) {
             categories.forEach(c => {
@@ -1563,10 +1752,8 @@ window.renderBulkDelete = async function() {
                 selector.appendChild(opt);
             });
         }
-    } catch (e) {
-        console.error(e);
-    }
-};
+    }).catch(console.error);
+}
 
 window.loadBulkProducts = async function() {
     const bid = getSelectedBusinessId();
@@ -1584,7 +1771,7 @@ window.loadBulkProducts = async function() {
 
     try {
         const products = await api.get(`/products?businessId=${bid}&categoryId=${cid}`);
-        if (products.length === 0) {
+        if (!products || products.length === 0) {
             container.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted)">${t("Mahsulotlar topilmadi")}</div>`;
             return;
         }
@@ -1618,31 +1805,27 @@ window.handleBulkDelete = async function() {
     const checkedBoxes = document.querySelectorAll('.bulk-product-checkbox:checked');
     const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
     
-    if (cid && selectedIds.length === 0) {
+    if (selectedIds.length === 0) {
         showToast(t("Kamida bitta mahsulotni tanlang"), 'warning');
         return;
     }
 
-    const confirmMsg = t("Haqiqatan ham tanlangan mahsulotlarni o'chirmoqchimisiz?");
-    if (!confirm(confirmMsg)) return;
-
-    const finalConfirm = t("Bu amalni ortga qaytarib bo'lmaydi! Davom etasizmi?");
-    if (!confirm(finalConfirm)) return;
+    const confirmReq = t("O'chirish so'rovini tasdiqlashga yubormoqchimisiz?");
+    if (!confirm(confirmReq)) return;
 
     try {
-        let url = `/products/bulk?businessId=${bid}`;
-        if (selectedIds.length > 0) {
-            url += `&ids=${selectedIds.join(',')}`;
-        } else if (cid) {
-            url += `&categoryId=${cid}`;
-        }
-        
-        await api.delete(url);
-        showToast(t("Mahsulotlar muvaffaqiyatli o'chirildi"), 'success');
+        await api.post('/products/bulk/request', {
+            businessId: parseInt(bid),
+            categoryId: cid ? parseInt(cid) : null,
+            productIds: selectedIds.join(',')
+        });
+        showToast(t("So'rov muvaffaqiyatli yuborildi"), 'success');
         navigateTo('products');
     } catch (e) {
         showToast(e.message || t("Xatolik"), 'error');
     }
 };
+
+
 
 

@@ -2151,4 +2151,43 @@ body.is-admin .nav-section-title {
     padding: 10px !important;
   }
 }
+
+.bulk-requests-table thead th {
+  background: var(--accent-gradient) !important;
+  color: white !important;
+  padding: 12px 15px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  border: none !important;
+  white-space: nowrap !important;
+}
+
+.bulk-requests-table tbody td {
+  padding: 12px 15px !important;
+  vertical-align: middle !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-size: 14px !important;
+}
+
+.bulk-requests-table .hover-row:hover {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+@media (max-width: 768px) {
+  .bulk-requests-table {
+    min-width: 600px !important;
+  }
+  
+  .bulk-requests-table td, .bulk-requests-table th {
+    padding: 10px 8px !important;
+    font-size: 12px !important;
+  }
+  
+  .bulk-requests-table .btn-sm {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+}
 
