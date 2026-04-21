@@ -3,7 +3,7 @@ import { t } from './i18n.js';
 
 let allEmployees = [];
 let allBusinesses = [];
-let employeesPage = 1;
+window.employeesPage = 1;
 const employeesPerPage = 10;
 
 export async function renderEmployees() {
@@ -31,7 +31,7 @@ export async function renderEmployees() {
                         </tr>
                     </thead>
                     <tbody id="employees-table-body">
-                        <tr><td colspan="6" style="text-align:center; padding:40px;"><div class="loader-inline"></div></td></tr>
+                        <tr><td colspan="7" style="text-align:center; padding:40px;"><div class="loader-inline"></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -61,7 +61,7 @@ function renderEmployeesTable(isAppend = false) {
     const pag = document.getElementById('employees-pagination');
     if (!tbody) return;
 
-    if (!isAppend) employeesPage = 1;
+    if (!isAppend) window.employeesPage = 1;
 
     if (allEmployees.length === 0 && !isAppend) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Sizda hali xodimlar yo'q")}</td></tr>`;
@@ -70,8 +70,8 @@ function renderEmployeesTable(isAppend = false) {
     }
 
     const totalPages = Math.ceil(allEmployees.length / employeesPerPage);
-    if (employeesPage > totalPages) employeesPage = totalPages;
-    const end = employeesPage * employeesPerPage;
+    if (window.employeesPage > totalPages) window.employeesPage = totalPages;
+    const end = window.employeesPage * employeesPerPage;
     const paginated = allEmployees.slice(end - employeesPerPage, end);
 
     const rows = paginated.map((emp, i) => {
@@ -83,7 +83,7 @@ function renderEmployeesTable(isAppend = false) {
 
         return `
             <tr>
-                <td style="text-align:center; color:var(--text-muted);">${(employeesPage - 1) * employeesPerPage + i + 1}</td>
+                <td style="text-align:center; color:var(--text-muted);">${(window.employeesPage - 1) * employeesPerPage + i + 1}</td>
                 <td style="font-weight:600;">${escapeHtml(emp.firstName)} ${escapeHtml(emp.lastName)}</td>
                 <td>@${escapeHtml(emp.userName)}</td>
                 <td><span class="badge" style="background:var(--primary-glow); color:var(--primary-color);">${escapeHtml(linkedBizNames || t("Biriktirilmagan"))}</span></td>
