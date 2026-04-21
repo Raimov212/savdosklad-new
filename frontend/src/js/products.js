@@ -135,8 +135,8 @@ function renderProductsTable(list, isAppend = false) {
               </div>` : ''}
             </div>
             <div class="acc-actions">
-              <button class="btn btn-success btn-sm" onclick='openProductModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ ${t("Tahrirlash")}</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️ ${t("O'chirish")}</button>
+              ${window.hasPermission('edit') ? `<button class="btn btn-success btn-sm" onclick='openProductModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ ${t("Tahrirlash")}</button>` : ''}
+              ${window.hasPermission('delete') ? `<button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️ ${t("O'chirish")}</button>` : ''}
             </div>
           </div>
         </div>`;
@@ -157,7 +157,7 @@ function renderProductsTable(list, isAppend = false) {
             style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
         </div>
         <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
-        ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
+        ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
       </div>
     `;
     attachInfiniteScroll('productPage', totalPages, 'renderProductsTable');

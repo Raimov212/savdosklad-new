@@ -18,6 +18,7 @@ type CreateCategoryRequest struct {
 }
 
 type UpdateCategoryRequest struct {
-	Name  *string `json:"name"`
-	Image *string `json:"image"`
+	BusinessID int     `json:"businessId"`
+	Name       *string `json:"name"`
+	Image      *string `json:"image"`
 }

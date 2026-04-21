@@ -206,6 +206,28 @@ export function escapeHtml(str) {
     return div.innerHTML;
 }
 
+export function hasPermission(action) {
+    const user = api.getUser();
+    if (!user) return false;
+    // SuperAdmin (2) and Admin/Owner (1) have all permissions
+    if (user.role >= 1) return true;
+
+    // For employees (role 0), check business-specific permissions
+    const bid = getSelectedBusinessId();
+    if (!bid) return false;
+
+    if (!user.businessPermissions) return false;
+
+    const perms = user.businessPermissions.find(p => p.businessId === bid);
+    if (!perms) return false;
+
+    if (action === 'add') return perms.canAdd;
+    if (action === 'edit') return perms.canEdit;
+    if (action === 'delete') return perms.canDelete;
+
+    return false;
+}
+
 // ==================== THEME TOGGLE ====================
 export function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -255,6 +277,7 @@ window.getDatePeriod = getDatePeriod;
 window.setDatePeriod = setDatePeriod;
 window.getDateQuery = getDateQuery;
 window.escapeHtml = escapeHtml;
+window.hasPermission = hasPermission;
 window.toggleTheme = toggleTheme;
 window.updateThemeIcon = updateThemeIcon;
 window.toggleAcc = toggleAcc;

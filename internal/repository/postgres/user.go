@@ -30,6 +30,9 @@ func (r *UserRepo) Create(user *entity.User) (int, error) {
 	if err == nil && len(user.BusinessIDs) > 0 {
 		_ = r.setBusinessIDs(id, user.BusinessIDs)
 	}
+	if err == nil && len(user.BusinessPermissions) > 0 {
+		_ = r.setBusinessPermissions(id, user.BusinessPermissions)
+	}
 	return id, err
 }
 
@@ -46,6 +49,7 @@ func (r *UserRepo) GetByID(id int) (*entity.User, error) {
 		return nil, err
 	}
 	u.BusinessIDs, _ = r.getBusinessIDs(u.ID)
+	u.BusinessPermissions, _ = r.getBusinessPermissions(u.ID)
 	return &u, nil
 }
 
@@ -62,6 +66,7 @@ func (r *UserRepo) GetByUsername(username string) (*entity.User, error) {
 		return nil, err
 	}
 	u.BusinessIDs, _ = r.getBusinessIDs(u.ID)
+	u.BusinessPermissions, _ = r.getBusinessPermissions(u.ID)
 	return &u, nil
 }
 
@@ -111,6 +116,8 @@ func (r *UserRepo) GetAll() ([]entity.User, error) {
 			&u.Image, &u.BrandName, &u.BrandImage, &u.TelegramUserID, &u.Language, &u.MarketID, &u.CreatedBy, &u.ExpirationDate, &u.CreatedAt, &u.UpdatedAt); err != nil {
 			return nil, err
 		}
+		u.BusinessIDs, _ = r.getBusinessIDs(u.ID)
+		u.BusinessPermissions, _ = r.getBusinessPermissions(u.ID)
 		users = append(users, u)
 	}
 	return users, nil
@@ -194,6 +201,9 @@ func (r *UserRepo) Update(id int, req entity.UpdateUserRequest) error {
 	if err == nil && req.BusinessIDs != nil {
 		_ = r.setBusinessIDs(id, req.BusinessIDs)
 	}
+	if err == nil && req.BusinessPermissions != nil {
+		_ = r.setBusinessPermissions(id, req.BusinessPermissions)
+	}
 	return err
 }
 
@@ -226,6 +236,7 @@ func (r *UserRepo) GetByCreatedBy(adminID int) ([]entity.User, error) {
 			return nil, err
 		}
 		u.BusinessIDs, _ = r.getBusinessIDs(u.ID)
+		u.BusinessPermissions, _ = r.getBusinessPermissions(u.ID)
 		users = append(users, u)
 	}
 	return users, nil
@@ -260,6 +271,60 @@ func (r *UserRepo) setBusinessIDs(userID int, ids []int) error {
 		}
 	}
 	return nil
+}
+
+func (r *UserRepo) getBusinessPermissions(userID int) ([]entity.BusinessPermission, error) {
+	rows, err := r.db.Query(`SELECT business_id, can_add, can_edit, can_delete FROM user_businesses WHERE user_id = $1`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var perms []entity.BusinessPermission
+	for rows.Next() {
+		var p entity.BusinessPermission
+		if err := rows.Scan(&p.BusinessID, &p.CanAdd, &p.CanEdit, &p.CanDelete); err != nil {
+			return nil, err
+		}
+		perms = append(perms, p)
+	}
+	return perms, nil
+}
+
+func (r *UserRepo) setBusinessPermissions(userID int, perms []entity.BusinessPermission) error {
+	// Note: setBusinessIDs already deletes existing rows. 
+	// If both are called, we should be careful.
+	// Actually, let's make setBusinessPermissions smarter: it should use UPSERT or we should merge them.
+	// For simplicity, if we have permissions, they define the linkage too.
+	
+	for _, p := range perms {
+		_, err := r.db.Exec(`INSERT INTO user_businesses (user_id, business_id, can_add, can_edit, can_delete) 
+			VALUES ($1, $2, $3, $4, $5) 
+			ON CONFLICT (user_id, business_id) DO UPDATE SET can_add = $3, can_edit = $4, can_delete = $5`, 
+			userID, p.BusinessID, p.CanAdd, p.CanEdit, p.CanDelete)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *UserRepo) HasPermission(userID, businessID int, action string) (bool, error) {
+	var canAdd, canEdit, canDelete bool
+	query := `SELECT can_add, can_edit, can_delete FROM user_businesses WHERE user_id = $1 AND business_id = $2`
+	err := r.db.QueryRow(query, userID, businessID).Scan(&canAdd, &canEdit, &canDelete)
+	if err != nil {
+		return false, err
+	}
+
+	switch action {
+	case "add":
+		return canAdd, nil
+	case "edit":
+		return canEdit, nil
+	case "delete":
+		return canDelete, nil
+	}
+	return false, nil
 }
 
 func (r *UserRepo) Delete(id int) error {

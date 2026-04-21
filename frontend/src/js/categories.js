@@ -53,7 +53,7 @@ function renderCategoriesTable(list) {
                <span class="search-icon">🔍</span>
                <input type="text" placeholder="${t("Qidirish...")}" id="category-search" value="${escapeHtml(document.getElementById('category-search')?.value || '')}" oninput="filterCategories(this.value)">
              </div>
-             <button class="btn btn-primary btn-sm" onclick="openCategoryModal()">${t("Qo'shish")}</button>
+             ${window.hasPermission('add') ? `<button class="btn btn-primary btn-sm" onclick="openCategoryModal()">${t("Qo'shish")}</button>` : ''}
            </div>
         </div>
         <div class="table-container">
@@ -74,8 +74,8 @@ function renderCategoriesTable(list) {
                     <td><strong style="color:var(--text-primary); font-size:15px;">${escapeHtml(c.name)}</strong></td>
                     <td style="text-align:center; font-size:12px; opacity:0.7;">${formatDate(c.createdAt)}</td>
                     <td class="actions" style="justify-content:center">
-                      <button class="btn-icon" onclick='openCategoryModal(${JSON.stringify(c).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
-                      <button class="btn-icon danger" onclick="deleteCategory(${c.id})" title="${t("O'chirish")}">🗑️</button>
+                      ${window.hasPermission('edit') ? `<button class="btn-icon" onclick='openCategoryModal(${JSON.stringify(c).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>` : ''}
+                      ${window.hasPermission('delete') ? `<button class="btn-icon danger" onclick="deleteCategory(${c.id})" title="${t("O'chirish")}">🗑️</button>` : ''}
                     </td>
                   </tr>`).join('')}
             </tbody>
@@ -253,7 +253,7 @@ async function saveCategory(e, id) {
 
   try {
     if (id) {
-      await api.put(`/categories/${id}`, { name, image: image || null });
+      await api.put(`/categories/${id}`, { businessId: bid || 0, name, image: image || null });
       showToast(t('Kategoriya yangilandi'));
     } else {
       await api.post('/categories', { businessId: bid, name, image: image || null });
@@ -269,7 +269,8 @@ async function saveCategory(e, id) {
 async function deleteCategory(id) {
   if (!confirm(t('Kategoriyani o\'chirishga ishonchingiz komilmi?'))) return;
   try {
-    await api.delete(`/categories/${id}`);
+    const bid = getSelectedBusinessId();
+    await api.delete(`/categories/${id}${bid ? '?businessId=' + bid : ''}`);
     showToast(t('Kategoriya o\'chirildi'));
     renderCategories();
   } catch (err) {

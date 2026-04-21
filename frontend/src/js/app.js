@@ -629,9 +629,15 @@ function renderTopProductsList(products) {
   // Mock sparklines
   setTimeout(() => {
     products.forEach((p, i) => {
-      const ctx = document.getElementById(`mini-sparkline-${i}`)?.getContext('2d');
-      if (ctx) {
-        new Chart(ctx, {
+      const canvas = document.getElementById(`mini-sparkline-${i}`);
+      if (canvas) {
+        // Destroy existing chart if it exists on this canvas
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+          existingChart.destroy();
+        }
+
+        new Chart(canvas, {
           type: 'line',
           data: {
             labels: [1, 2, 3, 4, 5],
@@ -657,17 +663,20 @@ function renderTopProductsList(products) {
 
 function renderDashboardCharts(transactions, products) {
   // 1. Sales Trend Chart
-  const ctxTrend = document.getElementById('salesTrendChart')?.getContext('2d');
-  if (ctxTrend) {
+  const canvasTrend = document.getElementById('salesTrendChart');
+  if (canvasTrend) {
+    const ctxTrend = canvasTrend.getContext('2d');
     const labels = [t('Dush'), t('Sesh'), t('Chor'), t('Pay'), t('Jum'), t('Shan'), t('Yak')];
-    const data = [12, 19, 15, 25, 22, 30, 20]; // Mock data - can be improved with real grouping
+    const data = [12, 19, 15, 25, 22, 30, 20]; // Mock data
 
     const gradient = ctxTrend.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-    if (currentTrendChart) currentTrendChart.destroy();
-    currentTrendChart = new Chart(ctxTrend, {
+    const existingChart = Chart.getChart(canvasTrend);
+    if (existingChart) existingChart.destroy();
+
+    currentTrendChart = new Chart(canvasTrend, {
       type: salesTrendChartType,
       data: {
         labels: labels,
@@ -706,8 +715,8 @@ function renderDashboardCharts(transactions, products) {
   }
 
   // 2. Sales Source Chart (Doughnut)
-  const ctxSource = document.getElementById('salesSourceChart')?.getContext('2d');
-  if (ctxSource) {
+  const canvasSource = document.getElementById('salesSourceChart');
+  if (canvasSource) {
     const totalCash = transactions.reduce((s, t) => s + (t.cash || 0), 0);
     const totalCard = transactions.reduce((s, t) => s + (t.card || 0), 0);
     const totalDebt = transactions.reduce((s, t) => s + (t.debt || 0), 0);
@@ -716,8 +725,10 @@ function renderDashboardCharts(transactions, products) {
     const sourceLabels = [t('Naqd'), t('Karta'), t('Qarz')];
     const sourceColors = ['#10b981', '#3b82f6', '#ef4444'];
 
-    if (currentSourceChart) currentSourceChart.destroy();
-    currentSourceChart = new Chart(ctxSource, {
+    const existingChart = Chart.getChart(canvasSource);
+    if (existingChart) existingChart.destroy();
+
+    currentSourceChart = new Chart(canvasSource, {
       type: 'doughnut',
       data: {
         labels: sourceLabels,

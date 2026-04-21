@@ -98,8 +98,8 @@ function renderClientsTable(list, isAppend = false) {
               </div>
             </div>
             <div class="acc-actions">
-              <button class="btn btn-success btn-sm" onclick='openClientModal(${JSON.stringify(c).replace(/'/g, "&#39;")})'>✏️ ${t("Tahrirlash")}</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteClient(${c.id})">🗑️ ${t("O'chirish")}</button>
+              ${window.hasPermission('edit') ? `<button class="btn btn-success btn-sm" onclick='openClientModal(${JSON.stringify(c).replace(/'/g, "&#39;")})'>✏️ ${t("Tahrirlash")}</button>` : ''}
+              ${window.hasPermission('delete') ? `<button class="btn btn-danger btn-sm" onclick="deleteClient(${c.id})">🗑️ ${t("O'chirish")}</button>` : ''}
             </div>
           </div>
         </div>`;
@@ -119,7 +119,7 @@ function renderClientsTable(list, isAppend = false) {
             oninput="filterClients(this.value)"
             style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
         </div>
-        ${getSelectedBusinessId() ? `<button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>` : ''}
+        ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>` : ''}
       </div>
     `;
     attachInfiniteScroll('clientPage', totalPages, 'renderClientsTable');
@@ -211,6 +211,7 @@ async function saveClient(e, id) {
   try {
     if (id) {
       await api.put(`/clients/${id}`, {
+        businessId: bid || 0,
         fullName: name,
         phone: phone,
         address: address,
@@ -235,7 +236,8 @@ async function saveClient(e, id) {
 async function deleteClient(id) {
   if (!confirm(t('Mijozni o\'chirishga ishonchingiz komilmi?'))) return;
   try {
-    await api.delete(`/clients/${id}`);
+    const bid = getSelectedBusinessId();
+    await api.delete(`/clients/${id}${bid ? '?businessId=' + bid : ''}`);
     showToast(t('Mijoz o\'chirildi'));
     renderClients();
   } catch (err) {

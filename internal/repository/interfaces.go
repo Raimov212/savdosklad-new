@@ -17,6 +17,7 @@ type UserRepository interface {
 	UpdateLanguage(id int, lang string) error
 	GetByCreatedBy(adminID int) ([]entity.User, error)
 	Delete(id int) error
+	HasPermission(userID, businessID int, action string) (bool, error)
 }
 
 type BusinessRepository interface {

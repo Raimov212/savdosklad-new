@@ -190,7 +190,7 @@ function renderExpenseTable(list, isAppend = false) {
                  <input type="text" placeholder="${t("Qidirish...")}" id="expense-search" value="${escapeHtml(document.getElementById('expense-search')?.value || '')}" oninput="renderExpenseTable()">
                </div>
                <button class="btn btn-ghost" onclick="openDateFilterModal()" title="${t("Sana bo'yicha filter")}">📅</button>
-               <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">${t("Qo'shish")}</button>
+               ${window.hasPermission('add') ? `<button class="btn btn-primary btn-sm" onclick="openExpenseModal()">${t("Qo'shish")}</button>` : ''}
              </div>
           </div>
           <div class="table-container">
@@ -256,7 +256,7 @@ function renderFixedTable(list, isAppend = false) {
       </td>
       <td style="text-align:center"><span style="font-size:13px; color:var(--text-muted)">${escapeHtml(f.description) || '—'}</span></td>
       <td class="actions" style="justify-content:center">
-        <button class="btn-icon" onclick='openFixedCostModal(${JSON.stringify(f).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
+        ${window.hasPermission('edit') ? `<button class="btn-icon" onclick='openFixedCostModal(${JSON.stringify(f).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>` : ''}
       </td>
     </tr>`).join('');
 
@@ -270,7 +270,7 @@ function renderFixedTable(list, isAppend = false) {
                <span class="search-icon">🔍</span>
                <input type="text" placeholder="${t("Qidirish...")}" id="fixed-search" value="${escapeHtml(document.getElementById('fixed-search')?.value || '')}" oninput="filterFixed(this.value)">
              </div>
-             <button class="btn btn-primary btn-sm" onclick="openFixedCostModal()">${t("Qo'shish")}</button>
+             ${window.hasPermission('add') ? `<button class="btn btn-primary btn-sm" onclick="openFixedCostModal()">${t("Qo'shish")}</button>` : ''}
            </div>
         </div>
         <div class="table-container">

@@ -118,10 +118,23 @@ window.renderEmployeesTable = renderEmployeesTable;
 
 window.openAddEmployeeModal = function () {
     const bizCheckboxes = allBusinesses.map(b => `
-        <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;">
-            <input type="checkbox" name="emp-businesses" value="${b.id}">
-            <span>${escapeHtml(b.name)}</span>
-        </label>
+        <div style="margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+                <input type="checkbox" name="emp-businesses" value="${b.id}" onchange="window.toggleBizPermissions(${b.id}, this.checked)">
+                <span>${escapeHtml(b.name)}</span>
+            </label>
+            <div id="biz-perms-${b.id}" style="display:none; gap:15px; margin-left:25px; margin-top:5px; font-size:12px;">
+                <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                    <input type="checkbox" class="perm-add" data-biz="${b.id}"> ${t("Qo'shish")}
+                </label>
+                <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                    <input type="checkbox" class="perm-edit" data-biz="${b.id}"> ${t("Tahrirlash")}
+                </label>
+                <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                    <input type="checkbox" class="perm-delete" data-biz="${b.id}"> ${t("O'chirish")}
+                </label>
+            </div>
+        </div>
     `).join('');
 
     const body = `
@@ -181,9 +194,16 @@ window.openAddEmployeeModal = function () {
 
 window.handleAddEmployee = async function (e) {
     e.preventDefault();
-    const selectedBids = Array.from(document.querySelectorAll('input[name="emp-businesses"]:checked')).map(cb => parseInt(cb.value));
+    const businessPermissions = selectedBids.map(bid => {
+        const row = document.getElementById(`biz-perms-${bid}`);
+        return {
+            businessId: bid,
+            canAdd: row.querySelector('.perm-add').checked,
+            canEdit: row.querySelector('.perm-edit').checked,
+            canDelete: row.querySelector('.perm-delete').checked
+        };
+    });
 
-    const currentUser = api.getUser() || {};
     const req = {
         firstName: document.getElementById('emp-firstName').value,
         lastName: document.getElementById('emp-lastName').value,
@@ -192,6 +212,7 @@ window.handleAddEmployee = async function (e) {
         password: document.getElementById('emp-pass').value,
         expirationDate: document.getElementById('emp-expiration').value ? new Date(document.getElementById('emp-expiration').value).toISOString() : undefined,
         businessIds: selectedBids,
+        businessPermissions: businessPermissions,
         image: document.getElementById('emp-image').value
     };
 
@@ -210,12 +231,33 @@ window.openEditEmployeeModal = async function (id) {
     if (!emp) return;
 
     const empBids = emp.businessIds || [];
-    const bizCheckboxes = allBusinesses.map(b => `
-        <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; cursor:pointer;">
-            <input type="checkbox" name="emp-businesses" value="${b.id}" ${empBids.includes(b.id) ? 'checked' : ''}>
-            <span>${escapeHtml(b.name)}</span>
-        </label>
-    `).join('');
+    const bizCheckboxes = allBusinesses.map(b => {
+        const isLinked = empBids.includes(b.id);
+        const perms = emp.businessPermissions ? emp.businessPermissions.find(p => p.businessId === b.id) : null;
+        const canAdd = perms ? perms.canAdd : false;
+        const canEdit = perms ? perms.canEdit : false;
+        const canDelete = perms ? perms.canDelete : false;
+
+        return `
+            <div style="margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+                    <input type="checkbox" name="emp-businesses" value="${b.id}" ${isLinked ? 'checked' : ''} onchange="window.toggleBizPermissions(${b.id}, this.checked)">
+                    <span>${escapeHtml(b.name)}</span>
+                </label>
+                <div id="biz-perms-${b.id}" style="display:${isLinked ? 'flex' : 'none'}; gap:15px; margin-left:25px; margin-top:5px; font-size:12px;">
+                    <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                        <input type="checkbox" class="perm-add" data-biz="${b.id}" ${canAdd ? 'checked' : ''}> ${t("Qo'shish")}
+                    </label>
+                    <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                        <input type="checkbox" class="perm-edit" data-biz="${b.id}" ${canEdit ? 'checked' : ''}> ${t("Tahrirlash")}
+                    </label>
+                    <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+                        <input type="checkbox" class="perm-delete" data-biz="${b.id}" ${canDelete ? 'checked' : ''}> ${t("O'chirish")}
+                    </label>
+                </div>
+            </div>
+        `;
+    }).join('');
 
     const body = `
         <form onsubmit="window.handleUpdateEmployee(event, ${emp.id})" id="employee-form">
@@ -271,13 +313,23 @@ window.openEditEmployeeModal = async function (id) {
 window.handleUpdateEmployee = async function (e, id) {
     e.preventDefault();
     const selectedBids = Array.from(document.querySelectorAll('input[name="emp-businesses"]:checked')).map(cb => parseInt(cb.value));
-    const currentUser = api.getUser() || {};
+    const businessPermissions = selectedBids.map(bid => {
+        const row = document.getElementById(`biz-perms-${bid}`);
+        return {
+            businessId: bid,
+            canAdd: row.querySelector('.perm-add').checked,
+            canEdit: row.querySelector('.perm-edit').checked,
+            canDelete: row.querySelector('.perm-delete').checked
+        };
+    });
+
     const req = {
         firstName: document.getElementById('emp-firstName').value,
         lastName: document.getElementById('emp-lastName').value,
         phoneNumber: document.getElementById('emp-phone').value,
         expirationDate: document.getElementById('emp-expiration').value ? new Date(document.getElementById('emp-expiration').value).toISOString() : undefined,
         businessIds: selectedBids,
+        businessPermissions: businessPermissions,
         image: document.getElementById('edit-emp-image') ? document.getElementById('edit-emp-image').value : ''
     };
     const pass = document.getElementById('edit-emp-pass') ? document.getElementById('edit-emp-pass').value : '';
@@ -316,4 +368,8 @@ window.previewEmployeeImage = async function (input, hiddenId, previewId) {
             }
         } catch (e) { showToast(e.message, 'error'); }
     }
+};
+window.toggleBizPermissions = function(bid, checked) {
+    const el = document.getElementById(`biz-perms-${bid}`);
+    if (el) el.style.display = checked ? 'flex' : 'none';
 };

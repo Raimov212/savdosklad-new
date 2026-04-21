@@ -22,7 +22,8 @@ type CreateClientRequest struct {
 }
 
 type UpdateClientRequest struct {
-	FullName *string `json:"fullName"`
-	Phone    *string `json:"phone"`
-	Address  *string `json:"address"`
+	BusinessID int     `json:"businessId"`
+	FullName   *string `json:"fullName"`
+	Phone      *string `json:"phone"`
+	Address    *string `json:"address"`
 }

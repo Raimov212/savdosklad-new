@@ -98,7 +98,7 @@ function renderRefundsTable(list, isAppend = false) {
             style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
         </div>
         <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
-        <button class="btn btn-primary" onclick="openRefundModal()">${t("Qo'shish")}</button>
+        ${window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openRefundModal()">${t("Qo'shish")}</button>` : ''}
       </div>
     `;
     attachInfiniteScroll('refundPage', totalPages, 'renderRefundsTable');
