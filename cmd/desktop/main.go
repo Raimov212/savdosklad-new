@@ -284,16 +284,18 @@ func main() {
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	log.Printf("SavdoSklad Backend starting on http://%s", addr)
 
-	// Background Goroutine: Backend serverini asosiy oqimdan (Main UI thread) 
-	// mustaqil ravishda parallel ishga tushiramiz.
+	// Go tili imkoniyati - "Goroutine (go func)": Go tilining asosiy asinxron vositasi.
+	// Backend serverni asosiy dastur oqimini (WebView UI oqimini) to'xtatib qo'ymasligi 
+	// (block qilinmasligi) uchun alohida goroutine yaratilib, server fonda parallel ishga tushiriladi.
 	go func() {
 		if err := router.Run(addr); err != nil {
 			log.Printf("Server error: %v", err)
 		}
 	}()
 
-	// Background Goroutine: Telegram bot xizmatini asosiy dasturga xalaqit
-	// bermaydigan qilib alohida "go" oqimida ishga tushiramiz.
+	// Go tili imkoniyati - "Goroutine (go func)": Yana bir parallel jarayon vositasi.
+	// Telegram bot doimiy ravishda Telegram serverlaridan xabarlarni kutadi (polling).
+	// Bu jarayon asosiy dastur va backend serverga xalaqit bermasligi uchun alohida oqimga (goroutine) olingan.
 	go func() {
 		bot, err := telegram.NewBot(
 			cfg.Telegram,

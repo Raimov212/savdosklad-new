@@ -64,8 +64,9 @@ func (b *Bot) Start() {
 	cache.TgAuthCache.Store("__bot_username__", b.api.Self.UserName)
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-	// Channels (Kanallar): Telegram API orqali kelayotgan xabarlar oqimini (stream)
-	// <-chan tgbotapi.Update kanali yordamida qabul qilamiz.
+	// Go tili imkoniyati - "Channel (Kanal)": Goroutine'lar o'rtasida ma'lumot almashish va sinxronizatsiya vositasi.
+	// GetUpdatesChan bizga maxsus <-chan (faqat o'qish uchun) kanal qaytaradi.
+	// Bu orqali Telegram serveridan kelayotgan xabarlar xavfsiz oqim tarzida birma-bir qabul qilinadi.
 	updates := b.api.GetUpdatesChan(u)
 
 	for update := range updates {
@@ -85,14 +86,15 @@ func (b *Bot) Start() {
 }
 
 func (b *Bot) RunScheduler() {
-	// Ticker (Vaqt o'lchagich): Har bir minutda signal jo'natib turadigan vosita.
-	// Bu orqa fonda vaqtni tekshirib turish uchun ishlatiladi.
+	// Go tili imkoniyati - "time.Ticker": Belgilangan vaqt oralig'ida (masalan, har minutda)
+	// o'zining kanali orqali avtomatik ravishda signal yuborib turuvchi taymer vositasi.
 	ticker := time.NewTicker(1 * time.Minute)
 
-	// Goroutine (Parallel ishlovchi): Asosiy jarayonni to'xtatib qo'ymaslik uchun
-	// scheduler alohida "go" ipining (routine) ichida ishga tushiriladi.
+	// Go tili imkoniyati - "Goroutine (go func)": Kunlik hisobotlarni jo'natuvchi 
+	// rejalashtiruvchi jarayon botning xabarlarni qayta ishlashini to'xtatib qo'ymasligi uchun parallel ishga tushirilgan.
 	go func() {
-		// Kanalni range orqali o'qish: Ticker signal berganda loop bir marta aylanadi.
+		// Go tili imkoniyati - "Channel Iteration (Range)": ticker.C kanalidan xabar
+		// kelguncha kutib turadi, kelgan zahoti siklni bir marta aylantiradi.
 		for range ticker.C {
 			now := time.Now()
 			// Send report at 19:00 (7 PM)
