@@ -207,8 +207,8 @@ async function openSaleModal() {
     const clients = clientsResults.flat();
 
     saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0).map(p => {
-       const b = (businesses || []).find(bus => bus.id === p.businessId);
-       return { ...p, businessName: b ? b.name : t("Noma'lum") };
+      const b = (businesses || []).find(bus => bus.id === p.businessId);
+      return { ...p, businessName: b ? b.name : t("Noma'lum") };
     });
     globalClients = clients || [];
     currentTotalTransactionID = null;
@@ -242,8 +242,11 @@ async function openSaleModal() {
         <div id="sale-batches-container" style="margin-bottom: 15px; max-height: 120px; overflow-y: auto;"></div>
         <div id="sale-items-container" style="min-height: 200px; max-height: 350px; overflow-y: auto;"></div>
         
-        <div class="modal-footer" style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
-          <div id="sale-total-mini" style="font-size: 18px; font-weight: 700; color: var(--primary);">0 ${t("so'm")}</div>
+        <div class="modal-footer" style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="sale-total-qty-mini" style="font-size: 16px; font-weight: 600; color: var(--text-muted);">0 ${t("ta")}</div>
+            <div id="sale-total-mini" style="font-size: 20px; font-weight: 700; color: var(--primary);">0 ${t("so'm")}</div>
+          </div>
           <button type="button" class="btn btn-primary" onclick="goToSalePaymentStep()" style="padding: 10px 30px;">${t("To'lovga o'tish")} →</button>
         </div>
       </div>
@@ -357,7 +360,7 @@ async function openSaleModal() {
   }
 }
 
-window.goToSalePaymentStep = function() {
+window.goToSalePaymentStep = function () {
   if (saleItems.length === 0 && savedBatchItems.length === 0) {
     showToast(t("Avval mahsulotlarni tanlang"), 'warning');
     return;
@@ -370,7 +373,7 @@ window.goToSalePaymentStep = function() {
   updateSaleTotal();
 };
 
-window.backToSaleProducts = function() {
+window.backToSaleProducts = function () {
   document.getElementById('sale-step-1').style.display = 'block';
   document.getElementById('sale-step-2').style.display = 'none';
   document.getElementById('step-1-indicator').classList.add('active');
@@ -427,10 +430,10 @@ function addSaleProductById(id) {
   if (existing) {
     existing.quantity++;
   } else {
-    saleItems.push({ 
-      productId: id, 
-      quantity: 1, 
-      price: product.price, 
+    saleItems.push({
+      productId: id,
+      quantity: 1,
+      price: product.price,
       name: product.name,
       businessId: product.businessId,
       businessName: product.businessName
@@ -534,13 +537,18 @@ function onSalePriceChange(idx, val) {
 }
 
 function updateSaleTotal() {
+  const totalQty = saleItems.reduce((s, i) => s + parseInt(i.quantity || 0), 0) + savedBatchItems.reduce((s, i) => s + parseInt(i.quantity || 0), 0);
   const total = saleItems.reduce((s, i) => s + (i.price * i.quantity), 0);
+
+  const miniQtyEl = document.getElementById('sale-total-qty-mini');
+  if (miniQtyEl) miniQtyEl.textContent = `${totalQty} ${t("ta")}`;
+
   const miniEl = document.getElementById('sale-total-mini');
   if (miniEl) miniEl.textContent = `${formatPrice(total)} ${t("so'm")}`;
-  
+
   const el = document.getElementById('sale-total-value');
   if (el) el.textContent = `${formatPrice(total + (savedBatchItems.reduce((s, i) => s + (i.price * i.quantity), 0)))} ${t("so'm")}`;
-  
+
   updateSalePayment();
 }
 
@@ -558,7 +566,7 @@ function updateSalePayment() {
   const cash = parseFloat(cashInp.value) || 0;
   const card = parseFloat(cardInp.value) || 0;
   const click = parseFloat(clickInp.value) || 0;
-  
+
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
   const currentPayments = cash + card + click;
   const totalPaid = overallPaidSoFar + currentPayments;
@@ -594,12 +602,12 @@ async function addToSaleBatch() {
   try {
     let bid = getSelectedBusinessId();
     if (!bid && validItems.length > 0) {
-        bid = validItems[0].businessId;
+      bid = validItems[0].businessId;
     }
 
     if (!bid) {
-        showToast(t("Iltimos, avval biznesni tanlang"), 'error');
-        return;
+      showToast(t("Iltimos, avval biznesni tanlang"), 'error');
+      return;
     }
 
     const total = validItems.reduce((s, i) => s + (i.price * i.quantity), 0);
@@ -608,11 +616,11 @@ async function addToSaleBatch() {
     const card = parseFloat(document.getElementById('sale-card').value) || 0;
     const click = parseFloat(document.getElementById('sale-click').value) || 0;
     const debt = parseFloat(document.getElementById('sale-debt').value) || 0;
-    
+
     const currentTotal = validItems.reduce((s, i) => s + (i.price * i.quantity), 0);
     const savedTotal = savedBatchItems.reduce((s, i) => s + (i.price * i.quantity), 0);
     const overallTotal = currentTotal + savedTotal;
-    
+
     const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
     const currentPayments = cash + card + click;
 
@@ -620,8 +628,8 @@ async function addToSaleBatch() {
       showToast(t('"JAMI" dan katta summani kirita olmaysiz!'), 'error');
       const totalValEl = document.getElementById('sale-total-value');
       if (totalValEl) {
-          totalValEl.classList.add('shake');
-          setTimeout(() => totalValEl.classList.remove('shake'), 500);
+        totalValEl.classList.add('shake');
+        setTimeout(() => totalValEl.classList.remove('shake'), 500);
       }
       return;
     }
@@ -722,9 +730,9 @@ async function finalizeSale(e) {
   const currentTotal = saleItems.reduce((s, i) => s + (i.price * i.quantity), 0);
   const savedTotal = savedBatchItems.reduce((s, i) => s + (i.price * i.quantity), 0);
   const overallTotal = currentTotal + savedTotal;
-  
+
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
-  
+
   if (overallPaidSoFar + cash + card + click > overallTotal + 0.01) {
     showToast(t('"JAMI" dan katta summani kirita olmaysiz!'), 'error');
     return;
@@ -737,13 +745,13 @@ async function finalizeSale(e) {
     // Fallback: If no business is selected in the UI (e.g., "All" is selected),
     // use the business of the first item in the sale.
     if (!bid) {
-        if (saleItems.length > 0) bid = saleItems[0].businessId;
-        else if (savedBatchItems.length > 0) bid = savedBatchItems[0].businessId;
+      if (saleItems.length > 0) bid = saleItems[0].businessId;
+      else if (savedBatchItems.length > 0) bid = savedBatchItems[0].businessId;
     }
 
     if (!bid) {
-        showToast(t("Iltimos, avval biznesni tanlang"), 'error');
-        return;
+      showToast(t("Iltimos, avval biznesni tanlang"), 'error');
+      return;
     }
 
     const clientId = document.getElementById('sale-client').value;
@@ -752,47 +760,47 @@ async function finalizeSale(e) {
 
     // Calculate first batch total or just use it
     if (!currentTotalTransactionID) {
-        // Create TotalTransaction with everything
-        const resp = await api.post('/transactions', {
-          businessId: bid,
-          total: overallTotal,
-          cash: cash,
-          card: card,
-          click: click,
-          debt: debt,
-          clientId: clientId ? parseInt(clientId) : null,
-          description: desc,
-          items: saleItems.map(i => ({
+      // Create TotalTransaction with everything
+      const resp = await api.post('/transactions', {
+        businessId: bid,
+        total: overallTotal,
+        cash: cash,
+        card: card,
+        click: click,
+        debt: debt,
+        clientId: clientId ? parseInt(clientId) : null,
+        description: desc,
+        items: saleItems.map(i => ({
+          productId: parseInt(i.productId),
+          productQuantity: i.quantity,
+          productPrice: i.price,
+          businessId: i.businessId
+        }))
+      });
+      currentTotalTransactionID = resp.id;
+    } else {
+      // We already have some batches saved. 
+      // 1. Add current items as a batch
+      if (saleItems.length > 0) {
+        await api.post(`/transactions/${currentTotalTransactionID}/items?businessId=${bid}`,
+          saleItems.map(i => ({
             productId: parseInt(i.productId),
             productQuantity: i.quantity,
             productPrice: i.price,
             businessId: i.businessId
           }))
-        });
-        currentTotalTransactionID = resp.id;
-    } else {
-        // We already have some batches saved. 
-        // 1. Add current items as a batch
-        if (saleItems.length > 0) {
-            await api.post(`/transactions/${currentTotalTransactionID}/items?businessId=${bid}`,
-              saleItems.map(i => ({
-                productId: parseInt(i.productId),
-                productQuantity: i.quantity,
-                productPrice: i.price,
-                businessId: i.businessId
-              }))
-            );
-        }
-        // 2. Update the final TotalTransaction with new payments
-        await api.put(`/transactions/${currentTotalTransactionID}`, {
-          total: overallTotal,
-          cash: cumulativePayments.cash + cash,
-          card: cumulativePayments.card + card,
-          click: cumulativePayments.click + click,
-          debt: debt,
-          clientId: clientId ? parseInt(clientId) : null,
-          description: desc,
-        });
+        );
+      }
+      // 2. Update the final TotalTransaction with new payments
+      await api.put(`/transactions/${currentTotalTransactionID}`, {
+        total: overallTotal,
+        cash: cumulativePayments.cash + cash,
+        card: cumulativePayments.card + card,
+        click: cumulativePayments.click + click,
+        debt: debt,
+        clientId: clientId ? parseInt(clientId) : null,
+        description: desc,
+      });
     }
 
     showToast(t('Sotuv muvaffaqiyatli yakunlandi!'), 'success');
@@ -821,7 +829,7 @@ async function viewTransactionItems(ids) {
       <div class="table-container">
         <table>
           <thead>
-            <tr><th>#</th><th style="text-align:center">${t("Mahsulot nomi")}</th><th style="text-align:center">${t("Narxi")}</th><th style="text-align:center">${t("Soni")}</th><th style="text-align:center">${t("Jami")}</th></tr>
+            <tr><th>№</th><th style="text-align:center">${t("Mahsulot nomi")}</th><th style="text-align:center">${t("Narxi")}</th><th style="text-align:center">${t("Soni")}</th><th style="text-align:center">${t("Jami")}</th></tr>
           </thead>
           <tbody>
             ${list.length === 0 ? `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
@@ -837,6 +845,14 @@ async function viewTransactionItems(ids) {
                 </tr>`;
         }).join('')}
           </tbody>
+          ${list.length > 0 ? `
+          <tfoot>
+            <tr style="background: rgba(255, 255, 255, 0.05); font-weight: bold;">
+              <td colspan="3" style="text-align:right; font-size: 14px;">${t("Jami")}:</td>
+              <td style="text-align:center; font-size: 14px;">${list.reduce((sum, item) => sum + (item.productQuantity || 0), 0)}</td>
+              <td class="price" style="text-align:right; font-size: 14px; color: var(--success);">${formatPrice(list.reduce((sum, item) => sum + ((item.productPrice || 0) * (item.productQuantity || 0)), 0))}</td>
+            </tr>
+          </tfoot>` : ''}
         </table>
       </div>
       <div class="modal-footer" style="justify-content: space-between; gap: 10px; margin-top:20px;">
@@ -919,19 +935,24 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
         index + 1,
         pName,
         item.productQuantity,
-        item.productPrice,
-        (item.productPrice * item.productQuantity),
+        formatPrice(item.productPrice),
+        formatPrice(item.productPrice * item.productQuantity),
         item.productBarcode || "-"
       ];
     });
 
+    const totalQty = transItems.reduce((sum, item) => sum + (item.productQuantity || 0), 0);
+    const totalAmount = transItems.reduce((sum, item) => sum + ((item.productPrice || 0) * (item.productQuantity || 0)), 0);
+
     // AutoTable
     doc.autoTable({
       startY: 35,
-      head: [['#', t('Mahsulot nomi'), t('Soni'), t('Narxi'), t('Jami'), t('Barcode')]],
+      head: [['№', t('Mahsulot nomi'), t('Soni'), t('Narxi'), t('Jami'), t('Barcode')]],
       body: tableData,
+      foot: [['', t('Jami') + ':', totalQty, '', formatPrice(totalAmount), '']],
       theme: 'grid',
       headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'normal', font: fontName, halign: 'center' },
+      footStyles: { fillColor: [240, 240, 240], textColor: [239, 68, 68], fontStyle: 'bold', font: fontName, halign: 'center' },
       styles: { fontSize: 10, textColor: 0, font: fontName, halign: 'center' },
       columnStyles: {
         0: { cellWidth: 10, halign: 'center' },
@@ -945,11 +966,6 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
     // Totals section
     let finalY = doc.lastAutoTable.finalY + 15;
 
-    doc.setFontSize(12);
-    doc.setTextColor(239, 68, 68); // Red color
-    doc.text(`${t("Jami summa")}: ${formatPrice(transaction.total)}`, 15, finalY);
-
-    finalY += 10;
     doc.setFontSize(11);
     doc.setTextColor(0, 0, 0);
     doc.text(`${t("Naqd")}: ${formatPrice(transaction.cash)}`, 15, finalY); finalY += 5;

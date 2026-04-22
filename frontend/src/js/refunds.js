@@ -130,7 +130,7 @@ async function viewRefundItems(id) {
         <table>
           <thead>
             <tr>
-              <th>#</th>
+              <th>№</th>
               <th style="text-align:center">${t("Mahsulot nomi")}</th>
               <th style="text-align:center">${t("Narxi")}</th>
               <th style="text-align:center">${t("Soni")}</th>
@@ -151,6 +151,14 @@ async function viewRefundItems(id) {
                 </tr>`;
         }).join('')}
           </tbody>
+          ${list.length > 0 ? `
+          <tfoot>
+            <tr style="background: rgba(255, 255, 255, 0.05); font-weight: bold;">
+              <td colspan="3" style="text-align:right; font-size: 14px;">${t("Jami")}:</td>
+              <td style="text-align:center; font-size: 14px;">${list.reduce((sum, item) => sum + (item.productQuantity || 0), 0)}</td>
+              <td class="price" style="text-align:right; font-size: 14px; color: var(--success);">${formatPrice(list.reduce((sum, item) => sum + ((item.productPrice || 0) * (item.productQuantity || 0)), 0))}</td>
+            </tr>
+          </tfoot>` : ''}
         </table>
       </div>
       <div class="modal-footer" style="padding-top:10px">
@@ -201,10 +209,10 @@ async function downloadRefundPdf(id) {
     doc.setFont(fontName);
     doc.setFontSize(14);
     doc.text(`${t("Qaytarish")}: #${id}`, 15, 15);
-    
+
     doc.setFontSize(10);
     doc.text(`${t("Sana")}: ${formatDateTime(refund.createdAt)}`, 15, 22);
-    
+
     if (refund.clientName) {
       doc.text(`${t("Mijoz")}: ${refund.clientName}`, 15, 29);
     }
@@ -213,26 +221,34 @@ async function downloadRefundPdf(id) {
       index + 1,
       item.productName || `${t("Mahsulot")} #${item.productId}`,
       item.productQuantity,
-      item.productPrice,
-      (item.productPrice * item.productQuantity)
+      formatPrice(item.productPrice),
+      formatPrice(item.productPrice * item.productQuantity)
     ]);
+
+    const totalQty = refundItems.reduce((sum, item) => sum + (item.productQuantity || 0), 0);
 
     doc.autoTable({
       startY: 40,
-      head: [['#', t('Mahsulot nomi'), t('Soni'), t('Narxi'), t('Jami')]],
+      head: [['№', t('Mahsulot nomi'), t('Soni'), t('Narxi'), t('Jami')]],
       body: tableData,
+      foot: [['', t('Jami') + ':', totalQty, '', formatPrice(refund.total)]],
       theme: 'grid',
-      styles: { font: fontName, fontSize: 10 },
-      headStyles: { fillColor: [240, 240, 240], textColor: 0, font: fontName }
+      styles: { font: fontName, fontSize: 10, halign: 'center' },
+      headStyles: { fillColor: [230, 230, 230], textColor: 0, font: fontName, halign: 'center' },
+      footStyles: { fillColor: [240, 240, 240], textColor: [239, 68, 68], fontStyle: 'bold', font: fontName, halign: 'center' },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        2: { cellWidth: 20, halign: 'center' },
+        3: { cellWidth: 35, halign: 'right' },
+        4: { cellWidth: 40, halign: 'right' }
+      }
     });
 
     let finalY = doc.lastAutoTable.finalY + 15;
-    doc.setFontSize(12);
-    doc.text(`${t("Jami")}: ${formatPrice(refund.total)} ${t("so'm")}`, 15, finalY);
 
     if (refund.description) {
-      finalY += 10;
       doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
       doc.text(`${t("Izoh")}: ${refund.description}`, 15, finalY);
     }
 
@@ -380,7 +396,7 @@ function validateRefundAmount(idx, val) {
   // wait, I used refund-qty-${idx} in template
   const qtyInput = document.getElementById(`refund-qty-${idx}`);
   const actualQty = qtyInput ? (parseInt(qtyInput.value) || 0) : 0;
-  
+
   const item = currentTransactionItems[idx];
   const maxAmount = actualQty * item.productPrice;
 
@@ -397,7 +413,7 @@ function updateRefundTotal() {
   currentTransactionItems.forEach((item, idx) => {
     const el = document.getElementById(`refund-amount-${idx}`);
     if (el) {
-        total += (parseFloat(el.value) || 0);
+      total += (parseFloat(el.value) || 0);
     }
   });
   const totalEl = document.getElementById('refund-total-amount');
@@ -415,21 +431,21 @@ async function submitRefund() {
   currentTransactionItems.forEach((item, idx) => {
     const qtyInput = document.getElementById(`refund-qty-${idx}`);
     const amountInput = document.getElementById(`refund-amount-${idx}`);
-    
-    if (qtyInput && amountInput) {
-        const qty = parseInt(qtyInput.value) || 0;
-        const amount = parseFloat(amountInput.value) || 0;
 
-        if (qty > 0) {
-          items.push({
-            productId: item.productId,
-            productQuantity: qty,
-            productPrice: item.productPrice,
-            transactionId: item.id,
-            description: desc
-          });
-          total += amount;
-        }
+    if (qtyInput && amountInput) {
+      const qty = parseInt(qtyInput.value) || 0;
+      const amount = parseFloat(amountInput.value) || 0;
+
+      if (qty > 0) {
+        items.push({
+          productId: item.productId,
+          productQuantity: qty,
+          productPrice: item.productPrice,
+          transactionId: item.id,
+          description: desc
+        });
+        total += amount;
+      }
     }
   });
 
