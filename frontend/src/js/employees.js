@@ -86,7 +86,7 @@ function renderEmployeesTable(isAppend = false) {
                 <td style="text-align:center; color:var(--text-muted);">${(window.employeesPage - 1) * employeesPerPage + i + 1}</td>
                 <td style="font-weight:600;">${escapeHtml(emp.firstName)} ${escapeHtml(emp.lastName)}</td>
                 <td>@${escapeHtml(emp.userName)}</td>
-                <td><span class="badge" style="background:var(--primary-glow); color:var(--primary-color);">${escapeHtml(linkedBizNames || t("Biriktirilmagan"))}</span></td>
+                <td><span class="badge" style="background:var(--accent-glow); color:var(--accent);">${escapeHtml(linkedBizNames || t("Biriktirilmagan"))}</span></td>
                 <td style="text-align:center;">${emp.phoneNumber || '—'}</td>
                 <td style="text-align:center; font-size:12px; font-weight:500;">${emp.expirationDate ? emp.expirationDate.split('T')[0] : '—'}</td>
                 <td class="actions" style="justify-content:center">

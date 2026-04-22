@@ -55,8 +55,8 @@ function renderDebtsTabs() {
     <div style="margin-bottom: 24px; display: flex; justify-content: flex-start;">
       <div style="background: rgba(255,255,255,0.05); padding: 4px; border-radius: 12px; display: inline-flex; border: 1px solid var(--border);">
         <button onclick="switchDebtTab('active')" style="
-          border: none; background: ${currentTab === 'active' ? 'var(--primary-glow)' : 'transparent'};
-          color: ${currentTab === 'active' ? 'var(--primary-color)' : 'var(--text-secondary)'};
+          border: none; background: ${currentTab === 'active' ? 'var(--accent-glow)' : 'transparent'};
+          color: ${currentTab === 'active' ? 'var(--accent)' : 'var(--text-secondary)'};
           padding: 10px 24px; border-radius: 8px; font-weight: 600; font-family: 'Outfit'; cursor: pointer;
           transition: all 0.3s;
         ">⚠️ ${t("Qarzdorlar")}</button>

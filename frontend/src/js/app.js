@@ -366,13 +366,13 @@ async function renderDashboard() {
 
     if (isEmployee) {
       content.innerHTML = `
-        <div class="card fade-in" style="padding:24px; margin-bottom:20px; background:var(--primary-glow); border-left:4px solid var(--primary-color);">
+        <div class="card fade-in" style="padding:24px; margin-bottom:20px; background:var(--accent-glow); border-left:4px solid var(--accent);">
            <div style="display:flex; align-items:center; gap:16px;">
-              <div style="width:48px; height:48px; border-radius:50%; background:var(--primary-color); display:flex; align-items:center; justify-content:center; color:#fff;">
+              <div style="width:48px; height:48px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; color:#fff;">
                 <i data-lucide="sun" style="width:24px; height:24px;"></i>
               </div>
               <div>
-                <h3 style="margin:0; font-family:'Outfit'; color:var(--primary-color); font-size:20px;">${t("Assalomu alaykum")}!</h3>
+                <h3 style="margin:0; font-family:'Outfit'; color:var(--accent); font-size:20px;">${t("Assalomu alaykum")}!</h3>
                 <p style="margin:4px 0 0 0; color:var(--text-secondary); font-size:14px;">${t("Bugungi ish kunida omad tilaymiz.")}</p>
               </div>
            </div>
@@ -902,12 +902,12 @@ async function renderProfile() {
   const u = api.getUser();
 
   content.innerHTML = `
-    <div class="profile-container fade-in" style="min-height: 80vh; padding: 20px; position: relative; overflow: hidden; background: #f8fafc; border-radius: 20px;">
+    <div class="profile-container fade-in" style="min-height: 80vh; padding: 20px; position: relative; overflow: hidden; background: var(--bg-secondary); border-radius: 20px;">
         <!-- Background Decorative Blobs -->
-        <div style="position: absolute; top: -10%; left: -10%; width: 400px; height: 400px; background: rgba(var(--primary-rgb), 0.15); border-radius: 50%; filter: blur(80px); z-index: 0;"></div>
+        <div style="position: absolute; top: -10%; left: -10%; width: 400px; height: 400px; background: rgba(16, 185, 129, 0.15); border-radius: 50%; filter: blur(80px); z-index: 0;"></div>
         <div style="position: absolute; bottom: -10%; right: -10%; width: 350px; height: 350px; background: rgba(99, 102, 241, 0.1); border-radius: 50%; filter: blur(80px); z-index: 0;"></div>
 
-        <div class="card shadow-lg" style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1; overflow: hidden; border: none; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.85); border-radius: 24px;">
+        <div class="card shadow-lg" style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1; overflow: hidden; border: none; backdrop-filter: blur(10px); background: var(--bg-card); border-radius: 24px;">
             <!-- Modern Header Banner (Sidebar Rangida) - Kengaytirilgan -->
             <div style="min-height: 220px; background: var(--sidebar-gradient); margin: 0; padding: 30px 40px; position: relative; display: flex; flex-direction: column; justify-content: flex-end;">
                 <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: url('https://www.transparenttextures.com/patterns/cubes.png'); opacity: 0.1;"></div>
@@ -940,23 +940,23 @@ async function renderProfile() {
 
                 <!-- Info Grid -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-                    <div class="info-card" style="padding: 15px 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+                    <div class="info-card" style="padding: 15px 20px; background: var(--bg-input); border-radius: 16px; border: 1px solid var(--border);">
                         <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Ism")}</label>
-                        <div style="font-size:17px; font-weight:600; color: #334155;">${u.firstName}</div>
+                        <div style="font-size:17px; font-weight:600; color: var(--text-primary);">${u.firstName}</div>
                     </div>
-                    <div class="info-card" style="padding: 15px 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+                    <div class="info-card" style="padding: 15px 20px; background: var(--bg-input); border-radius: 16px; border: 1px solid var(--border);">
                         <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Familiya")}</label>
-                        <div style="font-size:17px; font-weight:600; color: #334155;">${u.lastName}</div>
+                        <div style="font-size:17px; font-weight:600; color: var(--text-primary);">${u.lastName}</div>
                     </div>
-                    <div class="info-card" style="padding: 15px 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+                    <div class="info-card" style="padding: 15px 20px; background: var(--bg-input); border-radius: 16px; border: 1px solid var(--border);">
                         <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Telefon raqami")}</label>
-                        <div style="font-size:17px; font-weight:600; color: #334155;">${u.phoneNumber || '—'}</div>
+                        <div style="font-size:17px; font-weight:600; color: var(--text-primary);">${u.phoneNumber || '—'}</div>
                     </div>
-                    <div class="info-card" style="padding: 15px 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+                    <div class="info-card" style="padding: 15px 20px; background: var(--bg-input); border-radius: 16px; border: 1px solid var(--border);">
                         <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Obuna muddati")}</label>
-                        <div style="font-size:15px; font-weight:600; color: var(--primary-color);">${formatDateTime(u.expirationDate) || '—'}</div>
+                        <div style="font-size:15px; font-weight:600; color: var(--accent);">${formatDateTime(u.expirationDate) || '—'}</div>
                     </div>
-                    <div class="info-card" style="padding: 15px 20px; background: white; border-radius: 16px; border: 2px solid ${u.telegramUserId ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.1)'}; box-shadow: 0 4px 12px rgba(0,0,0,0.03); grid-column: span 1;">
+                    <div class="info-card" style="padding: 15px 20px; background: var(--bg-card); border-radius: 16px; border: 2px solid ${u.telegramUserId ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.1)'}; box-shadow: 0 4px 12px rgba(0,0,0,0.03); grid-column: span 1;">
                         <label style="display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Telegram")}</label>
                         <div style="display:flex; align-items:center; justify-content:space-between;">
                             <span style="font-size:15px; font-weight:700; color: ${u.telegramUserId ? '#10b981' : '#ef4444'};">
@@ -964,18 +964,18 @@ async function renderProfile() {
                             </span>
                             ${!u.telegramUserId ? `
                             <button class="btn btn-sm btn-outline" 
-                                    style="padding: 4px 10px; border-radius: 8px; font-size: 11px; color:var(--primary-color); border-color:var(--primary-color);" 
+                                    style="padding: 4px 10px; border-radius: 8px; font-size: 11px; color:var(--accent); border-color:var(--accent);" 
                                     onclick="window.generateTelegramLink()">
                                 🔗 ${t("Ulash")}
                             </button>` : ''}
                         </div>
                     </div>
-                    <div class="info-card" style="padding: 15px 20px; background: white; border-radius: 16px; border: 2px solid rgba(var(--primary-rgb), 0.15); box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.08); grid-column: span 1;">
-                        <label style="display:block; font-size:11px; color:var(--primary-color); text-transform:uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Taklif kodi (Promo)")}</label>
+                    <div class="info-card" style="padding: 15px 20px; background: var(--bg-card); border-radius: 16px; border: 2px solid rgba(16, 185, 129, 0.15); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08); grid-column: span 1;">
+                        <label style="display:block; font-size:11px; color:var(--accent); text-transform:uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.5px;">${t("Taklif kodi (Promo)")}</label>
                         <div style="display:flex; align-items:center; justify-content:space-between;">
-                            <span style="font-size:20px; font-weight:800; color:var(--primary-color); letter-spacing:2px;">${u.offerCode || '—'}</span>
+                            <span style="font-size:20px; font-weight:800; color:var(--accent); letter-spacing:2px;">${u.offerCode || '—'}</span>
                             <button class="btn btn-sm btn-primary" 
-                                    style="padding: 6px 14px; border-radius: 10px; font-size: 12px; box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.3);" 
+                                    style="padding: 6px 14px; border-radius: 10px; font-size: 12px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);" 
                                     onclick="copyToClipboard('${u.offerCode || ''}')">
                                 <span class="icon">📋</span> ${t("Nusxa")}
                             </button>
@@ -986,11 +986,11 @@ async function renderProfile() {
         </div>
 
         <!-- Tip Box -->
-        <div style="max-width: 800px; margin: 30px auto 0; padding: 25px; background: linear-gradient(to right, #ffffff, #f8fafc); border-radius: 20px; border: 1px solid #e2e8f0; display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
-            <div style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: #fffbeb; color: #f59e0b; font-size: 24px; border-radius: 15px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.1);">💡</div>
+        <div style="max-width: 800px; margin: 30px auto 0; padding: 25px; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border); display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+            <div style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: var(--warning-bg); color: #f59e0b; font-size: 24px; border-radius: 15px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.1);">💡</div>
             <div style="flex: 1;">
-                <h4 style="margin: 0 0 5px 0; font-size:16px; font-weight: 700; color: #1e293b;">${t("Taklif kodi nima?")}</h4>
-                <p style="font-size:14px; line-height:1.6; margin:0; color: #64748b; font-weight: 500;">
+                <h4 style="margin: 0 0 5px 0; font-size:16px; font-weight: 700; color: var(--text-primary);">${t("Taklif kodi nima?")}</h4>
+                <p style="font-size:14px; line-height:1.6; margin:0; color: var(--text-secondary); font-weight: 500;">
                     ${t("Ushbu kodni do'stlaringizga yuboring. Ular ro'yxatdan o'tayotganlarida ushbu kodni kiritsalar, sizga va ularga qo'shimcha imtiyozlar berilishi mumkin.")}
                 </p>
             </div>
@@ -1035,7 +1035,7 @@ function showEditProfileModal() {
 
             ${user.role >= 1 ? `
             <div style="margin-top:20px; padding-top:20px; border-top:1px dashed var(--border);">
-                <h4 style="margin-bottom:15px; color:var(--primary-color)">${t("Brend ma'lumotlari")}</h4>
+                <h4 style="margin-bottom:15px; color:var(--accent)">${t("Brend ma'lumotlari")}</h4>
                 <div class="form-group">
                     <label>${t("Brend nomi")}</label>
                     <input type="text" class="form-control" id="edit-brandName" value="${escapeHtml(user.brandName || '')}" placeholder="Masalan: Safia">
@@ -1064,7 +1064,7 @@ function showEditProfileModal() {
                     <p style="margin:0; font-weight:600; font-size:13px;">${t("Telegramni ulash")}</p>
                     <p style="margin:4px 0 0; font-size:11px; color:var(--text-muted);">${user.telegramUserId ? '✅ ' + t("Telegram ulangan") + ' (ID: ' + user.telegramUserId + ')' : t("Telegram hisobingizni ulab, bot orqali boshqaring")}</p>
                 </div>
-                <button type="button" class="btn btn-ghost" style="white-space:nowrap; padding:8px 16px; font-size:12px; border-color:var(--primary-color); color:var(--primary-color);" onclick="window.generateTelegramLink()">
+                <button type="button" class="btn btn-ghost" style="white-space:nowrap; padding:8px 16px; font-size:12px; border-color:var(--accent); color:var(--accent);" onclick="window.generateTelegramLink()">
                     🔗 ${t("Ulash")}
                 </button>
             </div>
