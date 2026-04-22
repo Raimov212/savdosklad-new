@@ -707,6 +707,15 @@ textarea.form-control {
   transform: scale(1.1);
 }
 
+[data-theme="light"] .mobile-close-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .mobile-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
 .brand-container {
   display: flex;
   align-items: center;

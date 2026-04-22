@@ -225,7 +225,7 @@ export const translations = {
         "Iyun": "Июнь",
         "Izoh": "Изоҳ",
         "Jami daromad": "Жами даромад",
-        "Jami mahsulotlar": "Жами маҳсулотlar",
+        "Jami mahsulotlar": "Жами маҳсулотлар",
         "Jami mijoz": "Жами мижоз",
         "Jami savdo": "Жами савдо",
         "Jami sotuv summasi": "Жами сотув суммаси",

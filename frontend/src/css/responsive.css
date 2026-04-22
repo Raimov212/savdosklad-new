@@ -62,7 +62,7 @@
   }
 
   /* Hide potential points/coin icon next to avatar on mobile if it exists */
-  .topbar-right .user-badge + .btn-icon,
+  .topbar-right .user-badge + .btn-icon:not(.theme-toggle),
   .topbar-right .user-badge ~ *:not(.theme-toggle) {
     display: none !important;
   }
