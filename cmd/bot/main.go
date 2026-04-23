@@ -40,7 +40,7 @@ func main() {
 	tgNotifier, _ := notifier.NewTelegramNotifier(cfg.Telegram.Token, userRepo, businessRepo)
 
 	// Use cases
-	userUC := usecase.NewUserUseCase(userRepo, jwtManager)
+	userUC := usecase.NewUserUseCase(userRepo, jwtManager, tgNotifier)
 	businessUC := usecase.NewBusinessUseCase(businessRepo)
 	productUC := usecase.NewProductUseCase(productRepo)
 	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, tgNotifier)

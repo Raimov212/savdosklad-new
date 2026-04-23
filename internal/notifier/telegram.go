@@ -158,3 +158,7 @@ func (n *TelegramNotifier) send(tgID int64, text string) {
 		log.Printf("Notifier error sending to %d: %v", tgID, err)
 	}
 }
+
+func (n *TelegramNotifier) SendRawMessage(tgID int64, text string) {
+	n.send(tgID, text)
+}

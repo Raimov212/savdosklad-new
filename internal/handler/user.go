@@ -70,6 +70,54 @@ func (h *UserHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// ForgotPassword godoc
+// @Summary      Request password reset
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        input body entity.ForgotPasswordRequest true "Forgot Password"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /auth/forgot-password [post]
+func (h *UserHandler) ForgotPassword(c *gin.Context) {
+	var req entity.ForgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.uc.ForgotPassword(req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Parolni tiklash kodi Telegram botingizga yuborildi."})
+}
+
+// ResetPassword godoc
+// @Summary      Reset password with code
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        input body entity.ResetPasswordRequest true "Reset Password"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /auth/reset-password [post]
+func (h *UserHandler) ResetPassword(c *gin.Context) {
+	var req entity.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.uc.ResetPassword(req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Parol muvaffaqiyatli yangilandi!"})
+}
+
 // GetAll godoc
 // @Summary      Get all users
 // @Tags         Users

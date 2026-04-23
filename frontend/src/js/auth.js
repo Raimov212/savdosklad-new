@@ -16,26 +16,43 @@ function switchTab(mode) {
     localStorage.setItem('activeAuthTab', mode);
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
+    const forgotForm = document.getElementById('forgot-password-form');
+    const resetForm = document.getElementById('reset-password-form');
     const tabLogin = document.getElementById('tab-login');
     const tabRegister = document.getElementById('tab-register');
     const authCard = document.getElementById('auth-card');
+    const authTabs = document.querySelector('.auth-tabs');
 
     if (!loginForm || !registerForm) return;
 
+    // Hide all forms initially
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'none';
+    if(forgotForm) forgotForm.style.display = 'none';
+    if(resetForm) resetForm.style.display = 'none';
+    if(authTabs) authTabs.style.display = 'flex';
+
     if (mode === 'login') {
         loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
         if (tabLogin) tabLogin.classList.add('active');
         if (tabRegister) tabRegister.classList.remove('active');
         if (authCard) authCard.style.maxWidth = '480px';
-    } else {
-        loginForm.style.display = 'none';
+    } else if (mode === 'register') {
         registerForm.style.display = 'block';
         if (tabLogin) tabLogin.classList.remove('active');
         if (tabRegister) tabRegister.classList.add('active');
-        if (authCard) authCard.style.maxWidth = '600px'; // Wider for registration
+        if (authCard) authCard.style.maxWidth = '600px';
+    } else if (mode === 'forgot-password') {
+        if(forgotForm) forgotForm.style.display = 'block';
+        if(authTabs) authTabs.style.display = 'none';
+        if (authCard) authCard.style.maxWidth = '480px';
+    } else if (mode === 'reset-password') {
+        if(resetForm) resetForm.style.display = 'block';
+        if(authTabs) authTabs.style.display = 'none';
+        if (authCard) authCard.style.maxWidth = '480px';
     }
     
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     if (typeof window.translateDOM === 'function') window.translateDOM();
 }
 
@@ -163,7 +180,86 @@ async function handleRegister(e) {
     }
 }
 
+async function handleForgotPassword(e) {
+    e.preventDefault();
+    const btn = document.getElementById('forgot-btn');
+    if (!btn) return;
+
+    const btnText = btn.querySelector('span');
+    const originalText = btnText ? btnText.innerText : btn.innerText;
+    
+    btn.disabled = true;
+    if (btnText) btnText.innerText = t('Yuklanmoqda...');
+    else btn.innerText = t('Yuklanmoqda...');
+
+    try {
+        const username = document.getElementById('forgot-username').value.trim();
+        const response = await fetch(`/api/v1/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userName: username })
+        });
+        
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || t("Xatolik yuz berdi"));
+
+        showToast(t(result.message));
+        
+        // Save username for reset password step
+        document.getElementById('reset-code').value = '';
+        document.getElementById('reset-password').value = '';
+        document.getElementById('reset-password-form').dataset.username = username;
+        
+        switchTab('reset-password');
+    } catch (err) {
+        showToast(t(err.message), 'error');
+    } finally {
+        btn.disabled = false;
+        if (btnText) btnText.innerText = originalText;
+        else btn.innerText = originalText;
+    }
+}
+
+async function handleResetPassword(e) {
+    e.preventDefault();
+    const btn = document.getElementById('reset-btn');
+    if (!btn) return;
+
+    const btnText = btn.querySelector('span');
+    const originalText = btnText ? btnText.innerText : btn.innerText;
+    
+    btn.disabled = true;
+    if (btnText) btnText.innerText = t('Yuklanmoqda...');
+    else btn.innerText = t('Yuklanmoqda...');
+
+    try {
+        const username = document.getElementById('reset-password-form').dataset.username;
+        const code = document.getElementById('reset-code').value.trim();
+        const newPassword = document.getElementById('reset-password').value;
+
+        const response = await fetch(`/api/v1/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userName: username, code: code, newPassword: newPassword })
+        });
+        
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || t("Xatolik yuz berdi"));
+
+        showToast(t(result.message));
+        switchTab('login');
+    } catch (err) {
+        showToast(t(err.message), 'error');
+    } finally {
+        btn.disabled = false;
+        if (btnText) btnText.innerText = originalText;
+        else btn.innerText = originalText;
+    }
+}
+
 // Global exports
 window.switchTab = switchTab;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
+window.handleForgotPassword = handleForgotPassword;
+window.handleResetPassword = handleResetPassword;

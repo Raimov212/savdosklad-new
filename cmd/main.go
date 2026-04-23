@@ -125,7 +125,7 @@ func main() {
 		tgNotifier, _ = notifier.NewTelegramNotifier(cfg.Telegram.Token, userRepo, businessRepo)
 	}
 	// Use cases
-	userUC := usecase.NewUserUseCase(userRepo, jwtManager)
+	userUC := usecase.NewUserUseCase(userRepo, jwtManager, tgNotifier)
 	businessUC := usecase.NewBusinessUseCase(businessRepo)
 	categoryUC := usecase.NewCategoryUseCase(categoryRepo)
 	productUC := usecase.NewProductUseCase(productRepo)
@@ -196,6 +196,8 @@ func main() {
 		{
 			authGroup.POST("/register", userH.Register)
 			authGroup.POST("/login", userH.Login)
+			authGroup.POST("/forgot-password", userH.ForgotPassword)
+			authGroup.POST("/reset-password", userH.ResetPassword)
 		}
 
 		// Geography (Public)

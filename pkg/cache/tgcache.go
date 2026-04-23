@@ -8,3 +8,6 @@ import "sync"
 // bilan ishlash vositasi. Bir vaqtning o'zida bir nechta goroutine'lar (masalan, Telegram bot va API server) 
 // map'ga murojaat qilganda ma'lumotlar buzilmasligi uchun oddiy map o'rniga sync.Map qo'llanilgan.
 var TgAuthCache sync.Map
+
+// PasswordResetCache stores reset codes (string) mapping to user names (string).
+var PasswordResetCache sync.Map

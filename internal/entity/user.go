@@ -92,3 +92,13 @@ type ExtendSubscriptionRequest struct {
 	UserName       string `json:"userName" binding:"required"`
 	ExpirationDate string `json:"expirationDate" binding:"required" example:"2026-04-28 00:00:00"`
 }
+
+type ForgotPasswordRequest struct {
+	UserName string `json:"userName" binding:"required"`
+}
+
+type ResetPasswordRequest struct {
+	UserName    string `json:"userName" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required,min=6"`
+}

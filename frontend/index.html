@@ -147,7 +147,54 @@
                 required>
             </div>
           </div>
+          <div style="text-align: right; margin-top: -5px; margin-bottom: 20px;">
+            <a href="#" onclick="switchMode('forgot-password'); return false;" style="color: var(--auth-primary); font-size: 14px; text-decoration: none; font-weight: 500;" data-i18n="Parolni unutdingizmi?">Parolni unutdingizmi?</a>
+          </div>
           <button type="submit" class="auth-btn-primary" id="login-btn" data-i18n="Kirish">Kirish</button>
+        </form>
+
+        <!-- Forgot Password Form -->
+        <form id="forgot-password-form" style="display:none" onsubmit="handleForgotPassword(event)">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <i data-lucide="shield-alert" style="width: 48px; height: 48px; color: var(--auth-primary); margin-bottom: 10px;"></i>
+            <h3 data-i18n="Parolni tiklash" style="margin-bottom: 10px; color: var(--auth-text-primary);">Parolni tiklash</h3>
+            <p data-i18n="Parolni tiklash yo'riqnomasi" style="font-size: 14px; color: var(--auth-text-secondary);">Telegram bot orqali parolni tiklash kodi yuboriladi.</p>
+          </div>
+          <div class="auth-form-group">
+            <label data-i18n="Foydalanuvchi nomi">Foydalanuvchi nomi <span>*</span></label>
+            <div class="auth-input-wrapper">
+              <input type="text" class="form-control" id="forgot-username" data-i18n="Foydalanuvchi nomi" placeholder="Foydalanuvchi nomi" required>
+            </div>
+          </div>
+          <button type="submit" class="auth-btn-primary" id="forgot-btn" data-i18n="Kodni olish">Kodni olish</button>
+          <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="switchMode('login'); return false;" style="color: var(--auth-text-secondary); font-size: 14px; text-decoration: none; font-weight: 500;" data-i18n="Ortga qaytish">Ortga qaytish</a>
+          </div>
+        </form>
+
+        <!-- Reset Password Form -->
+        <form id="reset-password-form" style="display:none" onsubmit="handleResetPassword(event)">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <i data-lucide="key-round" style="width: 48px; height: 48px; color: #10b981; margin-bottom: 10px;"></i>
+            <h3 data-i18n="Yangi parol" style="margin-bottom: 10px; color: var(--auth-text-primary);">Yangi parol</h3>
+            <p data-i18n="Kodni va yangi parolni kiriting" style="font-size: 14px; color: var(--auth-text-secondary);">Telegram botga yuborilgan kodni va yangi parolni kiriting.</p>
+          </div>
+          <div class="auth-form-group">
+            <label data-i18n="Tasdiqlash kodi">Tasdiqlash kodi <span>*</span></label>
+            <div class="auth-input-wrapper">
+              <input type="text" class="form-control" id="reset-code" data-i18n="Kodni kiriting" placeholder="Kodni kiriting" required autocomplete="off">
+            </div>
+          </div>
+          <div class="auth-form-group">
+            <label data-i18n="Yangi parol">Yangi parol <span>*</span></label>
+            <div class="auth-input-wrapper">
+              <input type="password" class="form-control" id="reset-password" data-i18n="Yangi parol" placeholder="••••••" required minlength="6">
+            </div>
+          </div>
+          <button type="submit" class="auth-btn-primary" id="reset-btn" data-i18n="Saqlash">Saqlash</button>
+          <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="switchMode('login'); return false;" style="color: var(--auth-text-secondary); font-size: 14px; text-decoration: none; font-weight: 500;" data-i18n="Ortga qaytish">Ortga qaytish</a>
+          </div>
         </form>
 
         <!-- Register Form -->

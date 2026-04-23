@@ -1,14 +1,17 @@
 package usecase
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"savdosklad/internal/entity"
+	"savdosklad/internal/notifier"
 	"savdosklad/internal/repository"
 	"savdosklad/pkg/auth"
+	"savdosklad/pkg/cache"
 	"savdosklad/pkg/i18n"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,10 +20,11 @@ import (
 type UserUseCase struct {
 	repo       repository.UserRepository
 	jwtManager *auth.JWTManager
+	tgNotifier *notifier.TelegramNotifier
 }
 
-func NewUserUseCase(repo repository.UserRepository, jwtManager *auth.JWTManager) *UserUseCase {
-	return &UserUseCase{repo: repo, jwtManager: jwtManager}
+func NewUserUseCase(repo repository.UserRepository, jwtManager *auth.JWTManager, tgNotifier *notifier.TelegramNotifier) *UserUseCase {
+	return &UserUseCase{repo: repo, jwtManager: jwtManager, tgNotifier: tgNotifier}
 }
 
 func (uc *UserUseCase) CreateEmployee(req entity.RegisterRequest, adminID int) (*entity.User, error) {
@@ -290,4 +294,89 @@ func (uc *UserUseCase) LinkTelegramByID(userID int, tgID int64) error {
 }
 func (uc *UserUseCase) HasPermission(userID, businessID int, action string) (bool, error) {
 	return uc.repo.HasPermission(userID, businessID, action)
+}
+
+func (uc *UserUseCase) ForgotPassword(req entity.ForgotPasswordRequest) error {
+	user, err := uc.repo.GetByUsername(req.UserName)
+	if err != nil {
+		// Do not reveal if user exists or not for security, but we need to for UX here.
+		return errors.New(i18n.MsgUserNotFound)
+	}
+
+	if user.TelegramUserID == 0 {
+		return errors.New("Sizda Telegram bot ulanmagan. Parolni tiklash imkonsiz. Iltimos, admin bilan bog'laning.")
+	}
+
+	// Generate 6 digit code
+	bytes := make([]byte, 3)
+	if _, err := rand.Read(bytes); err != nil {
+		return errors.New("Kodni generatsiya qilishda xatolik")
+	}
+	code := fmt.Sprintf("%06d", int(bytes[0])<<16|int(bytes[1])<<8|int(bytes[2]))[:6]
+
+	// Save to cache with expiration
+	cache.PasswordResetCache.Store(req.UserName, code)
+
+	// In a real app, we should use a TTL cache, but since we are using sync.Map, we can spawn a goroutine to clean it up
+	go func(username string) {
+		time.Sleep(5 * time.Minute)
+		cache.PasswordResetCache.Delete(username)
+	}(req.UserName)
+
+	lang := user.Language
+	if lang == "" {
+		lang = "uz"
+	}
+
+	text := fmt.Sprintf("🔑 Parolni tiklash kodi: %s\n\nBu kod 5 daqiqa davomida amal qiladi. Agar siz so'ramagan bo'lsangiz, bu xabarni e'tiborsiz qoldiring.", code)
+	if lang == "ru" {
+		text = fmt.Sprintf("🔑 Код для сброса пароля: %s\n\nЭтот код действителен в течение 5 минут. Если вы не запрашивали, проигнорируйте это сообщение.", code)
+	} else if lang == "en" {
+		text = fmt.Sprintf("🔑 Password reset code: %s\n\nThis code is valid for 5 minutes. If you did not request this, please ignore this message.", code)
+	} else if lang == "uz-cyrl" {
+		text = fmt.Sprintf("🔑 Паролни тиклаш коди: %s\n\nБу код 5 дақиқа давомида амал қилади. Агар сиз сўрамаган бўлсангиз, бу хабарни эътиборсиз қолдиринг.", code)
+	}
+
+	if uc.tgNotifier != nil {
+		uc.tgNotifier.SendRawMessage(user.TelegramUserID, text)
+	} else {
+		return errors.New("Telegram xizmati ishlamayapti")
+	}
+
+	return nil
+}
+
+func (uc *UserUseCase) ResetPassword(req entity.ResetPasswordRequest) error {
+	val, ok := cache.PasswordResetCache.Load(req.UserName)
+	if !ok {
+		return errors.New("Kod yaroqsiz yoki muddati o'tgan")
+	}
+	
+	if val.(string) != req.Code {
+		return errors.New("Noto'g'ri kod kiritildi")
+	}
+
+	user, err := uc.repo.GetByUsername(req.UserName)
+	if err != nil {
+		return errors.New(i18n.MsgUserNotFound)
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New("Parolni yangilashda xatolik")
+	}
+
+	hashed := string(hashedPassword)
+	updateReq := entity.UpdateUserRequest{
+		Password: &hashed,
+	}
+
+	err = uc.repo.Update(user.ID, updateReq)
+	if err != nil {
+		return err
+	}
+
+	// Delete from cache
+	cache.PasswordResetCache.Delete(req.UserName)
+	return nil
 }
