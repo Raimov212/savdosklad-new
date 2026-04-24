@@ -113,6 +113,16 @@ type CalculationRepository interface {
 	Create(calc *entity.Calculation) (int, error)
 	GetByBusinessID(businessID int) ([]entity.Calculation, error)
 	GetByBusinessIDAndPeriod(businessID, month, year int) (*entity.Calculation, error)
+	GetStats(bid, month, year int) (*entity.CalculationStats, error)
+}
+
+type SalaryRepository interface {
+	Create(s *entity.EmployeeSalary) (int, error)
+	GetByBusinessID(bid int) ([]entity.EmployeeSalary, error)
+	GetByEmployeeID(empID int) ([]entity.EmployeeSalary, error)
+	GetByPeriod(bid, month, year int) ([]entity.EmployeeSalary, error)
+	GetTotalByPeriod(bid, month, year int) (float64, error)
+	Delete(id int) error
 }
 
 type OrganizationRepository interface {

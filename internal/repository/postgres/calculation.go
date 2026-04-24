@@ -54,12 +54,69 @@ func (r *CalculationRepo) GetByBusinessIDAndPeriod(businessID, month, year int) 
 	var c entity.Calculation
 	err := r.db.QueryRow(
 		`SELECT id, "businessId", "totalIncome", "incomeTax", "totalExpense", "totalFixedCosts", salary, "salaryTax", profit, month, year, "totalSale", "addedMoney", "createdAt", "updatedAt"
-		FROM calculations WHERE "businessId" = $1 AND month = $2 AND year = $3`, businessID, month, year,
-	).Scan(&c.ID, &c.BusinessID, &c.TotalIncome, &c.IncomeTax, &c.TotalExpense, &c.TotalFixedCosts,
-		&c.Salary, &c.SalaryTax, &c.Profit, &c.Month, &c.Year, &c.TotalSale, &c.AddedMoney,
-		&c.CreatedAt, &c.UpdatedAt)
+		FROM calculations WHERE "businessId" = $1 AND month = $2 AND year = $3`,
+		businessID, month, year,
+	).Scan(&c.ID, &c.BusinessID, &c.TotalIncome, &c.IncomeTax, &c.TotalExpense, &c.TotalFixedCosts, &c.Salary, &c.SalaryTax, &c.Profit, &c.Month, &c.Year, &c.TotalSale, &c.AddedMoney, &c.CreatedAt, &c.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return &c, err
+}
+
+func (r *CalculationRepo) GetStats(bid, month, year int) (*entity.CalculationStats, error) {
+	var stats entity.CalculationStats
+
+	// 1. Total Sale
+	err := r.db.QueryRow(
+		`SELECT COALESCE(SUM(total), 0) FROM total_transactions 
+		 WHERE "businessId" = $1 AND EXTRACT(MONTH FROM "createdAt") = $2 AND EXTRACT(YEAR FROM "createdAt") = $3`,
+		bid, month, year,
+	).Scan(&stats.TotalSale)
 	if err != nil {
 		return nil, err
 	}
-	return &c, nil
+
+	// 2. Total Income (Gross Profit)
+	err = r.db.QueryRow(
+		`SELECT COALESCE(SUM((t."productPrice" - p."buyPrice") * t."productQuantity"), 0)
+		 FROM transactions t
+		 JOIN products p ON t."productId" = p.id
+		 WHERE t."businessId" = $1 AND EXTRACT(MONTH FROM t."createdAt") = $2 AND EXTRACT(YEAR FROM t."createdAt") = $3`,
+		bid, month, year,
+	).Scan(&stats.TotalIncome)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Total Expense
+	err = r.db.QueryRow(
+		`SELECT COALESCE(SUM(value), 0) FROM expenses
+		 WHERE "businessId" = $1 AND EXTRACT(MONTH FROM "expenseDate") = $2 AND EXTRACT(YEAR FROM "expenseDate") = $3`,
+		bid, month, year,
+	).Scan(&stats.TotalExpense)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. Total Fixed Costs
+	err = r.db.QueryRow(
+		`SELECT COALESCE(SUM(amount), 0) FROM fixed_facted_costs
+		 WHERE "businessId" = $1 AND EXTRACT(MONTH FROM date) = $2 AND EXTRACT(YEAR FROM date) = $3`,
+		bid, month, year,
+	).Scan(&stats.TotalFixedCosts)
+	if err != nil {
+		return nil, err
+	}
+
+	// 5. Total Salary
+	err = r.db.QueryRow(
+		`SELECT COALESCE(SUM(amount), 0) FROM employee_salaries
+		 WHERE "businessId" = $1 AND month = $2 AND year = $3`,
+		bid, month, year,
+	).Scan(&stats.TotalSalary)
+	if err != nil {
+		return nil, err
+	}
+
+	return &stats, nil
 }

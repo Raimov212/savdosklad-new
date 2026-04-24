@@ -9,6 +9,7 @@ type Product struct {
 	ShortDescription *string   `json:"shortDescription"`
 	FullDescription  *string   `json:"fullDescription"`
 	Price            float64   `json:"price"`
+	BuyPrice         float64   `json:"buyPrice"`
 	Discount         float64   `json:"discount"`
 	Quantity         int       `json:"quantity"`
 	Images           *string   `json:"images"`
@@ -27,6 +28,7 @@ type CreateProductRequest struct {
 	ShortDescription string  `json:"shortDescription"`
 	FullDescription  string  `json:"fullDescription"`
 	Price            float64 `json:"price" binding:"required"`
+	BuyPrice         float64 `json:"buyPrice"`
 	Discount         float64 `json:"discount"`
 	Quantity         int     `json:"quantity" binding:"required"`
 	Images           string  `json:"images"`
@@ -42,6 +44,7 @@ type UpdateProductRequest struct {
 	ShortDescription *string  `json:"shortDescription"`
 	FullDescription  *string  `json:"fullDescription"`
 	Price            *float64 `json:"price"`
+	BuyPrice         *float64 `json:"buyPrice"`
 	Discount         *float64 `json:"discount"`
 	Quantity         *int     `json:"quantity"`
 	Images           *string  `json:"images"`

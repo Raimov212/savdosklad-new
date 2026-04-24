@@ -90,6 +90,9 @@ function renderEmployeesTable(isAppend = false) {
                 <td style="text-align:center;">${emp.phoneNumber || '—'}</td>
                 <td style="text-align:center; font-size:12px; font-weight:500;">${emp.expirationDate ? emp.expirationDate.split('T')[0] : '—'}</td>
                 <td class="actions" style="justify-content:center">
+                    <button class="btn-icon" onclick="window.openSalaryModal(${emp.id})" title="${t("Ish haqi")}">
+                        <i data-lucide="banknote"></i>
+                    </button>
                     <button class="btn-icon" onclick="window.openEditEmployeeModal(${emp.id})" title="${t("Tahrirlash")}">
                         <i data-lucide="edit-3"></i>
                     </button>
@@ -373,3 +376,118 @@ window.toggleBizPermissions = function(bid, checked) {
     const el = document.getElementById(`biz-perms-${bid}`);
     if (el) el.style.display = checked ? 'flex' : 'none';
 };
+
+window.openSalaryModal = async function(empId) {
+    const emp = allEmployees.find(e => e.id === empId);
+    if (!emp) return;
+
+    const bid = getSelectedBusinessId(); // No longer mandatory to show the modal
+
+    const now = new Date();
+    const months = ['', 'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+
+    try {
+        const salaries = await api.get(`/salaries/employee/${empId}`);
+        const historyRows = (salaries || []).map(s => `
+            <tr>
+                <td>${months[s.month]} ${s.year}</td>
+                <td style="font-weight:700; color:var(--accent);">${window.formatPrice(s.amount)}</td>
+                <td style="font-size:12px; color:var(--text-muted);">${escapeHtml(s.description || '')}</td>
+                <td style="text-align:right;">
+                    <button class="btn-icon danger" onclick="window.deleteSalary(${s.id}, ${empId})" title="${t("O'chirish")}">
+                        <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        const body = `
+            <div style="margin-bottom:20px; padding:15px; background:var(--bg-glass); border-radius:12px; border:1px solid var(--accent-glow);">
+                <h4 style="margin-top:0; margin-bottom:10px; font-size:14px;">${t("Yangi to'lov qo'shish")}</h4>
+                <form onsubmit="window.handleSalaryPayment(event, ${empId}, ${bid})">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>${t("Oy")}</label>
+                            <select class="form-control" id="salary-month" required>
+                                ${months.map((m, i) => i === 0 ? '' : `<option value="${i}" ${i === now.getMonth() + 1 ? 'selected' : ''}>${t(m)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>${t("Yil")}</label>
+                            <input type="number" class="form-control" id="salary-year" value="${now.getFullYear()}" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>${t("Summa")}</label>
+                        <input type="number" class="form-control" id="salary-amount" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>${t("Izoh")}</label>
+                        <input type="text" class="form-control" id="salary-desc" placeholder="${t("Masalan: Bonus bilan")}">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%">${t("Qo'shish")}</button>
+                </form>
+            </div>
+
+            <h4 style="font-size:14px; margin-bottom:10px;">${t("To'lovlar tarixi")}</h4>
+            <div class="table-container" style="max-height:200px; overflow-y:auto;">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>${t("DAVR")}</th>
+                            <th>${t("SUMMA")}</th>
+                            <th>${t("Izoh")}</th>
+                            <th style="text-align:right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${historyRows || `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-muted);">${t("Hozircha to'lovlar yo'q")}</td></tr>`}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        window.openModal(`💸 ${emp.firstName} ${emp.lastName} — ${t("Ish haqi")}`, body);
+        lucide.createIcons();
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
+};
+
+window.handleSalaryPayment = async function(e, empId, bid) {
+    e.preventDefault();
+    if (!bid) {
+        showToast(t("Avval biznes tanlang"), 'warning');
+        return;
+    }
+    const req = {
+        employeeId: empId,
+        businessId: bid,
+        month: parseInt(document.getElementById('salary-month').value),
+        year: parseInt(document.getElementById('salary-year').value),
+        amount: parseFloat(document.getElementById('salary-amount').value),
+        description: document.getElementById('salary-desc').value
+    };
+
+    try {
+        await api.post('/salaries', req);
+        showToast(t("Ish haqi muvaffaqiyatli qo'shildi"));
+        window.openSalaryModal(empId); // Refresh history
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
+};
+
+window.deleteSalary = async function(id, empId) {
+    if (!confirm(t("Ushbu to'lovni o'chirishni xohlaysizmi?"))) return;
+    try {
+        await api.delete(`/salaries/${id}`);
+        showToast(t("O'chirildi"));
+        window.openSalaryModal(empId);
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
+};
+
+function getSelectedBusinessId() {
+    return parseInt(localStorage.getItem('selectedBusinessId'));
+}

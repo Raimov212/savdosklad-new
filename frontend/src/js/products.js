@@ -111,7 +111,11 @@ function renderProductsTable(list, isAppend = false) {
               </div>
               <div class="acc-detail-item">
                 <span class="acc-detail-icon">💰</span>
-                <div><div class="acc-detail-label">${t("Narxi")}</div><div class="acc-detail-value">${formatPrice(p.price)} ${t("so'm")}</div></div>
+                <div><div class="acc-detail-label">${t("Sotish narxi")}</div><div class="acc-detail-value">${formatPrice(p.price)} ${t("so'm")}</div></div>
+              </div>
+              <div class="acc-detail-item">
+                <span class="acc-detail-icon">📥</span>
+                <div><div class="acc-detail-label">${t("Tan narxi")} (Buy)</div><div class="acc-detail-value">${formatPrice(p.buyPrice || 0)} ${t("so'm")}</div></div>
               </div>
               ${p.discount > 0 ? `<div class="acc-detail-item">
                 <span class="acc-detail-icon">🏷️</span>
@@ -241,12 +245,22 @@ function openProductModal(p = null) {
 
         <div class="form-row">
           <div class="form-group">
-            <label>${t("Narxi")}</label>
+            <label>${t("Sotish narxi")}</label>
             <div style="position:relative">
                <input type="number" step="0.01" class="form-control" id="prod-price" value="${isEdit ? p.price : ''}" required style="padding-right:45px">
                <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; opacity:0.5;">UZS</span>
             </div>
           </div>
+          <div class="form-group">
+            <label>${t("Tan narxi")}</label>
+            <div style="position:relative">
+               <input type="number" step="0.01" class="form-control" id="prod-buy-price" value="${isEdit ? p.buyPrice : ''}" required style="padding-right:45px">
+               <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; opacity:0.5;">UZS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
             <label>${t("Chegirma")} (%)</label>
             <input type="number" step="0.01" class="form-control" id="prod-discount" value="${isEdit ? p.discount : 0}">
@@ -390,6 +404,7 @@ async function saveProduct(e, id) {
         lokalCode: document.getElementById('prod-lcode').value.trim() || null,
         shortDescription: document.getElementById('prod-short').value.trim(),
         price: parseFloat(document.getElementById('prod-price').value),
+        buyPrice: parseFloat(document.getElementById('prod-buy-price').value) || 0,
         discount: parseFloat(document.getElementById('prod-discount').value) || 0,
         quantity: parseInt(document.getElementById('prod-qty').value),
         barcode: document.getElementById('prod-barcode').value.trim() || null,
@@ -405,6 +420,7 @@ async function saveProduct(e, id) {
         lokalCode: document.getElementById('prod-lcode').value.trim() || null,
         shortDescription: document.getElementById('prod-short').value.trim(),
         price: parseFloat(document.getElementById('prod-price').value),
+        buyPrice: parseFloat(document.getElementById('prod-buy-price').value) || 0,
         discount: parseFloat(document.getElementById('prod-discount').value) || 0,
         quantity: parseInt(document.getElementById('prod-qty').value),
         barcode: document.getElementById('prod-barcode').value.trim(),

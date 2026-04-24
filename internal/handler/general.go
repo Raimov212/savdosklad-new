@@ -1102,6 +1102,19 @@ func NewCalculationHandler(uc *usecase.CalculationUseCase) *CalculationHandler {
 	return &CalculationHandler{uc: uc}
 }
 
+func (h *CalculationHandler) GetStats(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	month, _ := strconv.Atoi(c.Query("month"))
+	year, _ := strconv.Atoi(c.Query("year"))
+
+	stats, err := h.uc.GetStats(bid, month, year)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}
+
 // @Summary Create calculation
 // @Tags Calculations
 // @Security BearerAuth
@@ -1150,6 +1163,7 @@ func RegisterRoutes(
 	moneyH *MoneyHandler,
 	calculationH *CalculationHandler,
 	organizationH *OrganizationHandler,
+	salaryH *SalaryHandler,
 ) {
 	// User Handlers
 	r.GET("/users", userH.GetAll)
@@ -1219,6 +1233,14 @@ func RegisterRoutes(
 	// Calculation Handlers
 	r.POST("/calculations", calculationH.Create)
 	r.GET("/calculations", calculationH.GetByBusinessID)
+	r.GET("/calculations/stats", calculationH.GetStats)
+
+	// Salary Handlers
+	r.POST("/salaries", salaryH.Create)
+	r.GET("/salaries", salaryH.GetByBusinessID)
+	r.GET("/salaries/total", salaryH.GetTotalByPeriod)
+	r.GET("/salaries/employee/:employeeId", salaryH.GetByEmployeeID)
+	r.DELETE("/salaries/:id", salaryH.Delete)
 
 	// Organization Handlers
 	r.POST("/organizations", organizationH.Create)

@@ -21,9 +21,9 @@ func NewProductRepo(db *sql.DB) *ProductRepo {
 func (r *ProductRepo) Create(p *entity.Product) (int, error) {
 	var id int
 	err := r.db.QueryRow(
-		`INSERT INTO products (name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt")
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`,
-		p.Name, p.LokalCode, p.ShortDescription, p.FullDescription, p.Price, p.Discount, p.Quantity,
+		`INSERT INTO products (name, "lokalCode", "shortDescription", "fullDescription", price, "buyPrice", discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`,
+		p.Name, p.LokalCode, p.ShortDescription, p.FullDescription, p.Price, p.BuyPrice, p.Discount, p.Quantity,
 		p.Images, p.Barcode, p.Country, p.CategoryID, p.BusinessID, false, time.Now(), time.Now(),
 	).Scan(&id)
 	return id, err
@@ -32,9 +32,9 @@ func (r *ProductRepo) Create(p *entity.Product) (int, error) {
 func (r *ProductRepo) GetByID(id int) (*entity.Product, error) {
 	var p entity.Product
 	err := r.db.QueryRow(
-		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
+		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, "buyPrice", discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
 		FROM products WHERE id = $1`, id,
-	).Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+	).Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.BuyPrice, &p.Discount, &p.Quantity,
 		&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (r *ProductRepo) GetByID(id int) (*entity.Product, error) {
 
 func (r *ProductRepo) GetByBusinessID(businessID int) ([]entity.Product, error) {
 	rows, err := r.db.Query(
-		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
+		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, "buyPrice", discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
 		FROM products WHERE "businessId" = $1 AND "isDeleted" = false ORDER BY id`, businessID,
 	)
 	if err != nil {
@@ -55,7 +55,7 @@ func (r *ProductRepo) GetByBusinessID(businessID int) ([]entity.Product, error) 
 	var list []entity.Product
 	for rows.Next() {
 		var p entity.Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.BuyPrice, &p.Discount, &p.Quantity,
 			&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func (r *ProductRepo) GetByBusinessID(businessID int) ([]entity.Product, error) 
 
 func (r *ProductRepo) GetByCategoryID(categoryID int) ([]entity.Product, error) {
 	rows, err := r.db.Query(
-		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
+		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, "buyPrice", discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
 		FROM products WHERE "categoryId" = $1 AND "isDeleted" = false ORDER BY id`, categoryID,
 	)
 	if err != nil {
@@ -114,6 +114,11 @@ func (r *ProductRepo) Update(id int, req entity.UpdateProductRequest) error {
 	if req.Price != nil {
 		query += fmt.Sprintf(`, price = $%d`, argIdx)
 		args = append(args, *req.Price)
+		argIdx++
+	}
+	if req.BuyPrice != nil {
+		query += fmt.Sprintf(`, "buyPrice" = $%d`, argIdx)
+		args = append(args, *req.BuyPrice)
 		argIdx++
 	}
 	if req.Discount != nil {
@@ -184,7 +189,7 @@ func (r *ProductRepo) BulkDelete(bid int, categoryId *int, productIds []int) err
 
 func (r *ProductRepo) Search(bid int, query string) ([]entity.Product, error) {
 	rows, err := r.db.Query(
-		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
+		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, "buyPrice", discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
 		FROM products
 		WHERE "businessId" = $1 AND "isDeleted" = false
 		AND (name ILIKE $2 OR barcode ILIKE $3 OR "lokalCode" ILIKE $4)
@@ -199,7 +204,7 @@ func (r *ProductRepo) Search(bid int, query string) ([]entity.Product, error) {
 	var list []entity.Product
 	for rows.Next() {
 		var p entity.Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.BuyPrice, &p.Discount, &p.Quantity,
 			&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -210,7 +215,7 @@ func (r *ProductRepo) Search(bid int, query string) ([]entity.Product, error) {
 
 func (r *ProductRepo) GetByUserID(userID int) ([]entity.Product, error) {
 	rows, err := r.db.Query(
-		`SELECT p.id, p.name, p."lokalCode", p."shortDescription", p."fullDescription", p.price, p.discount, p.quantity, p.images, p.barcode, p.country, p."categoryId", p."businessId", p."isDeleted", p."createdAt", p."updatedAt"
+		`SELECT p.id, p.name, p."lokalCode", p."shortDescription", p."fullDescription", p.price, p."buyPrice", p.discount, p.quantity, p.images, p.barcode, p.country, p."categoryId", p."businessId", p."isDeleted", p."createdAt", p."updatedAt"
 		FROM products p
 		WHERE p."businessId" IN (
 			SELECT id FROM businesses WHERE "userId" = $1
@@ -228,7 +233,7 @@ func (r *ProductRepo) GetByUserID(userID int) ([]entity.Product, error) {
 	var list []entity.Product
 	for rows.Next() {
 		var p entity.Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.BuyPrice, &p.Discount, &p.Quantity,
 			&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -239,7 +244,7 @@ func (r *ProductRepo) GetByUserID(userID int) ([]entity.Product, error) {
 
 func (r *ProductRepo) SearchByUserID(userID int, query string) ([]entity.Product, error) {
 	rows, err := r.db.Query(
-		`SELECT p.id, p.name, p."lokalCode", p."shortDescription", p."fullDescription", p.price, p.discount, p.quantity, p.images, p.barcode, p.country, p."categoryId", p."businessId", p."isDeleted", p."createdAt", p."updatedAt"
+		`SELECT p.id, p.name, p."lokalCode", p."shortDescription", p."fullDescription", p.price, p."buyPrice", p.discount, p.quantity, p.images, p.barcode, p.country, p."categoryId", p."businessId", p."isDeleted", p."createdAt", p."updatedAt"
 		FROM products p
 		WHERE p."businessId" IN (
 			SELECT id FROM businesses WHERE "userId" = $1
@@ -258,7 +263,7 @@ func (r *ProductRepo) SearchByUserID(userID int, query string) ([]entity.Product
 	var list []entity.Product
 	for rows.Next() {
 		var p entity.Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.Discount, &p.Quantity,
+		if err := rows.Scan(&p.ID, &p.Name, &p.LokalCode, &p.ShortDescription, &p.FullDescription, &p.Price, &p.BuyPrice, &p.Discount, &p.Quantity,
 			&p.Images, &p.Barcode, &p.Country, &p.CategoryID, &p.BusinessID, &p.IsDeleted, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -270,7 +275,7 @@ func (r *ProductRepo) SearchByUserID(userID int, query string) ([]entity.Product
 func (r *ProductRepo) GetByIDs(ids []int) ([]entity.Product, error) {
 	fmt.Printf("GetByIDs query with: %v\n", ids)
 	rows, err := r.db.Query(
-		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
+		`SELECT id, name, "lokalCode", "shortDescription", "fullDescription", price, "buyPrice", discount, quantity, images, barcode, country, "categoryId", "businessId", "isDeleted", "createdAt", "updatedAt"
 		FROM products WHERE id = ANY($1) AND "isDeleted" = false ORDER BY id`, pq.Array(ids),
 	)
 	if err != nil {

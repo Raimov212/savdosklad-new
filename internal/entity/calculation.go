@@ -20,6 +20,14 @@ type Calculation struct {
 	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
+type CalculationStats struct {
+	TotalSale       float64 `json:"totalSale"`
+	TotalIncome     float64 `json:"totalIncome"`
+	TotalExpense    float64 `json:"totalExpense"`
+	TotalFixedCosts float64 `json:"totalFixedCosts"`
+	TotalSalary     float64 `json:"totalSalary"`
+}
+
 type CreateCalculationRequest struct {
 	BusinessID      int     `json:"businessId" binding:"required"`
 	TotalIncome     float64 `json:"totalIncome"`

@@ -478,3 +478,7 @@ func (uc *CalculationUseCase) GetByBusinessID(bid int) ([]entity.Calculation, er
 func (uc *CalculationUseCase) GetByPeriod(bid, m, y int) (*entity.Calculation, error) {
 	return uc.repo.GetByBusinessIDAndPeriod(bid, m, y)
 }
+
+func (uc *CalculationUseCase) GetStats(bid, month, year int) (*entity.CalculationStats, error) {
+	return uc.repo.GetStats(bid, month, year)
+}
