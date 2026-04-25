@@ -149,6 +149,7 @@ export const translations = {
         "Qolgan qarz": "Qolgan qarz",
         "To'lov summasini kiriting": "To'lov summasini kiriting",
         "To'lov summasi qarzdan ko'p bo'lishi mumkin emas!": "To'lov summasi qarzdan ko'p bo'lishi mumkin emas!",
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)",
         "To'langan summasi": "To'langan summasi",
         "Ism Familiya": "Ism Familiya",
         "Qarz muvaffaqiyatli to'landi!": "Qarz muvaffaqiyatli to'landi!",
@@ -187,7 +188,8 @@ export const translations = {
         "O'zbekiston": "O'zbekiston",
         "Lokal kod": "Lokal kod",
         "Begona": "Begona",
-        "Ixtiyoriy": "Ixtiyoriy"
+        "Ixtiyoriy": "Ixtiyoriy",
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"
     },
     'uz-cyrl': {
         "Biznesingizni": "Бизнесингизни",
@@ -805,7 +807,8 @@ export const translations = {
         "Miqdorni kiriting": "Миқдорни киритинг",
         "O'zbekiston": "Ўзбекистон",
         "Lokal kod": "Локал код",
-        "Ixtiyoriy": "Ихтиёрий"
+        "Ixtiyoriy": "Ихтиёрий",
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Телефон рақами нотўғри форматда (Масалан: +998901234567)"
     },
     ru: {
         "Biznesingizni": "Управляйте бизнесом",
@@ -1422,7 +1425,8 @@ export const translations = {
         "Miqdorni kiriting": "Введите количество",
         "O'zbekiston": "Узбекистан",
         "Lokal kod": "Локальный код",
-        "Ixtiyoriy": "Необязательно"
+        "Ixtiyoriy": "Необязательно",
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Номер телефона в неправильном формате (Например: +998901234567)"
     },
     en: {
         "Biznesingizni": "Manage your business",
@@ -2027,7 +2031,8 @@ export const translations = {
         "demo_slide_3": "Create a sale in a few steps. Cash, card or credit. PDF receipt for every transaction.",
         "demo_slide_4": "Maintain a customer database. Track purchase history, debts and payments. Manage debtors list.",
         "demo_slide_5": "Automatically calculate monthly income, expenses, salaries and taxes. Net profit at a glance.",
-        "demo_slide_6": "Get sales notifications via Telegram bot. Monitor your business from your phone in real time."
+        "demo_slide_6": "Get sales notifications via Telegram bot. Monitor your business from your phone in real time.",
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Phone number is in incorrect format (Example: +998901234567)"
     }
 };
 

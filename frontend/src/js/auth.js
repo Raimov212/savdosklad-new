@@ -151,6 +151,13 @@ async function handleRegister(e) {
         return;
     }
 
+    const phone = document.getElementById('reg-phone').value.trim();
+    const phoneRegex = /^\+998[0-9]{9}$/;
+    if (!phoneRegex.test(phone)) {
+        showToast(t("Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"), 'error');
+        return;
+    }
+
     btn.disabled = true;
     if (btnText) btnText.innerText = t('Yuklanmoqda...');
     else btn.innerText = t('Yuklanmoqda...');

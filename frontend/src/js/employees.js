@@ -234,11 +234,17 @@ window.handleAddEmployee = async function (e) {
         };
     });
 
+    const phoneNumber = document.getElementById('emp-phone').value.trim();
+    if (phoneNumber && !/^\+998[0-9]{9}$/.test(phoneNumber)) {
+        showToast(t("Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"), 'error');
+        return;
+    }
+
     const req = {
         firstName: document.getElementById('emp-firstName').value,
         lastName: document.getElementById('emp-lastName').value,
         userName: document.getElementById('emp-user').value,
-        phoneNumber: document.getElementById('emp-phone').value,
+        phoneNumber: phoneNumber,
         password: document.getElementById('emp-pass').value,
         expirationDate: document.getElementById('emp-expiration').value ? new Date(document.getElementById('emp-expiration').value).toISOString() : undefined,
         businessIds: selectedBids,
@@ -353,10 +359,16 @@ window.handleUpdateEmployee = async function (e, id) {
         };
     });
 
+    const phoneNumber = document.getElementById('emp-phone').value.trim();
+    if (phoneNumber && !/^\+998[0-9]{9}$/.test(phoneNumber)) {
+        showToast(t("Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"), 'error');
+        return;
+    }
+
     const req = {
         firstName: document.getElementById('emp-firstName').value,
         lastName: document.getElementById('emp-lastName').value,
-        phoneNumber: document.getElementById('emp-phone').value,
+        phoneNumber: phoneNumber,
         expirationDate: document.getElementById('emp-expiration').value ? new Date(document.getElementById('emp-expiration').value).toISOString() : undefined,
         businessIds: selectedBids,
         businessPermissions: businessPermissions,
