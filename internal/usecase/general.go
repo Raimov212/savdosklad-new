@@ -482,3 +482,7 @@ func (uc *CalculationUseCase) GetByPeriod(bid, m, y int) (*entity.Calculation, e
 func (uc *CalculationUseCase) GetStats(bid, month, year int) (*entity.CalculationStats, error) {
 	return uc.repo.GetStats(bid, month, year)
 }
+
+func (uc *CalculationUseCase) GetIncomeBreakdown(bid, month, year int) ([]entity.IncomeBreakdownItem, error) {
+	return uc.repo.GetIncomeBreakdown(bid, month, year)
+}

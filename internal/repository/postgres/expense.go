@@ -47,7 +47,7 @@ func (r *ExpenseRepo) GetTotalExpensesByBusinessID(bid int) ([]entity.TotalExpen
 	}
 	defer rows.Close()
 
-	var list []entity.TotalExpense
+	list := []entity.TotalExpense{}
 	for rows.Next() {
 		var te entity.TotalExpense
 		if err := r.scanTotalExpense(rows, &te); err != nil {
@@ -68,7 +68,7 @@ func (r *ExpenseRepo) GetExpensesByTotalID(totalID int) ([]entity.Expense, error
 	}
 	defer rows.Close()
 
-	var list []entity.Expense
+	list := []entity.Expense{}
 	for rows.Next() {
 		var e entity.Expense
 		if err := rows.Scan(&e.ID, &e.Name, &e.Description, &e.Value, &e.BusinessID, &e.TotalExpenseID, &e.ExpenseDate, &e.CreatedAt, &e.UpdatedAt); err != nil {
@@ -93,7 +93,7 @@ func (r *ExpenseRepo) GetTotalExpensesByPeriod(bid int, start, end time.Time) ([
 	}
 	defer rows.Close()
 
-	var results []entity.TotalExpense
+	results := []entity.TotalExpense{}
 	for rows.Next() {
 		var t entity.TotalExpense
 		if err := r.scanTotalExpense(rows, &t); err != nil {
@@ -127,7 +127,7 @@ func (r *ExpenseRepo) GetFixedCostsByBusinessID(bid int) ([]entity.FixedCost, er
 		return nil, err
 	}
 	defer rows.Close()
-	var list []entity.FixedCost
+	list := []entity.FixedCost{}
 	for rows.Next() {
 		var fc entity.FixedCost
 		if err := rows.Scan(&fc.ID, &fc.Name, &fc.Description, &fc.Amount, &fc.Type, &fc.BusinessID, &fc.CreatedAt, &fc.UpdatedAt); err != nil {
@@ -162,7 +162,7 @@ func (r *ExpenseRepo) GetFixedFactedCostsByBusinessID(bid int) ([]entity.FixedFa
 		return nil, err
 	}
 	defer rows.Close()
-	var list []entity.FixedFactedCost
+	list := []entity.FixedFactedCost{}
 	for rows.Next() {
 		var ffc entity.FixedFactedCost
 		if err := rows.Scan(&ffc.ID, &ffc.Amount, &ffc.Date, &ffc.BusinessID, &ffc.FixedCostID, &ffc.CreatedAt, &ffc.UpdatedAt); err != nil {

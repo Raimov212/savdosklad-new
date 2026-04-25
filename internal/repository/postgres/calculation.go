@@ -37,7 +37,7 @@ func (r *CalculationRepo) GetByBusinessID(businessID int) ([]entity.Calculation,
 	}
 	defer rows.Close()
 
-	var list []entity.Calculation
+	list := []entity.Calculation{}
 	for rows.Next() {
 		var c entity.Calculation
 		if err := rows.Scan(&c.ID, &c.BusinessID, &c.TotalIncome, &c.IncomeTax, &c.TotalExpense, &c.TotalFixedCosts,
@@ -119,4 +119,36 @@ func (r *CalculationRepo) GetStats(bid, month, year int) (*entity.CalculationSta
 	}
 
 	return &stats, nil
+}
+
+func (r *CalculationRepo) GetIncomeBreakdown(bid, month, year int) ([]entity.IncomeBreakdownItem, error) {
+	query := `SELECT 
+			p.name, 
+			SUM(t."productQuantity") as qty, 
+			AVG(t."productPrice") as avg_price, 
+			COALESCE(p."buyPrice", 0) as buy_price,
+			SUM((t."productPrice" - COALESCE(p."buyPrice", 0)) * t."productQuantity") as total_profit
+		 FROM transactions t
+		 JOIN products p ON t."productId" = p.id
+		 WHERE t."businessId" = $1 
+		   AND EXTRACT(MONTH FROM t."createdAt") = $2 
+		   AND EXTRACT(YEAR FROM t."createdAt") = $3
+		 GROUP BY p.id, p.name, p."buyPrice"
+		 ORDER BY total_profit DESC`
+
+	rows, err := r.db.Query(query, bid, month, year)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []entity.IncomeBreakdownItem
+	for rows.Next() {
+		var item entity.IncomeBreakdownItem
+		if err := rows.Scan(&item.ProductName, &item.Quantity, &item.AvgPrice, &item.BuyPrice, &item.TotalProfit); err != nil {
+			return nil, err
+		}
+		list = append(list, item)
+	}
+	return list, nil
 }

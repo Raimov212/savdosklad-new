@@ -20,7 +20,7 @@ async function renderProducts() {
       }
 
       const results = await Promise.all(
-        businesses.map(b => 
+        businesses.map(b =>
           Promise.all([
             api.get(`/products?businessId=${b.id}`).catch(() => []),
             api.get(`/categories?businessId=${b.id}`).catch(() => [])
@@ -247,14 +247,14 @@ function openProductModal(p = null) {
           <div class="form-group">
             <label>${t("Sotish narxi")}</label>
             <div style="position:relative">
-               <input type="number" step="0.01" class="form-control" id="prod-price" value="${isEdit ? p.price : ''}" required style="padding-right:45px">
+               <input type="number" step="0.01" class="form-control" id="prod-price" value="${isEdit ? p.price : 0}" required style="padding-right:45px">
                <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; opacity:0.5;">UZS</span>
             </div>
           </div>
           <div class="form-group">
             <label>${t("Tan narxi")}</label>
             <div style="position:relative">
-               <input type="number" step="0.01" class="form-control" id="prod-buy-price" value="${isEdit ? p.buyPrice : ''}" required style="padding-right:45px">
+               <input type="number" step="0.01" class="form-control" id="prod-buy-price" value="${isEdit ? p.buyPrice : 0}" required style="padding-right:45px">
                <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; opacity:0.5;">UZS</span>
             </div>
           </div>
@@ -263,18 +263,11 @@ function openProductModal(p = null) {
         <div class="form-row">
           <div class="form-group">
             <label>${t("Chegirma")} (%)</label>
-            <input type="number" step="0.01" class="form-control" id="prod-discount" value="${isEdit ? p.discount : 0}">
+            <input type="number" min="0" step="0.01" class="form-control" id="prod-discount" value="${isEdit ? p.discount : 0}">
           </div>
-        </div>
-
-        <div class="form-row">
           <div class="form-group">
             <label>${t("Miqdori")}</label>
-            <input type="number" class="form-control" id="prod-qty" value="${isEdit ? p.quantity : ''}">
-          </div>
-          <div class="form-group">
-            <label>${t("Mamlakat")}</label>
-            <input type="text" class="form-control" id="prod-country" value="${isEdit && p.country ? escapeHtml(p.country) : ''}">
+            <input type="number" min="0" step="1" class="form-control" id="prod-qty" value="${isEdit ? p.quantity : 0}" required>
           </div>
         </div>
 
@@ -282,6 +275,10 @@ function openProductModal(p = null) {
           <div class="form-group">
             <label>${t("Lokal kod")}</label>
             <input type="text" class="form-control" id="prod-lcode" value="${isEdit && p.lokalCode ? escapeHtml(p.lokalCode) : ''}" placeholder="${t('Ixtiyoriy')}">
+          </div>
+          <div class="form-group">
+            <label>${t("Mamlakat")}</label>
+            <input type="text" class="form-control" id="prod-country" value="${isEdit ? escapeHtml(p.country || '') : t('O\'zbekiston')}" placeholder="${t('O\'zbekiston')}">
           </div>
         </div>
 

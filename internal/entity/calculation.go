@@ -42,3 +42,11 @@ type CreateCalculationRequest struct {
 	TotalSale       float64 `json:"totalSale"`
 	AddedMoney      float64 `json:"addedMoney"`
 }
+
+type IncomeBreakdownItem struct {
+	ProductName string  `json:"productName"`
+	Quantity    int     `json:"quantity"`
+	AvgPrice    float64 `json:"avgPrice"`
+	BuyPrice    float64 `json:"buyPrice"`
+	TotalProfit float64 `json:"totalProfit"`
+}

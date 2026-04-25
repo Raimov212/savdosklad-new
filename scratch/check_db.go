@@ -3,41 +3,43 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
-	"os"
-	"github.com/joho/godotenv"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	godotenv.Load()
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		dbURL = "postgres://postgres:postgres@localhost:5432/savdosklad?sslmode=disable"
-	}
-
-	db, err := sql.Open("postgres", dbURL)
+	connStr := "postgres://postgres:postgres@localhost:5432/savdosklad?sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 
-	// Check user businesses
-	fmt.Println("--- User Businesses ---")
-	rows, _ := db.Query(`SELECT user_id, business_id FROM user_businesses`)
+	rows, err := db.Query(`
+		SELECT b.name, c.month, c.year, c.profit, c."totalIncome" 
+		FROM calculations c 
+		JOIN businesses b ON c."businessId" = b.id 
+		WHERE c.month = 4 AND c.year = 2026
+	`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	found := false
 	for rows.Next() {
-		var uid, bid int
-		rows.Scan(&uid, &bid)
-		fmt.Printf("User: %d, Business: %d\n", uid, bid)
+		var name string
+		var m, y int
+		var profit, income float64
+		if err := rows.Scan(&name, &m, &y, &profit, &income); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Business: %s, Period: %d/%d, Income: %f, Profit: %f\n", name, m, y, income, profit)
+		found = true
 	}
 
-	// Check users marketId
-	fmt.Println("\n--- Users marketId ---")
-	rows, _ = db.Query(`SELECT id, "userName", role, "marketId" FROM users`)
-	for rows.Next() {
-		var id, role int
-		var username string
-		var mid sql.NullInt64
-		rows.Scan(&id, &username, &role, &mid)
-		fmt.Printf("ID: %d, User: %s, Role: %d, MarketID: %v\n", id, username, role, mid.Int64)
+	if !found {
+		fmt.Println("No April 2026 reports found in database.")
 	}
 }

@@ -289,15 +289,15 @@ async function renderDashboard() {
     if (!bid) {
       // "Hammasi" tanlangan — barcha bizneslar bo'yicha ma'lumotlarni yuklaymiz
       const businesses = await api.get('/businesses/my').catch(() => []);
+      const user = api.getUser();
       if (!businesses || businesses.length === 0) {
-        const user = api.getUser();
         content.innerHTML = `
           <div class="empty-state">
             <div class="icon">🏢</div>
             <h4>${t("Biznes yarating")}</h4>
-            <p>${user.role >= 1 ? t("Yangi biznes yarating va ma'lumotlaringizni boshqaring.") : t("Hozircha biznes mavjud emas.")}</p>
+            <p>${user && user.role >= 1 ? t("Yangi biznes yarating va ma'lumotlaringizni boshqaring.") : t("Hozircha biznes mavjud emas.")}</p>
             <br>
-            ${user.role >= 1 ? `<button class="btn btn-primary" onclick="navigateTo('businesses')">${t("Biznes yaratish")}</button>` : ''}
+            ${user && user.role >= 1 ? `<button class="btn btn-primary" onclick="navigateTo('businesses')">${t("Biznes yaratish")}</button>` : ''}
           </div>`;
         return;
       }

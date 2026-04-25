@@ -11,14 +11,19 @@ async function renderCalculations() {
   const content = document.getElementById('page-content');
   const bid = getSelectedBusinessId();
 
-  if (!bid) {
-    content.innerHTML = `<div class="empty-state"><div class="icon">📊</div><h4>${t("Avval biznes tanlang")}</h4></div>`;
-    return;
-  }
-
   try {
-    const calculations = await api.get(`/calculations?businessId=${bid}`);
-    allCalculationsList = calculations || [];
+    let calculations = [];
+    if (!bid) {
+      const businesses = await api.get('/businesses/my').catch(() => []);
+      if (businesses && businesses.length > 0) {
+        const all = await Promise.all(businesses.map(b => api.get(`/calculations?businessId=${b.id}`).catch(() => [])));
+        calculations = all.flat();
+      }
+    } else {
+      calculations = await api.get(`/calculations?businessId=${bid}`);
+    }
+    
+    allCalculationsList = (calculations || []).filter(c => c && typeof c === 'object');
 
     // Sort by year desc, month desc
     allCalculationsList.sort((a, b) => {
@@ -96,7 +101,7 @@ function renderCalculationsTable(list, isAppend = false) {
         <div class="toolbar">
           <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" placeholder="${t("Yil bo'yicha")}" id="calculation-search" value="${escapeHtml(document.getElementById('calculation-search')?.value || '')}" oninput="filterCalculations(this.value)">
+            <input type="text" placeholder="${t("Oy/Yil bo'yicha")}" id="calculation-search" value="${escapeHtml(document.getElementById('calculation-search')?.value || '')}" oninput="filterCalculations(this.value)">
           </div>
           <button class="btn btn-primary btn-sm" onclick="openCalculationModal()">${t("Qo'shish")}</button>
         </div>
@@ -112,11 +117,10 @@ function renderCalculationsTable(list, isAppend = false) {
       <div class="page-bottom-bar">
         <div class="search-box" style="flex:1; max-width:none;">
           <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-          <input type="text" placeholder="${t("Yil bo'yicha")}" id="calculation-search-bottom" 
+          <input type="text" placeholder="${t("Oy/Yil bo'yicha")}" id="calculation-search-bottom" 
             oninput="filterCalculations(this.value)"
             style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
         </div>
-        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
         <button class="btn btn-primary" onclick="openCalculationModal()">${t("Qo'shish")}</button>
       </div >
     `;
@@ -136,9 +140,12 @@ function renderCalculationsTable(list, isAppend = false) {
 
 function filterCalculations(query) {
   const q = query.toLowerCase();
-  const filtered = allCalculationsList.filter(c =>
-    String(c.year).includes(q)
-  );
+  const months = ['', 'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+  
+  const filtered = allCalculationsList.filter(c => {
+    const monthName = t(months[c.month] || '').toLowerCase();
+    return String(c.year).includes(q) || monthName.includes(q);
+  });
   const _inputEl = document.getElementById('calculation-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;
 
@@ -171,7 +178,10 @@ function viewCalculationDetail(c) {
               <td class="price" style="padding:12px; border:none; text-align:right; font-weight:700;">${formatPrice(c.totalSale)} ${t("so'm")}</td>
             </tr>
             <tr>
-              <td style="padding:12px; border:none; color:var(--text-secondary)">${t("Jami daromad")}</td>
+              <td style="padding:12px; border:none; color:var(--text-secondary); display:flex; align-items:center; gap:8px;">
+                ${t("Jami daromad")}
+                <button type="button" class="btn btn-ghost" style="padding:0; height:auto; font-size:10px; opacity:0.5;" onclick="showIncomeBreakdown(${c.businessId}, ${c.month}, ${c.year})" title="${t("Daromad yoyilmasini ko'rish")}">ℹ️</button>
+              </td>
               <td class="price" style="padding:12px; border:none; text-align:right; color:var(--success); font-weight:700;">${formatPrice(c.totalIncome)} ${t("so'm")}</td>
             </tr>
             <tr>
@@ -242,7 +252,10 @@ function openCalculationModal() {
             <input type="number" step="0.01" class="form-control" id="calc-sale" value="0">
           </div>
           <div class="form-group">
-            <label style="font-size:12px; font-weight:600;">${t("Jami daromad")}</label>
+            <label style="font-size:12px; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+              ${t("Jami daromad")}
+              <button type="button" class="btn btn-ghost" style="padding:0; height:auto; font-size:10px; opacity:0.5;" onclick="const bid = getSelectedBusinessId(); const month = document.getElementById('calc-month').value; const year = document.getElementById('calc-year').value; showIncomeBreakdown(bid, month, year);" title="${t("Daromad yoyilmasini ko'rish")}">ℹ️</button>
+            </label>
             <input type="number" step="0.01" class="form-control" id="calc-income" value="0" oninput="calculateNetProfit()">
           </div>
           <div class="form-group">
@@ -358,6 +371,71 @@ function calculateNetProfit() {
   const profit = income - expense - fixed - salary + added - incomeTax;
   document.getElementById('calc-profit').value = profit.toFixed(2);
 }
+
+
+window.showIncomeBreakdown = async function(bid, month, year) {
+  try {
+    const data = await api.get(`/calculations/income-breakdown?businessId=${bid}&month=${month}&year=${year}`);
+    if (!data || data.length === 0) {
+      showToast(t("Ma'lumot topilmadi"), 'info');
+      return;
+    }
+
+    let rows = '';
+    data.forEach(item => {
+      rows += `
+        <tr>
+          <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${item.productName}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); text-align:center; font-size:13px;">${item.quantity}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); text-align:right; font-size:13px;">${formatPrice(item.avgPrice)}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); text-align:right; font-size:13px; color:var(--danger);">${formatPrice(item.buyPrice)}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); text-align:right; font-size:13px; font-weight:700; color:${item.totalProfit >= 0 ? 'var(--success)' : 'var(--danger)'};">
+            ${formatPrice(item.totalProfit)}
+          </td>
+        </tr>
+      `;
+    });
+
+    const breakdownHtml = `
+      <div class="modal-header">
+        <h3>${t("Daromad yoyilmasi")}</h3>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      </div>
+      <div style="max-height:400px; overflow-y:auto; padding:10px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead style="position:sticky; top:0; background:var(--bg-card); z-index:1;">
+            <tr>
+              <th style="text-align:left; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Mahsulot")}</th>
+              <th style="text-align:center; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Soni")}</th>
+              <th style="text-align:right; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Sotish narxi")}</th>
+              <th style="text-align:right; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Tan narxi")}</th>
+              <th style="text-align:right; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Foyda")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">${t("Yopish")}</button>
+      </div>
+    `;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.style.zIndex = '2000';
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.width = '700px';
+    modal.innerHTML = breakdownHtml;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+};
 
 // Global exports
 window.renderCalculations = renderCalculations;

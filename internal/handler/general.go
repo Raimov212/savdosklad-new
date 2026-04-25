@@ -1115,6 +1115,19 @@ func (h *CalculationHandler) GetStats(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
+func (h *CalculationHandler) GetIncomeBreakdown(c *gin.Context) {
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	month, _ := strconv.Atoi(c.Query("month"))
+	year, _ := strconv.Atoi(c.Query("year"))
+
+	list, err := h.uc.GetIncomeBreakdown(bid, month, year)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
 // @Summary Create calculation
 // @Tags Calculations
 // @Security BearerAuth
@@ -1234,6 +1247,7 @@ func RegisterRoutes(
 	r.POST("/calculations", calculationH.Create)
 	r.GET("/calculations", calculationH.GetByBusinessID)
 	r.GET("/calculations/stats", calculationH.GetStats)
+	r.GET("/calculations/income-breakdown", calculationH.GetIncomeBreakdown)
 
 	// Salary Handlers
 	r.POST("/salaries", salaryH.Create)

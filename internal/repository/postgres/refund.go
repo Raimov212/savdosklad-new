@@ -66,7 +66,7 @@ func (r *RefundRepo) GetTotalRefundsByBusinessID(businessID int) ([]entity.Total
 	}
 	defer rows.Close()
 
-	var list []entity.TotalRefund
+	list := []entity.TotalRefund{}
 	for rows.Next() {
 		var tr entity.TotalRefund
 		if err := rows.Scan(&tr.ID, &tr.Description, &tr.Total, &tr.Cash, &tr.Card, &tr.Click, &tr.Debt,
@@ -96,7 +96,7 @@ func (r *RefundRepo) GetTotalRefundsByPeriod(bid int, start, end time.Time) ([]e
 	}
 	defer rows.Close()
 
-	var list []entity.TotalRefund
+	list := []entity.TotalRefund{}
 	for rows.Next() {
 		var tt entity.TotalRefund
 		if err := rows.Scan(&tt.ID, &tt.Description, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt,
@@ -118,7 +118,7 @@ func (r *RefundRepo) GetRefundsByTotalID(totalID int) ([]entity.Refund, error) {
 	}
 	defer rows.Close()
 
-	var list []entity.Refund
+	list := []entity.Refund{}
 	for rows.Next() {
 		var rf entity.Refund
 		if err := rows.Scan(&rf.ID, &rf.Description, &rf.ProductPrice, &rf.ProductQuantity, &rf.ProductID, &rf.BusinessID, &rf.TotalRefundID, &rf.TransactionID, &rf.CreatedAt, &rf.UpdatedAt); err != nil {

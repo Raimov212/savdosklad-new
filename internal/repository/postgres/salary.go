@@ -38,7 +38,7 @@ func (r *SalaryRepo) GetByBusinessID(bid int) ([]entity.EmployeeSalary, error) {
 	}
 	defer rows.Close()
 
-	var list []entity.EmployeeSalary
+	list := []entity.EmployeeSalary{}
 	for rows.Next() {
 		var s entity.EmployeeSalary
 		if err := rows.Scan(&s.ID, &s.EmployeeID, &s.EmployeeName, &s.BusinessID, &s.Amount, &s.Month, &s.Year, &s.Description, &s.CreatedAt, &s.UpdatedAt); err != nil {
@@ -61,7 +61,7 @@ func (r *SalaryRepo) GetByEmployeeID(empID int) ([]entity.EmployeeSalary, error)
 	}
 	defer rows.Close()
 
-	var list []entity.EmployeeSalary
+	list := []entity.EmployeeSalary{}
 	for rows.Next() {
 		var s entity.EmployeeSalary
 		if err := rows.Scan(&s.ID, &s.EmployeeID, &s.EmployeeName, &s.BusinessID, &s.Amount, &s.Month, &s.Year, &s.Description, &s.CreatedAt, &s.UpdatedAt); err != nil {
@@ -84,7 +84,7 @@ func (r *SalaryRepo) GetByPeriod(bid, month, year int) ([]entity.EmployeeSalary,
 	}
 	defer rows.Close()
 
-	var list []entity.EmployeeSalary
+	list := []entity.EmployeeSalary{}
 	for rows.Next() {
 		var s entity.EmployeeSalary
 		if err := rows.Scan(&s.ID, &s.EmployeeID, &s.EmployeeName, &s.BusinessID, &s.Amount, &s.Month, &s.Year, &s.Description, &s.CreatedAt, &s.UpdatedAt); err != nil {

@@ -84,7 +84,7 @@ function renderDebtsTabs() {
   renderDebtsTable(currentTab);
 }
 
-window.filterDebts = function(query) {
+window.filterDebts = function (query) {
   const q = query.toLowerCase();
   renderDebtsTable(window.currentDebtTab || 'active', q);
 }
@@ -138,7 +138,7 @@ function renderDebtsTable(tab, filter = '', isAppend = false) {
               <div>
                 <div class="acc-title">${clientName}</div>
                 <div class="acc-subtitle">
-                  Sotuv № ${trans.id} — ${formatDateTime(trans.createdAt)}
+                  ${t("Sotuv")} № ${trans.id} — ${formatDateTime(trans.createdAt)}
                   ${tab === 'active' && trans.debtLimitDate ? `<span class="badge badge-warning" style="margin-left:6px;">${t("Muddat")}: ${escapeHtml(trans.debtLimitDate.substring(0, 10))}</span>` : ''}
                 </div>
               </div>

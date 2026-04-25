@@ -10,30 +10,15 @@ export async function renderEmployees() {
     const content = document.getElementById('page-content');
     content.innerHTML = `
         <div class="card" style="padding:24px;">
-            <div class="card-header" style="margin-bottom:20px;">
-                <h3 style="font-family:'Outfit'; font-size:18px;">${t("Xodimlar")}</h3>
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
+                <h3 style="font-family:'Outfit'; font-size:18px; margin:0;">${t("Xodimlar")}</h3>
                 <button class="btn btn-primary" onclick="window.openAddEmployeeModal()">
                     <i data-lucide="user-plus"></i> ${t("Xodim qo'shish")}
                 </button>
             </div>
             
-            <div class="table-container">
-                <table class="premium-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align:center">№</th>
-                            <th>${t("Ism Familiya")}</th>
-                            <th>${t("Foydalanuvchi nomi")}</th>
-                            <th>${t("Biznes")}</th>
-                            <th style="text-align:center">${t("Telefon")}</th>
-                            <th style="text-align:center">${t("Muddati")}</th>
-                            <th style="text-align:center">${t("Amallar")}</th>
-                        </tr>
-                    </thead>
-                    <tbody id="employees-table-body">
-                        <tr><td colspan="7" style="text-align:center; padding:40px;"><div class="loader-inline"></div></td></tr>
-                    </tbody>
-                </table>
+            <div id="employees-list" class="acc-list">
+                <div style="text-align:center; padding:40px;"><div class="loader-inline"></div></div>
             </div>
             <div id="employees-pagination"></div>
         </div>
@@ -50,21 +35,21 @@ export async function renderEmployees() {
         lucide.createIcons();
     } catch (err) {
         showToast(err.message, 'error');
-        document.getElementById('employees-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--danger);">${err.message}</td></tr>`;
+        document.getElementById('employees-list').innerHTML = `<p style="text-align:center; color:var(--danger);">${err.message}</p>`;
     }
 }
 
 function renderEmployeesTable(isAppend = false) {
-    if (typeof isAppend !== 'boolean') isAppend = false; // it receives `true` from observer
+    if (typeof isAppend !== 'boolean') isAppend = false;
 
-    const tbody = document.getElementById('employees-table-body');
+    const listContainer = document.getElementById('employees-list');
     const pag = document.getElementById('employees-pagination');
-    if (!tbody) return;
+    if (!listContainer) return;
 
     if (!isAppend) window.employeesPage = 1;
 
     if (allEmployees.length === 0 && !isAppend) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Sizda hali xodimlar yo'q")}</td></tr>`;
+        listContainer.innerHTML = `<div class="empty-state" style="padding:40px; text-align:center; color:var(--text-muted);">${t("Sizda hali xodimlar yo'q")}</div>`;
         pag.innerHTML = '';
         return;
     }
@@ -74,42 +59,84 @@ function renderEmployeesTable(isAppend = false) {
     const end = window.employeesPage * employeesPerPage;
     const paginated = allEmployees.slice(end - employeesPerPage, end);
 
-    const rows = paginated.map((emp, i) => {
+    const avatarColors = ['acc-avatar-indigo', 'acc-avatar-green', 'acc-avatar-blue', 'acc-avatar-orange'];
+
+    const items = paginated.map((emp, i) => {
         const empBids = emp.businessIds || [];
         const linkedBizNames = allBusinesses
             .filter(b => empBids.includes(b.id))
             .map(b => b.name)
             .join(', ');
+        
+        const colorClass = avatarColors[i % avatarColors.length];
+        const initial = (emp.firstName || '?')[0].toUpperCase();
+        const fullName = `${escapeHtml(emp.firstName)} ${escapeHtml(emp.lastName)}`;
+        const expDate = emp.expirationDate ? emp.expirationDate.split('T')[0] : '—';
 
         return `
-            <tr>
-                <td style="text-align:center; color:var(--text-muted);">${(window.employeesPage - 1) * employeesPerPage + i + 1}</td>
-                <td style="font-weight:600;">${escapeHtml(emp.firstName)} ${escapeHtml(emp.lastName)}</td>
-                <td>@${escapeHtml(emp.userName)}</td>
-                <td><span class="badge" style="background:var(--accent-glow); color:var(--accent);">${escapeHtml(linkedBizNames || t("Biriktirilmagan"))}</span></td>
-                <td style="text-align:center;">${emp.phoneNumber || '—'}</td>
-                <td style="text-align:center; font-size:12px; font-weight:500;">${emp.expirationDate ? emp.expirationDate.split('T')[0] : '—'}</td>
-                <td class="actions" style="justify-content:center">
-                    <button class="btn-icon" onclick="window.openSalaryModal(${emp.id})" title="${t("Ish haqi")}">
-                        <i data-lucide="banknote"></i>
-                    </button>
-                    <button class="btn-icon" onclick="window.openEditEmployeeModal(${emp.id})" title="${t("Tahrirlash")}">
-                        <i data-lucide="edit-3"></i>
-                    </button>
-                    <button class="btn-icon danger" onclick="window.deleteEmployee(${emp.id})" title="${t("O'chirish")}">
-                        <i data-lucide="trash-2"></i>
-                    </button>
-                </td>
-            </tr>
+            <div class="acc-item" id="emp-acc-${emp.id}">
+                <div class="acc-header" onclick="toggleAcc('emp-acc-${emp.id}')">
+                    <div class="acc-header-left">
+                        ${emp.image 
+                            ? `<img src="${emp.image}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;">`
+                            : `<div class="acc-avatar ${colorClass}">${initial}</div>`
+                        }
+                        <div>
+                            <div class="acc-title">${fullName}</div>
+                            <div class="acc-subtitle">@${escapeHtml(emp.userName)} ${emp.phoneNumber ? ' · ' + escapeHtml(emp.phoneNumber) : ''}</div>
+                        </div>
+                    </div>
+                    <div class="acc-header-right">
+                        <span class="acc-chevron">▼</span>
+                    </div>
+                </div>
+                <div class="acc-body">
+                    <div class="acc-detail-grid">
+                        <div class="acc-detail-item">
+                            <span class="acc-detail-icon">🏢</span>
+                            <div>
+                                <div class="acc-detail-label">${t("Biznes")}</div>
+                                <div class="acc-detail-value">${escapeHtml(linkedBizNames || t("Biriktirilmagan"))}</div>
+                            </div>
+                        </div>
+                        <div class="acc-detail-item">
+                            <span class="acc-detail-icon">📅</span>
+                            <div>
+                                <div class="acc-detail-label">${t("Obuna muddati")}</div>
+                                <div class="acc-detail-value">${expDate}</div>
+                            </div>
+                        </div>
+                        ${emp.phoneNumber ? `
+                        <div class="acc-detail-item">
+                            <span class="acc-detail-icon">📞</span>
+                            <div>
+                                <div class="acc-detail-label">${t("Telefon")}</div>
+                                <div class="acc-detail-value">${escapeHtml(emp.phoneNumber)}</div>
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    <div class="acc-actions">
+                        <button class="btn btn-ghost btn-sm" onclick="window.openSalaryModal(${emp.id})" title="${t("Ish haqi")}">
+                            <i data-lucide="banknote" style="width:14px; height:14px;"></i> ${t("Ish haqi")}
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="window.openEditEmployeeModal(${emp.id})" title="${t("Tahrirlash")}">
+                            <i data-lucide="edit-3" style="width:14px; height:14px;"></i> ${t("Tahrirlash")}
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="window.deleteEmployee(${emp.id})" title="${t("O'chirish")}">
+                            <i data-lucide="trash-2" style="width:14px; height:14px;"></i> ${t("O'chirish")}
+                        </button>
+                    </div>
+                </div>
+            </div>
         `;
     }).join('');
 
     if (!isAppend) {
-        tbody.innerHTML = rows;
+        listContainer.innerHTML = items;
         pag.innerHTML = window.renderPageControls('employeesPage', totalPages, 'renderEmployeesTable');
         window.attachInfiniteScroll('employeesPage', totalPages, 'renderEmployeesTable');
     } else {
-        tbody.insertAdjacentHTML('beforeend', rows);
+        listContainer.insertAdjacentHTML('beforeend', items);
         pag.innerHTML = window.renderPageControls('employeesPage', totalPages, 'renderEmployeesTable');
         window.attachInfiniteScroll('employeesPage', totalPages, 'renderEmployeesTable');
     }
@@ -388,7 +415,7 @@ window.openSalaryModal = async function(empId) {
 
     try {
         const salaries = await api.get(`/salaries/employee/${empId}`);
-        const historyRows = (salaries || []).map(s => `
+        const historyRows = (salaries || []).filter(s => s && typeof s === 'object').map(s => `
             <tr>
                 <td>${months[s.month]} ${s.year}</td>
                 <td style="font-weight:700; color:var(--accent);">${window.formatPrice(s.amount)}</td>

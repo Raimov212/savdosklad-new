@@ -80,7 +80,7 @@ func (r *TransactionRepo) GetTotalTransactionsByBusinessID(bid int) ([]entity.To
 	}
 	defer rows.Close()
 
-	var list []entity.TotalTransaction
+	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
 		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
@@ -109,7 +109,7 @@ func (r *TransactionRepo) GetTransactionsByTotalID(totalID int) ([]entity.Transa
 	}
 	defer rows.Close()
 
-	var list []entity.Transaction
+	list := []entity.Transaction{}
 	for rows.Next() {
 		var t entity.Transaction
 		if err := rows.Scan(
@@ -138,7 +138,7 @@ func (r *TransactionRepo) GetTotalTransactionsByPeriod(bid int, start, end time.
 	}
 	defer rows.Close()
 
-	var list []entity.TotalTransaction
+	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
 		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
@@ -191,7 +191,7 @@ func (r *TransactionRepo) GetRecentTransactionsByBusinessID(bid int, limit int) 
 	}
 	defer rows.Close()
 
-	var list []entity.TotalTransaction
+	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
 		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
@@ -218,7 +218,7 @@ func (r *TransactionRepo) GetRecentTransactionsByClientID(clientID int, limit in
 	}
 	defer rows.Close()
 
-	var list []entity.TotalTransaction
+	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
 		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {

@@ -18,9 +18,7 @@ export const api = {
     },
 
     logout(reason = '') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('selectedBusinessId');
+        localStorage.clear();
         let url = 'index.html';
         if (reason) url += `?reason=${encodeURIComponent(reason)}`;
         window.location.href = url;

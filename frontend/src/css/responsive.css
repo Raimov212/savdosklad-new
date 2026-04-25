@@ -111,6 +111,10 @@
       padding: 12px !important;
   }
 
+  .card {
+      padding: 16px !important;
+  }
+
   .modal {
     width: 98% !important;
     margin: 4px;
