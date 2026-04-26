@@ -274,6 +274,10 @@ async function openSaleModal() {
             <label>⚠️ ${t("Qarz")}</label>
             <input type="number" step="0.01" class="form-control form-control-lg" id="sale-debt" value="0" readonly style="color: var(--warning); font-weight: 800;">
           </div>
+          <div class="form-group">
+            <label>🏷️ ${t("Chegirma")}</label>
+            <input type="number" step="0.01" class="form-control form-control-lg" id="sale-discount" value="0" oninput="updateSalePayment()">
+          </div>
         </div>
 
         <div id="payment-error-msg" style="color: #EF4444; font-size: 13px; font-weight: 700; margin: 15px 0; display: none; text-align: center; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px;">
@@ -403,7 +407,10 @@ function searchSaleProduct(query) {
           <div class="p-info">${p.barcode ? p.barcode : ''}</div>
         </div>
         <div style="text-align: right;">
-          <div style="font-weight: 700; color: ${p.quantity <= 0 ? '#EF4444' : 'var(--success)'};">${formatPrice(p.price)}</div>
+          <div style="font-weight: 700; color: ${p.quantity <= 0 ? '#EF4444' : 'var(--success)'};">
+            ${p.discount > 0 ? `<span style="text-decoration: line-through; font-size: 11px; opacity: 0.6; margin-right: 5px;">${formatPrice(p.price)}</span>` : ''}
+            ${formatPrice(p.discount > 0 ? p.price * (1 - p.discount / 100) : p.price)}
+          </div>
           <div style="font-size: 11px; font-weight: 600; color: ${p.quantity <= 10 ? '#EF4444' : 'inherit'};">
             ${p.quantity} ${t("dona")}
           </div>
@@ -429,10 +436,14 @@ function addSaleProductById(id) {
   if (existing) {
     existing.quantity++;
   } else {
+    const priceAfterDiscount = product.discount > 0 
+      ? product.price * (1 - product.discount / 100) 
+      : product.price;
+
     saleItems.push({
       productId: id,
       quantity: 1,
-      price: product.price,
+      price: priceAfterDiscount,
       name: product.name,
       businessId: product.businessId,
       businessName: product.businessName
@@ -565,6 +576,7 @@ function updateSalePayment() {
   const cash = parseFloat(cashInp.value) || 0;
   const card = parseFloat(cardInp.value) || 0;
   const click = parseFloat(clickInp.value) || 0;
+  const discount = parseFloat(document.getElementById('sale-discount')?.value || 0) || 0;
 
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
   const currentPayments = cash + card + click;
@@ -574,7 +586,9 @@ function updateSalePayment() {
   const totalValEl = document.getElementById('sale-total-value');
   const errorEl = document.getElementById('payment-error-msg');
 
-  if (totalPaid > overallTotal) {
+  const payableTotal = overallTotal - discount;
+
+  if (totalPaid > payableTotal + 0.01) {
     totalValEl.style.color = '#EF4444';
     debtEl.style.color = '#EF4444';
     if (errorEl) errorEl.style.display = 'block';
@@ -585,7 +599,7 @@ function updateSalePayment() {
   }
 
   // Debt is calculated for the whole transaction
-  const remainingDebt = overallTotal - totalPaid;
+  const remainingDebt = payableTotal - totalPaid;
   debtEl.value = Math.max(0, remainingDebt).toFixed(2);
 }
 
@@ -725,14 +739,16 @@ async function finalizeSale(e) {
   const cash = parseFloat(document.getElementById('sale-cash').value) || 0;
   const card = parseFloat(document.getElementById('sale-card').value) || 0;
   const click = parseFloat(document.getElementById('sale-click').value) || 0;
+  const discount = parseFloat(document.getElementById('sale-discount').value) || 0;
 
   const currentTotal = saleItems.reduce((s, i) => s + (i.price * i.quantity), 0);
   const savedTotal = savedBatchItems.reduce((s, i) => s + (i.price * i.quantity), 0);
   const overallTotal = currentTotal + savedTotal;
+  const payableTotal = overallTotal - discount;
 
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
 
-  if (overallPaidSoFar + cash + card + click > overallTotal + 0.01) {
+  if (overallPaidSoFar + cash + card + click > payableTotal + 0.01) {
     showToast(t('"JAMI" dan katta summani kirita olmaysiz!'), 'error');
     return;
   }
@@ -755,7 +771,7 @@ async function finalizeSale(e) {
 
     const clientId = document.getElementById('sale-client').value;
     const desc = document.getElementById('sale-desc').value.trim();
-    const debt = Math.max(0, overallTotal - (overallPaidSoFar + cash + card + click));
+    const debt = Math.max(0, payableTotal - (overallPaidSoFar + cash + card + click));
 
     // Calculate first batch total or just use it
     if (!currentTotalTransactionID) {
@@ -767,6 +783,7 @@ async function finalizeSale(e) {
         card: card,
         click: click,
         debt: debt,
+        discount: discount,
         clientId: clientId ? parseInt(clientId) : null,
         description: desc,
         items: saleItems.map(i => ({
@@ -797,6 +814,7 @@ async function finalizeSale(e) {
         card: cumulativePayments.card + card,
         click: cumulativePayments.click + click,
         debt: debt,
+        discount: discount,
         clientId: clientId ? parseInt(clientId) : null,
         description: desc,
       });
@@ -822,6 +840,8 @@ async function finalizeSale(e) {
       if (cashInp) cashInp.value = 0;
       if (cardInp) cardInp.value = 0;
       if (clickInp) clickInp.value = 0;
+      const discountInp = document.getElementById('sale-discount');
+      if (discountInp) discountInp.value = 0;
       
       const clientSel = document.getElementById('sale-client');
       if (clientSel) clientSel.value = '';

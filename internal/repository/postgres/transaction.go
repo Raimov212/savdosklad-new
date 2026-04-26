@@ -18,9 +18,9 @@ func NewTransactionRepo(db *sql.DB) *TransactionRepo {
 func (r *TransactionRepo) CreateTotalTransaction(tt *entity.TotalTransaction) (int, error) {
 	var id int
 	err := r.db.QueryRow(
-		`INSERT INTO total_transactions ("total", "cash", "card", "click", "debt", "clientNumber", "description", "debtLimitDate", "businessId", "clientId", "createdBy", "createdAt", "updatedAt")
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
-		tt.Total, tt.Cash, tt.Card, tt.Click, tt.Debt, tt.ClientNumber, tt.Description, tt.DebtLimitDate, tt.BusinessID, tt.ClientID, tt.CreatedBy, time.Now(), time.Now(),
+		`INSERT INTO total_transactions ("total", "cash", "card", "click", "debt", "discount", "clientNumber", "description", "debtLimitDate", "businessId", "clientId", "createdBy", "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
+		tt.Total, tt.Cash, tt.Card, tt.Click, tt.Debt, tt.Discount, tt.ClientNumber, tt.Description, tt.DebtLimitDate, tt.BusinessID, tt.ClientID, tt.CreatedBy, time.Now(), time.Now(),
 	).Scan(&id)
 	return id, err
 }
@@ -53,13 +53,13 @@ func (r *TransactionRepo) CreateTransaction(t *entity.Transaction) (int, error) 
 func (r *TransactionRepo) GetTotalTransactionByID(id int) (*entity.TotalTransaction, error) {
 	var tt entity.TotalTransaction
 	err := r.db.QueryRow(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
 		 LEFT JOIN users u ON t."createdBy" = u.id
 		 WHERE t.id = $1`, id,
-	).Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName)
+	).Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (r *TransactionRepo) GetTotalTransactionByID(id int) (*entity.TotalTransact
 
 func (r *TransactionRepo) GetTotalTransactionsByBusinessID(bid int) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
@@ -83,7 +83,7 @@ func (r *TransactionRepo) GetTotalTransactionsByBusinessID(bid int) ([]entity.To
 	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
-		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
 		list = append(list, tt)
@@ -125,7 +125,7 @@ func (r *TransactionRepo) GetTransactionsByTotalID(totalID int) ([]entity.Transa
 
 func (r *TransactionRepo) GetTotalTransactionsByPeriod(bid int, start, end time.Time) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
@@ -141,7 +141,7 @@ func (r *TransactionRepo) GetTotalTransactionsByPeriod(bid int, start, end time.
 	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
-		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
 		list = append(list, tt)
@@ -177,7 +177,7 @@ func (r *TransactionRepo) GetStats(bid int, start, end *time.Time) (entity.Trans
 
 func (r *TransactionRepo) GetRecentTransactionsByBusinessID(bid int, limit int) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(b.name, ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
@@ -194,7 +194,7 @@ func (r *TransactionRepo) GetRecentTransactionsByBusinessID(bid int, limit int) 
 	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
-		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
 		list = append(list, tt)
@@ -204,7 +204,7 @@ func (r *TransactionRepo) GetRecentTransactionsByBusinessID(bid int, limit int) 
 
 func (r *TransactionRepo) GetRecentTransactionsByClientID(clientID int, limit int) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(b.name, ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
@@ -221,7 +221,7 @@ func (r *TransactionRepo) GetRecentTransactionsByClientID(clientID int, limit in
 	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
-		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
 		list = append(list, tt)
@@ -231,9 +231,9 @@ func (r *TransactionRepo) GetRecentTransactionsByClientID(clientID int, limit in
 
 func (r *TransactionRepo) UpdateTotalTransaction(tt *entity.TotalTransaction) error {
 	_, err := r.db.Exec(
-		`UPDATE total_transactions SET "total"=$1, "cash"=$2, "card"=$3, "click"=$4, "debt"=$5, "clientNumber"=$6, "description"=$7, "debtLimitDate"=$8, "clientId"=$9, "updatedAt"=$10
-		 WHERE id = $11`,
-		tt.Total, tt.Cash, tt.Card, tt.Click, tt.Debt, tt.ClientNumber, tt.Description, tt.DebtLimitDate, tt.ClientID, time.Now(), tt.ID,
+		`UPDATE total_transactions SET "total"=$1, "cash"=$2, "card"=$3, "click"=$4, "debt"=$5, "discount"=$6, "clientNumber"=$7, "description"=$8, "debtLimitDate"=$9, "clientId"=$10, "updatedAt"=$11
+		 WHERE id = $12`,
+		tt.Total, tt.Cash, tt.Card, tt.Click, tt.Debt, tt.Discount, tt.ClientNumber, tt.Description, tt.DebtLimitDate, tt.ClientID, time.Now(), tt.ID,
 	)
 	return err
 }

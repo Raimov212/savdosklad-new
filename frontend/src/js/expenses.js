@@ -368,7 +368,7 @@ function filterFixed(query) {
 
 
 function editExpense(id) {
-  const e = allExpenseList.find(x => x.id === id);
+  const e = allExpensesList.find(x => x.id === id);
   if (e) openExpenseModal(e);
 }
 

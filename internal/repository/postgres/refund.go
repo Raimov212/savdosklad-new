@@ -19,9 +19,9 @@ func NewRefundRepo(db *sql.DB) *RefundRepo {
 func (r *RefundRepo) CreateTotalRefund(tr *entity.TotalRefund) (int, error) {
 	var id int
 	err := r.db.QueryRow(
-		`INSERT INTO total_refunds (description, total, cash, card, click, debt, "clientNumber", "debtLimitDate", "businessId", "clientId", "createdBy", "createdAt", "updatedAt")
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
-		tr.Description, tr.Total, tr.Cash, tr.Card, tr.Click, tr.Debt,
+		`INSERT INTO total_refunds (description, total, cash, card, click, debt, discount, "clientNumber", "debtLimitDate", "businessId", "clientId", "createdBy", "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
+		tr.Description, tr.Total, tr.Cash, tr.Card, tr.Click, tr.Debt, tr.Discount,
 		tr.ClientNumber, tr.DebtLimitDate, tr.BusinessID, tr.ClientID, tr.CreatedBy, time.Now(), time.Now(),
 	).Scan(&id)
 	return id, err
@@ -40,12 +40,12 @@ func (r *RefundRepo) CreateRefund(rf *entity.Refund) (int, error) {
 func (r *RefundRepo) GetTotalRefundByID(id int) (*entity.TotalRefund, error) {
 	var tr entity.TotalRefund
 	err := r.db.QueryRow(
-		`SELECT t.id, t.description, t.total, t.cash, t.card, t.click, t.debt, t."clientNumber", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t.description, t.total, t.cash, t.card, t.click, t.debt, t.discount, t."clientNumber", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_refunds t
 		 LEFT JOIN users u ON t."createdBy" = u.id
 		 WHERE t.id = $1`, id,
-	).Scan(&tr.ID, &tr.Description, &tr.Total, &tr.Cash, &tr.Card, &tr.Click, &tr.Debt,
+	).Scan(&tr.ID, &tr.Description, &tr.Total, &tr.Cash, &tr.Card, &tr.Click, &tr.Debt, &tr.Discount,
 		&tr.ClientNumber, &tr.DebtLimitDate, &tr.BusinessID, &tr.ClientID, &tr.CreatedBy, &tr.CreatedAt, &tr.UpdatedAt, &tr.CreatedByName)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (r *RefundRepo) GetTotalRefundsByBusinessID(businessID int) ([]entity.Total
 	list := []entity.TotalRefund{}
 	for rows.Next() {
 		var tr entity.TotalRefund
-		if err := rows.Scan(&tr.ID, &tr.Description, &tr.Total, &tr.Cash, &tr.Card, &tr.Click, &tr.Debt,
+		if err := rows.Scan(&tr.ID, &tr.Description, &tr.Total, &tr.Cash, &tr.Card, &tr.Click, &tr.Debt, &tr.Discount,
 			&tr.ClientNumber, &tr.DebtLimitDate, &tr.BusinessID, &tr.ClientID, &tr.CreatedBy, &tr.CreatedAt, &tr.UpdatedAt, &tr.CreatedByName); err != nil {
 			return nil, err
 		}
@@ -99,7 +99,7 @@ func (r *RefundRepo) GetTotalRefundsByPeriod(bid int, start, end time.Time) ([]e
 	list := []entity.TotalRefund{}
 	for rows.Next() {
 		var tt entity.TotalRefund
-		if err := rows.Scan(&tt.ID, &tt.Description, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt,
+		if err := rows.Scan(&tt.ID, &tt.Description, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount,
 			&tt.ClientNumber, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.CreatedByName); err != nil {
 			return nil, err
 		}

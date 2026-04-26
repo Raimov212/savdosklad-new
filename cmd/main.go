@@ -179,6 +179,8 @@ func main() {
 			"updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS "buyPrice" NUMERIC(15,2) DEFAULT 0;
+		ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "discount" NUMERIC(15,2) DEFAULT 0;
+		ALTER TABLE total_refunds ADD COLUMN IF NOT EXISTS "discount" NUMERIC(15,2) DEFAULT 0;
 	`)
 	if err != nil {
 		log.Printf("Migration error: %v", err)

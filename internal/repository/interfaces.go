@@ -117,6 +117,8 @@ type CalculationRepository interface {
 	GetByBusinessIDAndPeriod(businessID, month, year int) (*entity.Calculation, error)
 	GetStats(bid, month, year int) (*entity.CalculationStats, error)
 	GetIncomeBreakdown(bid, month, year int) ([]entity.IncomeBreakdownItem, error)
+	GetExpenseBreakdown(bid, month, year int) ([]entity.TotalExpense, error)
+	GetFixedBreakdown(bid int) ([]entity.FixedCost, error)
 }
 
 type SalaryRepository interface {

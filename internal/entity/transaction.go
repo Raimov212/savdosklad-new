@@ -40,6 +40,7 @@ type TotalTransaction struct {
 	Card          float64    `json:"card"`
 	Click         float64    `json:"click"`
 	Debt          float64    `json:"debt"`
+	Discount      float64    `json:"discount"`
 	ClientNumber  *string    `json:"clientNumber"`
 	DebtLimitDate *time.Time `json:"debtLimitDate"`
 	BusinessID    int        `json:"businessId"`
@@ -60,6 +61,7 @@ type CreateTotalTransactionRequest struct {
 	Card          float64                        `json:"card"`
 	Click         float64                        `json:"click"`
 	Debt          float64                        `json:"debt"`
+	Discount      float64                        `json:"discount"`
 	ClientNumber  string                         `json:"clientNumber"`
 	Description   string                         `json:"description"`
 	DebtLimitDate *time.Time                     `json:"debtLimitDate"`
@@ -82,6 +84,7 @@ type TotalRefund struct {
 	Card          float64    `json:"card"`
 	Click         float64    `json:"click"`
 	Debt          float64    `json:"debt"`
+	Discount      float64    `json:"discount"`
 	ClientNumber  *string    `json:"clientNumber"`
 	DebtLimitDate *time.Time `json:"debtLimitDate"`
 	BusinessID    int        `json:"businessId"`
@@ -117,6 +120,7 @@ type CreateTotalRefundRequest struct {
 	Card          float64                   `json:"card"`
 	Click         float64                   `json:"click"`
 	Debt          float64                   `json:"debt"`
+	Discount      float64                   `json:"discount"`
 	ClientNumber  string                    `json:"clientNumber"`
 	Description   string                    `json:"description"`
 	DebtLimitDate *time.Time                `json:"debtLimitDate"`
@@ -137,6 +141,7 @@ type UpdateTotalTransactionRequest struct {
 	Card          float64    `json:"card"`
 	Click         float64    `json:"click"`
 	Debt          float64    `json:"debt"`
+	Discount      float64    `json:"discount"`
 	ClientID      *int       `json:"clientId"`
 	ClientNumber  string     `json:"clientNumber"`
 	Description   string     `json:"description"`

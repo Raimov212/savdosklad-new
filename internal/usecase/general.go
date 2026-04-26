@@ -182,7 +182,7 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 	tt := &entity.TotalTransaction{
 		BusinessID: req.BusinessID, ClientID: req.ClientID,
 		Total: req.Total, Cash: req.Cash, Card: req.Card, Click: req.Click, Debt: req.Debt,
-		CreatedBy: &userID,
+		Discount: req.Discount, CreatedBy: &userID,
 	}
 	if req.ClientNumber != "" {
 		cn := req.ClientNumber
@@ -283,6 +283,7 @@ func (uc *TransactionUseCase) UpdateSale(id int, req entity.UpdateTotalTransacti
 	tt.Card = req.Card
 	tt.Click = req.Click
 	tt.Debt = req.Debt
+	tt.Discount = req.Discount
 	tt.ClientID = req.ClientID
 	if req.ClientNumber != "" {
 		tt.ClientNumber = &req.ClientNumber
@@ -346,7 +347,7 @@ func (uc *RefundUseCase) Create(userID int, req entity.CreateTotalRefundRequest)
 	tr := &entity.TotalRefund{
 		BusinessID: req.BusinessID, ClientID: req.ClientID,
 		Total: req.Total, Cash: req.Cash, Card: req.Card, Click: req.Click, Debt: req.Debt,
-		CreatedBy: &userID,
+		Discount: req.Discount, CreatedBy: &userID,
 	}
 	if req.ClientNumber != "" {
 		cn := req.ClientNumber
@@ -491,4 +492,10 @@ func (uc *CalculationUseCase) GetStats(bid, month, year int) (*entity.Calculatio
 
 func (uc *CalculationUseCase) GetIncomeBreakdown(bid, month, year int) ([]entity.IncomeBreakdownItem, error) {
 	return uc.repo.GetIncomeBreakdown(bid, month, year)
+}
+func (uc *CalculationUseCase) GetExpenseBreakdown(bid, month, year int) ([]entity.TotalExpense, error) {
+	return uc.repo.GetExpenseBreakdown(bid, month, year)
+}
+func (uc *CalculationUseCase) GetFixedBreakdown(bid int) ([]entity.FixedCost, error) {
+	return uc.repo.GetFixedBreakdown(bid)
 }

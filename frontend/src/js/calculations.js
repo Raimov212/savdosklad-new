@@ -178,14 +178,17 @@ function viewCalculationDetail(c) {
               <td class="price" style="padding:12px; border:none; text-align:right; font-weight:700;">${formatPrice(c.totalSale)} ${t("so'm")}</td>
             </tr>
             <tr>
-              <td style="padding:12px; border:none; color:var(--text-secondary); display:flex; align-items:center; gap:8px;">
+              <td style="padding:12px; border:none; color:var(--text-secondary); display:flex; align-items:center; gap:8px; justify-content:space-between;">
                 ${t("Jami daromad")}
-                <button type="button" class="btn btn-ghost" style="padding:0; height:auto; font-size:10px; opacity:0.5;" onclick="showIncomeBreakdown(${c.businessId}, ${c.month}, ${c.year})" title="${t("Daromad yoyilmasini ko'rish")}">ℹ️</button>
+                <button type="button" class="btn btn-ghost" style="padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; opacity:0.6; background:rgba(16, 185, 129, 0.1); border-radius:50%;" onclick="showIncomeBreakdown(${c.businessId}, ${c.month}, ${c.year})" title="${t("Daromad yoyilmasini ko'rish")}">ℹ️</button>
               </td>
               <td class="price" style="padding:12px; border:none; text-align:right; color:var(--success); font-weight:700;">${formatPrice(c.totalIncome)} ${t("so'm")}</td>
             </tr>
             <tr>
-              <td style="padding:12px; border:none; color:var(--text-secondary)">${t("Jami xarajat")}</td>
+              <td style="padding:12px; border:none; color:var(--text-secondary); display:flex; align-items:center; gap:8px; justify-content:space-between;">
+                ${t("Jami xarajat")}
+                <button type="button" class="btn btn-ghost" style="padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; opacity:0.6; background:rgba(239, 68, 68, 0.1); border-radius:50%;" onclick="showExpenseBreakdown(${c.businessId}, ${c.month}, ${c.year})" title="${t("Xarajatlar yoyilmasini ko'rish")}">ℹ️</button>
+              </td>
               <td class="price" style="padding:12px; border:none; text-align:right; color:var(--danger); font-weight:700;">-${formatPrice(c.totalExpense + c.totalFixedCosts)} ${t("so'm")}</td>
             </tr>
             <tr style="border-bottom: 2px solid var(--border);">
@@ -219,14 +222,16 @@ function openCalculationModal() {
   const months = ['', 'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
 
   openModal(`
-    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
-      <h3>${t("Yangi hisob-kitob")}</h3>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button type="button" class="btn btn-ghost" onclick="syncCalculationStats()" title="${t("Hisoblash")}" style="padding:8px; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05);">🔄</button>
-        <button class="modal-close" onclick="closeModal()" title="${t("Yopish")}" style="position:static; margin:0;">✕</button>
+    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding: 20px 24px;">
+      <h3 style="margin:0;">${t("Yangi hisob-kitob")}</h3>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <button type="button" class="btn btn-success btn-sm" onclick="syncCalculationStats()" style="display:flex; align-items:center; gap:8px; padding: 8px 16px;">
+          <span>🔄</span> ${t("Hisoblash")}
+        </button>
+        <button class="modal-close" onclick="closeModal()" title="${t("Yopish")}" style="position:static; margin:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.05); border-radius:50%;">✕</button>
       </div>
     </div>
-    <form onsubmit="createCalculation(event)" style="min-width:600px; padding: 0 10px;">
+    <form onsubmit="createCalculation(event)" style="width:100%; padding: 0 10px;">
       <div class="form-row" style="margin-bottom: 20px; background: var(--bg-glass); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
         <div class="form-group" style="margin-bottom:0">
           <label style="font-size:11px; text-transform:uppercase; opacity:0.6; letter-spacing:0.5px;">${t("Oy")}</label>
@@ -240,7 +245,7 @@ function openCalculationModal() {
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+      <div class="form-row" style="margin-bottom:20px;">
         <!-- Daromadlar Section -->
         <div style="background:rgba(16, 185, 129, 0.03); border:1px solid rgba(16, 185, 129, 0.1); padding:20px; border-radius:16px;">
           <h4 style="font-size:13px; color:var(--success); border-bottom:1px solid rgba(16, 185, 129, 0.2); padding-bottom:10px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
@@ -254,7 +259,7 @@ function openCalculationModal() {
           <div class="form-group">
             <label style="font-size:12px; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
               ${t("Jami daromad")}
-              <button type="button" class="btn btn-ghost" style="padding:0; height:auto; font-size:10px; opacity:0.5;" onclick="const bid = getSelectedBusinessId(); const month = document.getElementById('calc-month').value; const year = document.getElementById('calc-year').value; showIncomeBreakdown(bid, month, year);" title="${t("Daromad yoyilmasini ko'rish")}">ℹ️</button>
+              <button type="button" class="btn btn-ghost" style="padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; opacity:0.6; background:rgba(16, 185, 129, 0.1); border-radius:50%;" onclick="const bid = getSelectedBusinessId(); const month = document.getElementById('calc-month').value; const year = document.getElementById('calc-year').value; showIncomeBreakdown(bid, month, year);" title="${t("Daromad yoyilmasini ko'rish")}">ℹ️</button>
             </label>
             <input type="number" step="0.01" class="form-control" id="calc-income" value="0" oninput="calculateNetProfit()">
           </div>
@@ -275,11 +280,17 @@ function openCalculationModal() {
             ${t("Xarajatlar")}
           </h4>
           <div class="form-group">
-            <label style="font-size:12px; font-weight:600;">${t("Xarajatlar")}</label>
+            <label style="font-size:12px; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+              ${t("Xarajatlar")}
+              <button type="button" class="btn btn-ghost" style="padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; opacity:0.6; background:rgba(239, 68, 68, 0.1); border-radius:50%;" onclick="const bid = getSelectedBusinessId(); const month = document.getElementById('calc-month').value; const year = document.getElementById('calc-year').value; showExpenseBreakdown(bid, month, year);" title="${t("Xarajatlar yoyilmasini ko'rish")}">ℹ️</button>
+            </label>
             <input type="number" step="0.01" class="form-control" id="calc-expense" value="0" oninput="calculateNetProfit()">
           </div>
           <div class="form-group">
-            <label style="font-size:12px; font-weight:600;">${t("Doimiy xarajatlar")}</label>
+            <label style="font-size:12px; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+              ${t("Doimiy xarajatlar")}
+              <button type="button" class="btn btn-ghost" style="padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; opacity:0.6; background:rgba(239, 68, 68, 0.1); border-radius:50%;" onclick="const bid = getSelectedBusinessId(); showFixedBreakdown(bid);" title="${t("Doimiy xarajatlar yoyilmasini ko'rish")}">ℹ️</button>
+            </label>
             <input type="number" step="0.01" class="form-control" id="calc-fixed" value="0" oninput="calculateNetProfit()">
           </div>
           <div class="form-group" style="margin-bottom:0">
@@ -343,7 +354,11 @@ async function syncCalculationStats() {
   const month = document.getElementById('calc-month').value;
   const year = document.getElementById('calc-year').value;
 
-  if (!bid || !month || !year) return;
+  if (!bid) {
+    showToast(t("Iltimos, avval do'konni tanlang"), 'warning');
+    return;
+  }
+  if (!month || !year) return;
 
   try {
     const res = await api.get(`/calculations/stats?businessId=${bid}&month=${month}&year=${year}`);
@@ -436,6 +451,127 @@ window.showIncomeBreakdown = async function(bid, month, year) {
     showToast(err.message, 'error');
   }
 };
+
+window.showExpenseBreakdown = async function(bid, month, year) {
+  try {
+    const data = await api.get(`/calculations/expense-breakdown?businessId=${bid}&month=${month}&year=${year}`);
+    if (!data || data.length === 0) {
+      showToast(t("Ma'lumot topilmadi"), 'info');
+      return;
+    }
+
+    let rows = '';
+    data.forEach(item => {
+      rows += `
+        <tr>
+          <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${formatDate(item.createdAt)}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${escapeHtml(item.description || '—')}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); text-align:right; font-size:13px; font-weight:700; color:var(--danger);">
+            ${formatPrice(item.total)}
+          </td>
+        </tr>
+      `;
+    });
+
+    const breakdownHtml = `
+      <div class="modal-header">
+        <h3>${t("Xarajatlar yoyilmasi")}</h3>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      </div>
+      <div style="max-height:400px; overflow-y:auto; padding:10px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead style="position:sticky; top:0; background:var(--bg-card); z-index:1;">
+            <tr>
+              <th style="text-align:left; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Sana")}</th>
+              <th style="text-align:left; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Tavsifi")}</th>
+              <th style="text-align:right; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Summa")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">${t("Yopish")}</button>
+      </div>
+    `;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.style.zIndex = '2000';
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.width = '600px';
+    modal.innerHTML = breakdownHtml;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+};
+
+window.showFixedBreakdown = async function(bid) {
+  try {
+    const data = await api.get(`/calculations/fixed-breakdown?businessId=${bid}`);
+    if (!data || data.length === 0) {
+      showToast(t("Ma'lumot topilmadi"), 'info');
+      return;
+    }
+
+    let rows = '';
+    data.forEach(item => {
+      rows += `
+        <tr>
+          <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${escapeHtml(item.name)}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${escapeHtml(item.description || '—')}</td>
+          <td style="padding:10px; border-bottom:1px solid var(--border); text-align:right; font-size:13px; font-weight:700; color:var(--danger);">
+            ${formatPrice(item.amount)}
+          </td>
+        </tr>
+      `;
+    });
+
+    const breakdownHtml = `
+      <div class="modal-header">
+        <h3>${t("Doimiy xarajatlar yoyilmasi")}</h3>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      </div>
+      <div style="max-height:400px; overflow-y:auto; padding:10px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead style="position:sticky; top:0; background:var(--bg-card); z-index:1;">
+            <tr>
+              <th style="text-align:left; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Nomi")}</th>
+              <th style="text-align:left; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Tavsifi")}</th>
+              <th style="text-align:right; padding:10px; font-size:11px; text-transform:uppercase; opacity:0.6;">${t("Summa")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">${t("Yopish")}</button>
+      </div>
+    `;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.style.zIndex = '2000';
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.width = '600px';
+    modal.innerHTML = breakdownHtml;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+};
+
 
 // Global exports
 window.renderCalculations = renderCalculations;
