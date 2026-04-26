@@ -410,6 +410,7 @@ async function saveProduct(e, id) {
         images: imageUrl || null,
       });
       showToast(t('Mahsulot yangilandi'));
+      closeModal();
     } else {
       await api.post('/products', {
         businessId: bid,
@@ -426,8 +427,8 @@ async function saveProduct(e, id) {
         images: imageUrl,
       });
       showToast(t('Mahsulot yaratildi'));
+      resetProductForm();
     }
-    closeModal();
     renderProducts();
   } catch (err) {
     showToast(err.message, 'error');

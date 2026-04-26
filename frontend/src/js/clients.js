@@ -217,6 +217,7 @@ async function saveClient(e, id) {
         address: address,
       });
       showToast(t('Mijoz yangilandi'));
+      closeModal();
     } else {
       await api.post('/clients', {
         businessId: bid,
@@ -225,8 +226,11 @@ async function saveClient(e, id) {
         address: address,
       });
       showToast(t('Mijoz qo\'shildi'));
+      document.getElementById('client-name').value = '';
+      document.getElementById('client-phone').value = '';
+      document.getElementById('client-address').value = '';
+      document.getElementById('client-name').focus();
     }
-    closeModal();
     renderClients();
   } catch (err) {
     showToast(err.message, 'error');

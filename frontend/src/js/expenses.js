@@ -399,7 +399,11 @@ async function createExpense(e) {
       description: document.getElementById('exp-desc').value.trim(),
     });
     showToast(t('Xarajat qo\'shildi'));
-    closeModal();
+    document.getElementById('exp-total').value = '';
+    document.getElementById('exp-cash').value = '0';
+    document.getElementById('exp-card').value = '0';
+    document.getElementById('exp-desc').value = '';
+    document.getElementById('exp-total').focus();
     renderExpenses();
   } catch (err) {
     showToast(err.message, 'error');
@@ -463,6 +467,7 @@ async function saveFixedCost(e, id) {
         type: parseInt(document.getElementById('fc-type').value),
       });
       showToast(t('Doimiy xarajat yangilandi'));
+      closeModal();
     } else {
       await api.post('/fixed-costs', {
         businessId: bid,
@@ -472,8 +477,11 @@ async function saveFixedCost(e, id) {
         type: parseInt(document.getElementById('fc-type').value),
       });
       showToast(t('Doimiy xarajat qo\'shildi'));
+      document.getElementById('fc-name').value = '';
+      document.getElementById('fc-amount').value = '';
+      document.getElementById('fc-desc').value = '';
+      document.getElementById('fc-name').focus();
     }
-    closeModal();
     renderExpenses();
   } catch (err) {
     showToast(err.message, 'error');

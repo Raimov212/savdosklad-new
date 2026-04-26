@@ -804,7 +804,43 @@ async function finalizeSale(e) {
     }
 
     showToast(t('Sotuv muvaffaqiyatli yakunlandi!'), 'success');
-    closeModal();
+    
+    // Reset sale state and return to step 1
+    saleItems = [];
+    savedBatchItems = [];
+    currentTotalTransactionID = null;
+    cumulativePayments = { cash: 0, card: 0, click: 0, debt: 0 };
+    
+    if (document.getElementById('sale-step-1')) {
+      document.getElementById('sale-step-1').style.display = 'block';
+      document.getElementById('sale-step-2').style.display = 'none';
+      document.getElementById('step-1-indicator').classList.add('active');
+      document.getElementById('step-2-indicator').classList.remove('active');
+      
+      const cashInp = document.getElementById('sale-cash');
+      const cardInp = document.getElementById('sale-card');
+      const clickInp = document.getElementById('sale-click');
+      if (cashInp) cashInp.value = 0;
+      if (cardInp) cardInp.value = 0;
+      if (clickInp) clickInp.value = 0;
+      
+      const clientSel = document.getElementById('sale-client');
+      if (clientSel) clientSel.value = '';
+      
+      const descInp = document.getElementById('sale-desc');
+      if (descInp) descInp.value = '';
+      
+      renderSaleItems();
+      updateSaleTotal();
+      
+      const searchInp = document.getElementById('sale-product-search');
+      if (searchInp) {
+        searchInp.value = '';
+        searchInp.focus();
+      }
+    } else {
+        closeModal();
+    }
     renderTransactions();
   } catch (err) {
     showToast(err.message, 'error');

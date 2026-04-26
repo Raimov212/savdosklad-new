@@ -5,14 +5,14 @@
   /* Default: Premium Dark */
   --bg-primary: #020617;
   --bg-secondary: #0b1120;
-  --bg-card: rgba(15, 23, 42, 0.6);
-  --bg-card-hover: rgba(30, 41, 59, 0.7);
+  --bg-card: rgba(15, 23, 42, 0.9);
+  --bg-card-hover: rgba(30, 41, 59, 0.95);
   --bg-glass: rgba(255, 255, 255, 0.03);
   --bg-input: rgba(15, 23, 42, 0.8);
   --bg-input-focus: rgba(30, 41, 59, 0.9);
   --sidebar-bg: #05070a;
   --sidebar-nav-active: rgba(16, 185, 129, 0.15);
-  --topbar-bg: rgba(15, 23, 42, 0.8);
+  --topbar-bg: rgba(15, 23, 42, 0.9);
   --topbar-text: #ffffff;
 
   --accent: #10b981;
@@ -1147,8 +1147,8 @@ tbody tr:last-child td {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(1px);
   display: flex;
   align-items: center;
   justify-content: center;

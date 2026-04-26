@@ -255,11 +255,12 @@ async function saveCategory(e, id) {
     if (id) {
       await api.put(`/categories/${id}`, { businessId: bid || 0, name, image: image || null });
       showToast(t('Kategoriya yangilandi'));
+      closeModal();
     } else {
       await api.post('/categories', { businessId: bid, name, image: image || null });
       showToast(t('Kategoriya yaratildi'));
+      resetCategoryForm();
     }
-    closeModal();
     renderCategories();
   } catch (err) {
     showToast(err.message, 'error');

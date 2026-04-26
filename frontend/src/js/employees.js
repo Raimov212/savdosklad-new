@@ -255,7 +255,12 @@ window.handleAddEmployee = async function (e) {
     try {
         await api.post('/users/employees', req);
         showToast(t("Xodim muvaffaqiyatli qo'shildi"));
-        closeModal();
+        document.getElementById('emp-firstName').value = '';
+        document.getElementById('emp-lastName').value = '';
+        document.getElementById('emp-user').value = '';
+        document.getElementById('emp-phone').value = '';
+        document.getElementById('emp-pass').value = '';
+        document.getElementById('emp-firstName').focus();
         renderEmployees();
     } catch (err) {
         showToast(err.message, 'error');

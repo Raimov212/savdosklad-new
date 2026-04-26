@@ -464,7 +464,16 @@ async function submitRefund() {
     });
 
     showToast(t("Qaytarish muvaffaqiyatli amalga oshirildi!"));
-    closeModal();
+    
+    // Clear form
+    const tidInput = document.getElementById('refund-trans-id');
+    if (tidInput) {
+      tidInput.value = '';
+      document.getElementById('refund-items-area').innerHTML = '';
+      tidInput.focus();
+    } else {
+      closeModal();
+    }
     renderRefunds();
   } catch (err) {
     showToast(err.message, 'error');

@@ -364,11 +364,21 @@ async function saveBusiness(e, id) {
     if (id) {
       await api.put(`/businesses/${id}`, data);
       showToast(t('Biznes yangilandi'));
+      closeModal();
     } else {
       await api.post('/businesses', data);
       showToast(t('Biznes yaratildi'));
+      // Clear form
+      document.getElementById('biz-name').value = '';
+      document.getElementById('biz-desc').value = '';
+      document.getElementById('biz-account').value = '';
+      document.getElementById('biz-balance').value = '0';
+      document.getElementById('biz-address').value = '';
+      document.getElementById('biz-extra-address').value = '';
+      document.getElementById('biz-image-url').value = '';
+      document.getElementById('biz-image-preview').innerHTML = `<span style="font-size:32px; opacity:0.3;">🖼️</span>`;
+      document.getElementById('biz-name').focus();
     }
-    closeModal();
     if (typeof loadBusinesses === 'function') loadBusinesses();
     renderBusinesses();
   } catch (err) {

@@ -343,11 +343,23 @@ window.saveOrg = async function(e, id) {
         if (id) {
             await api.put(`/organizations/${id}`, data);
             showToast(t('Tashkilot yangilandi'), 'success');
+            closeModal();
         } else {
             await api.post('/organizations', data);
             showToast(t('Tashkilot yaratildi'), 'success');
+            // Clear form
+            document.getElementById('org-name').value = '';
+            document.getElementById('org-stir').value = '';
+            document.getElementById('org-phone').value = '';
+            document.getElementById('org-email').value = '';
+            document.getElementById('org-address').value = '';
+            document.getElementById('org-bank').value = '';
+            document.getElementById('org-acc').value = '';
+            document.getElementById('org-mfo').value = '';
+            document.getElementById('org-logo-url').value = '';
+            document.getElementById('org-logo-preview').innerHTML = `<span style="font-size:24px; opacity:0.3;">🖼️</span>`;
+            document.getElementById('org-name').focus();
         }
-        closeModal();
         loadOrganizations();
     } catch (e) {
         showToast(e.message, 'error');
