@@ -5,6 +5,7 @@ import { t } from './i18n.js';
 
 let allProducts = [];
 let allCategories = [];
+let outOfStockFilterActive = false;
 
 async function renderProducts() {
   const content = document.getElementById('page-content');
@@ -160,7 +161,7 @@ function renderProductsTable(list, isAppend = false) {
             oninput="filterProducts(this.value)"
             style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
         </div>
-        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
+        <button class="btn btn-ghost" id="out-of-stock-btn" onclick="toggleOutOfStockFilter()" style="padding: 10px 15px; white-space:nowrap;" title="${t("Qolmagan mahsulotlar")}">📦 ${t("Qolmagan")}</button>
         ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
       </div>
     `;
@@ -471,6 +472,33 @@ function resetProductForm() {
   showToast(t("Forma tozalandi"));
 }
 
+function toggleOutOfStockFilter() {
+  outOfStockFilterActive = !outOfStockFilterActive;
+
+  if (outOfStockFilterActive) {
+    const outOfStock = allProducts.filter(p => (p.quantity || 0) <= 0);
+    renderProductsTable(outOfStock);
+  } else {
+    renderProductsTable(allProducts);
+  }
+
+  // Tugma ko'rinishini yangilash
+  setTimeout(() => {
+    const btn = document.getElementById('out-of-stock-btn');
+    if (btn) {
+      if (outOfStockFilterActive) {
+        btn.style.background = 'var(--danger)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = 'var(--danger)';
+      } else {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    }
+  }, 50);
+}
+
 // Global exports
 window.resetProductForm = resetProductForm;
 window.renderProducts = renderProducts;
@@ -482,6 +510,7 @@ window.deleteProduct = deleteProduct;
 window.handleProductExport = handleProductExport;
 window.handleProductImport = handleProductImport;
 window.handleProductTemplate = handleProductTemplate;
+window.toggleOutOfStockFilter = toggleOutOfStockFilter;
 window.productPage = productPage;
 window.allProducts = allProducts;
 window.allCategories = allCategories;
