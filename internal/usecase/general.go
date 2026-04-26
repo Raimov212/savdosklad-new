@@ -425,6 +425,12 @@ func (uc *ExpenseUseCase) GetTotalExpensesByBusinessID(bid int) ([]entity.TotalE
 func (uc *ExpenseUseCase) GetByPeriod(bid int, start, end time.Time) ([]entity.TotalExpense, error) {
 	return uc.repo.GetTotalExpensesByPeriod(bid, start, end)
 }
+func (uc *ExpenseUseCase) UpdateTotalExpense(id int, req entity.UpdateTotalExpenseRequest) error {
+	return uc.repo.UpdateTotalExpense(id, req)
+}
+func (uc *ExpenseUseCase) DeleteTotalExpense(id int) error {
+	return uc.repo.DeleteTotalExpense(id)
+}
 func (uc *ExpenseUseCase) CreateFixedCost(req entity.CreateFixedCostRequest) (int, error) {
 	fc := &entity.FixedCost{BusinessID: req.BusinessID, Amount: req.Amount, Type: req.Type}
 	n := req.Name

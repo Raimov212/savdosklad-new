@@ -2199,4 +2199,10 @@ body.is-admin .nav-section-title {
     font-size: 11px !important;
   }
 }
-
+
+/* ==================== TABLE RESPONSIVENESS ==================== */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

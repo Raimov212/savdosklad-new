@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"savdosklad/internal/entity"
+	"strconv"
 	"time"
 )
 
@@ -16,10 +17,11 @@ func NewExpenseRepo(db *sql.DB) *ExpenseRepo {
 
 func (r *ExpenseRepo) CreateTotalExpense(te *entity.TotalExpense) (int, error) {
 	var id int
+	now := time.Now()
 	err := r.db.QueryRow(
-		`INSERT INTO total_expenses ("total", "cash", "card", "description", "businessId", "createdBy", "createdAt")
-		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-		te.Total, te.Cash, te.Card, te.Description, te.BusinessID, te.CreatedBy, time.Now(),
+		`INSERT INTO total_expenses ("total", "cash", "card", "description", "businessId", "createdBy", "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+		te.Total, te.Cash, te.Card, te.Description, te.BusinessID, te.CreatedBy, now, now,
 	).Scan(&id)
 	return id, err
 }
@@ -37,7 +39,7 @@ func (r *ExpenseRepo) CreateExpense(e *entity.Expense) (int, error) {
 func (r *ExpenseRepo) GetTotalExpensesByBusinessID(bid int) ([]entity.TotalExpense, error) {
 	rows, err := r.db.Query(
 		`SELECT t.id, t."total", t."cash", t."card", t."description", t."businessId", t."createdBy", t."createdAt",
-		        COALESCE(u."firstName" || ' ' || u."lastName", '')
+		        COALESCE(u."firstName" || ' ' || u."lastName", ''), COALESCE(t."updatedAt", t."createdAt")
 		 FROM total_expenses t
 		 LEFT JOIN users u ON t."createdBy" = u.id
 		 WHERE t."businessId" = $1 ORDER BY t.id DESC`, bid,
@@ -82,7 +84,7 @@ func (r *ExpenseRepo) GetExpensesByTotalID(totalID int) ([]entity.Expense, error
 func (r *ExpenseRepo) GetTotalExpensesByPeriod(bid int, start, end time.Time) ([]entity.TotalExpense, error) {
 	rows, err := r.db.Query(
 		`SELECT t.id, t."total", t."cash", t."card", t."description", t."businessId", t."createdBy", t."createdAt",
-		        COALESCE(u."firstName" || ' ' || u."lastName", '')
+		        COALESCE(u."firstName" || ' ' || u."lastName", ''), COALESCE(t."updatedAt", t."createdAt")
 		 FROM total_expenses t
 		 LEFT JOIN users u ON t."createdBy" = u.id
 		 WHERE t."businessId" = $1 AND t."createdAt" >= $2 AND t."createdAt" <= $3 ORDER BY t.id DESC`,
@@ -105,7 +107,44 @@ func (r *ExpenseRepo) GetTotalExpensesByPeriod(bid int, start, end time.Time) ([
 }
 
 func (r *ExpenseRepo) scanTotalExpense(rows *sql.Rows, t *entity.TotalExpense) error {
-	return rows.Scan(&t.ID, &t.Total, &t.Cash, &t.Card, &t.Description, &t.BusinessID, &t.CreatedBy, &t.CreatedAt, &t.CreatedByName)
+	return rows.Scan(&t.ID, &t.Total, &t.Cash, &t.Card, &t.Description, &t.BusinessID, &t.CreatedBy, &t.CreatedAt, &t.CreatedByName, &t.UpdatedAt)
+}
+
+func (r *ExpenseRepo) UpdateTotalExpense(id int, req entity.UpdateTotalExpenseRequest) error {
+	query := `UPDATE total_expenses SET "updatedAt" = $1`
+	args := []interface{}{time.Now()}
+	idx := 2
+
+	if req.Total != nil {
+		query += `, "total" = $` + strconv.Itoa(idx)
+		args = append(args, *req.Total)
+		idx++
+	}
+	if req.Cash != nil {
+		query += `, "cash" = $` + strconv.Itoa(idx)
+		args = append(args, *req.Cash)
+		idx++
+	}
+	if req.Card != nil {
+		query += `, "card" = $` + strconv.Itoa(idx)
+		args = append(args, *req.Card)
+		idx++
+	}
+	if req.Description != nil {
+		query += `, "description" = $` + strconv.Itoa(idx)
+		args = append(args, *req.Description)
+		idx++
+	}
+	query += ` WHERE id = $` + strconv.Itoa(idx)
+	args = append(args, id)
+
+	_, err := r.db.Exec(query, args...)
+	return err
+}
+
+func (r *ExpenseRepo) DeleteTotalExpense(id int) error {
+	_, err := r.db.Exec(`DELETE FROM total_expenses WHERE id = $1`, id)
+	return err
 }
 
 func (r *ExpenseRepo) CreateFixedCost(fc *entity.FixedCost) (int, error) {

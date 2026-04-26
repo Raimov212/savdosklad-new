@@ -108,6 +108,7 @@ func main() {
 
 	// Tracking who created the records
 	_, _ = db.Exec(`ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "createdBy" INTEGER REFERENCES users(id);`)
+	_, _ = db.Exec(`ALTER TABLE total_expenses ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP;`)
 	_, _ = db.Exec(`ALTER TABLE total_refunds ADD COLUMN IF NOT EXISTS "createdBy" INTEGER REFERENCES users(id);`)
 	_, _ = db.Exec(`ALTER TABLE total_expenses ADD COLUMN IF NOT EXISTS "createdBy" INTEGER REFERENCES users(id);`)
 

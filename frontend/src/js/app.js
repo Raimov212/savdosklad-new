@@ -1467,7 +1467,7 @@ window.openDateFilterModal = function() {
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body-wrapper" style="padding: 20px;">
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
+      <div class="form-row" style="margin-bottom:20px;">
         <div class="form-group">
           <label>${t("Boshlang'ich sana")}</label>
           <input type="date" class="form-control" id="filter-start-date" value="${period.start}">

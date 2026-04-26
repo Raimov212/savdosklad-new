@@ -35,47 +35,46 @@
   }
 
   .topbar {
-    padding: 0 16px;
+    padding: 0 8px !important;
+    gap: 4px !important;
   }
 
-  /* Adjust Topbar elements */
-  .topbar-center {
-    display: none !important;
-  }
-
-  .topbar-right .user-badge {
-    display: flex !important;
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin-right: 2px !important;
-  }
-
-  .topbar-right .user-name {
-    display: none !important;
-  }
-
-  .topbar-right .user-avatar {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 11px !important;
-  }
-
-  /* Hide potential points/coin icon next to avatar on mobile if it exists */
-  .topbar-right .user-badge + .btn-icon:not(.theme-toggle),
-  .topbar-right .user-badge ~ *:not(.theme-toggle) {
-    display: none !important;
+  .topbar-left {
+    min-width: auto !important;
+    gap: 8px !important;
   }
 
   .topbar-right {
-    gap: 4px;
+    gap: 4px !important;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .business-selector, #lang-selector-app, .lang-selector, #lang-selector {
+    padding: 4px 18px 4px 8px !important;
+    font-size: 11px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
   }
 
   .business-selector {
-    max-width: 120px;
-    padding-right: 24px;
-    font-size: 11px;
-    min-width: 100px !important;
+    max-width: 90px !important;
+    min-width: 0 !important;
+  }
+
+  #lang-selector-app, .lang-selector, #lang-selector {
+    max-width: 60px !important;
+  }
+
+  .user-badge {
+    padding: 0 !important;
+    border: none !important;
+    background: none !important;
+  }
+
+  .user-avatar {
+    width: 30px !important;
+    height: 30px !important;
   }
 
   /* Dashboard Grid Adjustments (Image 2) */
@@ -144,6 +143,73 @@
 
   .profile-content {
     padding: 20px !important;
+  }
+
+  /* General Responsive Utilities */
+  .card-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .toolbar {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .search-box {
+    width: 100% !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  .toolbar .btn, .toolbar .btn-ghost {
+    width: 100% !important;
+    margin: 0 !important;
+    justify-content: center !important;
+  }
+
+  /* Table Specific Mobile Fixes */
+  .table-container {
+    max-height: none !important;
+    margin: 10px -16px !important; /* Stretch to edges for more horizontal space */
+    width: calc(100% + 32px) !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+  }
+
+  table {
+    min-width: 800px !important; /* Force more width for readable columns */
+  }
+
+  thead th {
+    padding: 12px 10px !important;
+    font-size: 12px !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  tbody td {
+    padding: 12px 10px !important;
+    font-size: 13px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Pagination Responsiveness */
+  .pagination {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 6px !important;
   }
 }
 

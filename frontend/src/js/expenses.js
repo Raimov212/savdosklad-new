@@ -152,6 +152,13 @@ function renderExpenseTable(list, isAppend = false) {
     return `
       <tr>
         <td style="text-align:center">${startIdx + i + 1}</td>
+        ${!isAggregated ? `
+        <td style="text-align:center">
+          <div style="font-size:11px; color:var(--text-muted);">
+            <div style="margin-bottom:2px;">${formatDateTime(e.createdAt)}</div>
+            ${e.updatedAt && e.createdAt !== e.updatedAt ? `<div style="color:var(--danger); font-weight:500;">${formatDateTime(e.updatedAt)}</div>` : ''}
+          </div>
+        </td>` : ''}
         <td class="price price-negative" style="text-align:center; font-weight:700;">-${formatPrice(e.total)} ${t("so'm")}</td>
         <td style="text-align:center">
           <div style="font-size:11px; display:flex; flex-direction:column; gap:2px; align-items:center;">
@@ -161,9 +168,9 @@ function renderExpenseTable(list, isAppend = false) {
         </td>
         ${!isAggregated ? `<td style="text-align:center">${escapeHtml(e.description) || '<span style="opacity:0.3">—</span>'}</td>` : ''}
         <td style="text-align:center; font-weight:600; font-size:12px;">${escapeHtml(e.createdByName || t("Tizim"))}</td>
+        ${isAggregated ? `
         <td style="text-align:center; font-size:12px; opacity:0.7;">
-            ${isAggregated ? (
-            window.expensePeriod === 'yearly' ? 
+            ${window.expensePeriod === 'yearly' ? 
             (() => {
                 const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
                 const [y, m] = e.date.split('-');
@@ -173,9 +180,15 @@ function renderExpenseTable(list, isAppend = false) {
                 const months = ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"];
                 const [y, m, d] = e.date.split('-');
                 return `${parseInt(d)} ${t(months[parseInt(m) - 1])}`;
-            })()
-          ) : formatDateTime(e.createdAt)}
-        </td>
+            })()}
+        </td>` : ''}
+        ${!isAggregated ? `
+        <td style="text-align:center">
+            <div class="action-buttons" style="justify-content:center;">
+              ${window.hasPermission('edit') ? `<button class="btn btn-icon btn-sm" onclick="editExpense(${e.id})" title="${t("Tahrirlash")}">✏️</button>` : ''}
+              ${window.hasPermission('delete') ? `<button class="btn btn-icon btn-sm" onclick="deleteExpense(${e.id})" style="color:var(--danger)" title="${t("O'chirish")}">🗑️</button>` : ''}
+            </div>
+        </td>` : ''}
       </tr>`;
   }).join('');
 
@@ -198,15 +211,17 @@ function renderExpenseTable(list, isAppend = false) {
               <thead>
                 <tr>
                   <th style="text-align:center">№</th>
+                  ${!isAggregated ? `<th style="text-align:center">${t("Sana")}</th>` : ''}
                   <th style="text-align:center">${t("Summa")}</th>
                   <th style="text-align:center">${t("To'lov turi")}</th>
                   ${!isAggregated ? `<th style="text-align:center">${t("Tavsifi")}</th>` : ''}
                   <th style="text-align:center">${t("Mas'ul")}</th>
-                  <th style="text-align:center">${t("Sana")}</th>
+                  ${isAggregated ? `<th style="text-align:center">${t("Sana (davr)")}</th>` : ''}
+                  ${!isAggregated ? `<th style="text-align:center">${t("Amallar")}</th>` : ''}
                 </tr>
               </thead>
               <tbody id="expense-tbody">
-                ${paginated.length === 0 && !isAppend ? `<tr><td colspan="${isAggregated ? 5 : 6}" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Xarajatlar mavjud emas")}</td></tr>` : rows}
+                ${paginated.length === 0 && !isAppend ? `<tr><td colspan="${isAggregated ? 5 : 8}" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Xarajatlar mavjud emas")}</td></tr>` : rows}
               </tbody>
             </table>
           </div>
@@ -247,6 +262,12 @@ function renderFixedTable(list, isAppend = false) {
   const rows = paginated.map((f, i) => `
     <tr>
       <td style="text-align:center">${start + i + 1}</td>
+      <td style="text-align:center">
+        <div style="font-size:11px; color:var(--text-muted);">
+          <div style="margin-bottom:2px;">${formatDateTime(f.createdAt)}</div>
+          ${f.updatedAt && f.createdAt !== f.updatedAt ? `<div style="color:var(--danger); font-weight:500;">${formatDateTime(f.updatedAt)}</div>` : ''}
+        </div>
+      </td>
       <td style="text-align:center"><strong style="color:var(--text-primary)">${escapeHtml(f.name)}</strong></td>
       <td class="price" style="text-align:center; font-weight:700;">${formatPrice(f.amount)} ${t("so'm")}</td>
       <td style="text-align:center">
@@ -278,6 +299,7 @@ function renderFixedTable(list, isAppend = false) {
             <thead>
               <tr>
                 <th style="text-align:center">№</th>
+                <th style="text-align:center">${t("Sana")}</th>
                 <th style="text-align:center">${t("Nomi")}</th>
                 <th style="text-align:center">${t("Summa")}</th>
                 <th style="text-align:center">${t("Turi")}</th>
@@ -286,7 +308,7 @@ function renderFixedTable(list, isAppend = false) {
               </tr>
             </thead>
             <tbody id="fixed-tbody">
-              ${paginated.length === 0 ? `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Doimiy xarajatlar mavjud emas")}</td></tr>` : rows}
+              ${paginated.length === 0 ? `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">${t("Doimiy xarajatlar mavjud emas")}</td></tr>` : rows}
             </tbody>
           </table>
         </div>
@@ -345,17 +367,34 @@ function filterFixed(query) {
 }
 
 
-function openExpenseModal() {
+function editExpense(id) {
+  const e = allExpenseList.find(x => x.id === id);
+  if (e) openExpenseModal(e);
+}
+
+async function deleteExpense(id) {
+  if (!confirm(t("Haqiqatan ham bu xarajatni o'chirmoqchimisiz?"))) return;
+  try {
+    await api.delete('/expenses/' + id);
+    showToast(t("O'chirildi"));
+    renderExpenses();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function openExpenseModal(e = null) {
+  const isEdit = !!e;
   openModal(`
     <div class="modal-header">
-      <h3>${t("Yangi xarajat")}</h3>
+      <h3>${isEdit ? t("Xarajatni tahrirlash") : t("Yangi xarajat")}</h3>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <form onsubmit="createExpense(event)" style="min-width:400px">
+    <form onsubmit="saveExpense(event, ${isEdit ? e.id : 'null'})" style="width:100%">
       <div class="form-group">
         <label>${t("Jami summa")}</label>
         <div style="position:relative">
-          <input type="number" step="0.01" class="form-control" id="exp-total" placeholder="0.00" required style="padding-right:45px; font-weight:700; font-size:18px;">
+          <input type="number" step="0.01" class="form-control" id="exp-total" value="${isEdit ? e.total : ''}" placeholder="0.00" required style="padding-right:45px; font-weight:700; font-size:18px;">
           <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); opacity:0.5; font-size:12px;">UZS</span>
         </div>
       </div>
@@ -365,18 +404,18 @@ function openExpenseModal() {
         <div class="form-row" style="margin-bottom:0">
           <div class="form-group" style="margin-bottom:0">
             <label style="font-size:11px">${t("Naqd")}</label>
-            <input type="number" step="0.01" class="form-control" id="exp-cash" value="0">
+            <input type="number" step="0.01" class="form-control" id="exp-cash" value="${isEdit ? e.cash : '0'}">
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label style="font-size:11px">${t("Karta")}</label>
-            <input type="number" step="0.01" class="form-control" id="exp-card" value="0">
+            <input type="number" step="0.01" class="form-control" id="exp-card" value="${isEdit ? e.card : '0'}">
           </div>
         </div>
       </div>
 
       <div class="form-group">
         <label>${t("Tavsifi")}</label>
-        <textarea class="form-control" id="exp-desc" rows="2" placeholder="${t('Xarajat tavsifi')}" style="resize:none"></textarea>
+        <textarea class="form-control" id="exp-desc" rows="2" placeholder="${t('Xarajat tavsifi')}" style="resize:none">${isEdit ? (e.description || '') : ''}</textarea>
       </div>
 
       <div class="modal-footer" style="padding-top:10px">
@@ -387,23 +426,30 @@ function openExpenseModal() {
   `);
 }
 
-async function createExpense(e) {
+async function saveExpense(e, id) {
   e.preventDefault();
   const bid = getSelectedBusinessId();
   try {
-    await api.post('/expenses', {
+    const payload = {
       businessId: bid,
       total: parseFloat(document.getElementById('exp-total').value),
       cash: parseFloat(document.getElementById('exp-cash').value) || 0,
       card: parseFloat(document.getElementById('exp-card').value) || 0,
       description: document.getElementById('exp-desc').value.trim(),
-    });
-    showToast(t('Xarajat qo\'shildi'));
-    document.getElementById('exp-total').value = '';
-    document.getElementById('exp-cash').value = '0';
-    document.getElementById('exp-card').value = '0';
-    document.getElementById('exp-desc').value = '';
-    document.getElementById('exp-total').focus();
+    };
+    if (id) {
+      await api.put('/expenses/' + id, payload);
+      showToast(t("O'zgarishlar saqlandi"));
+      closeModal();
+    } else {
+      await api.post('/expenses', payload);
+      showToast(t('Xarajat qo\'shildi'));
+      document.getElementById('exp-total').value = '';
+      document.getElementById('exp-cash').value = '0';
+      document.getElementById('exp-card').value = '0';
+      document.getElementById('exp-desc').value = '';
+      document.getElementById('exp-total').focus();
+    }
     renderExpenses();
   } catch (err) {
     showToast(err.message, 'error');
@@ -417,7 +463,7 @@ function openFixedCostModal(f = null) {
       <h3>${isEdit ? t('Doimiy xarajatni tahrirlash') : t('Yangi doimiy xarajat')}</h3>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <form onsubmit="saveFixedCost(event, ${isEdit ? f.id : 0})" style="min-width:450px">
+    <form onsubmit="saveFixedCost(event, ${isEdit ? f.id : 0})" style="width:100%">
       <div class="form-group">
         <label>${t("Turi")}</label>
         <input type="text" class="form-control" id="fc-name" value="${isEdit ? escapeHtml(f.name) : ''}" placeholder="${t('Turini kiriting')}" required>
@@ -494,7 +540,9 @@ window.renderExpenseTable = renderExpenseTable;
 window.filterExpensesByPeriod = filterExpensesByPeriod;
 window.setExpensePeriod = setExpensePeriod;
 window.openExpenseModal = openExpenseModal;
-window.createExpense = createExpense;
+window.saveExpense = saveExpense;
+window.editExpense = editExpense;
+window.deleteExpense = deleteExpense;
 window.renderFixedTable = renderFixedTable;
 window.filterFixed = filterFixed;
 window.openFixedCostModal = openFixedCostModal;

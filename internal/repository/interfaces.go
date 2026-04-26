@@ -96,6 +96,8 @@ type ExpenseRepository interface {
 	CreateExpense(e *entity.Expense) (int, error)
 	GetTotalExpensesByBusinessID(bid int) ([]entity.TotalExpense, error)
 	GetTotalExpensesByPeriod(bid int, start, end time.Time) ([]entity.TotalExpense, error)
+	UpdateTotalExpense(id int, req entity.UpdateTotalExpenseRequest) error
+	DeleteTotalExpense(id int) error
 	GetExpensesByTotalID(totalID int) ([]entity.Expense, error)
 	CreateFixedCost(fc *entity.FixedCost) (int, error)
 	GetFixedCostsByBusinessID(businessID int) ([]entity.FixedCost, error)

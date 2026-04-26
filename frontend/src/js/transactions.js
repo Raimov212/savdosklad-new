@@ -94,10 +94,9 @@ function renderTransactionsTable(list, isAppend = false) {
             <div class="acc-header-left">
               <div class="acc-avatar acc-avatar-indigo" style="${hasDebt ? 'background:linear-gradient(135deg,#EF4444,#DC2626)' : ''}">🛒</div>
               <div>
-                <div class="acc-title">№ ${absoluteIndex} — ${formatDateTime(trans.createdAt)}</div>
+                <div class="acc-title">№ ${trans.ids.join(', ')} — ${formatDateTime(trans.createdAt)}</div>
                 <div class="acc-subtitle">
                   ${trans.clientName ? `<strong>${escapeHtml(trans.clientName)}</strong>` : (trans.clientNumber ? escapeHtml(trans.clientNumber) : t('Begona xaridor'))}
-                  <span style="opacity:0.6; margin-left:8px;">№: ${trans.ids.join(',')}</span>
                   ${hasDebt ? `<span class="badge badge-danger" style="margin-left:6px;">${t("Qarz")}: ${formatPrice(trans.debt)}</span>` : ''}
                 </div>
               </div>

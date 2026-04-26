@@ -997,6 +997,42 @@ func (h *ExpenseHandler) GetByBusinessID(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
+// @Summary Update total expense
+// @Tags Expenses
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Param input body entity.UpdateTotalExpenseRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /expenses/{id} [put]
+func (h *ExpenseHandler) Update(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateTotalExpenseRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.UpdateTotalExpense(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
+}
+
+// @Summary Delete total expense
+// @Tags Expenses
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Success 200 {object} map[string]string
+// @Router /expenses/{id} [delete]
+func (h *ExpenseHandler) Delete(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.uc.DeleteTotalExpense(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
 // @Summary Create fixed cost
 // @Tags FixedCosts
 // @Security BearerAuth
@@ -1235,6 +1271,8 @@ func RegisterRoutes(
 	// Expense Handlers
 	r.POST("/expenses", expenseH.Create)
 	r.GET("/expenses", expenseH.GetByBusinessID)
+	r.PUT("/expenses/:id", expenseH.Update)
+	r.DELETE("/expenses/:id", expenseH.Delete)
 	r.POST("/fixed-costs", expenseH.CreateFixedCost)
 	r.GET("/fixed-costs", expenseH.GetFixedCostsByBusinessID)
 	r.PUT("/fixed-costs/:id", expenseH.UpdateFixedCost)

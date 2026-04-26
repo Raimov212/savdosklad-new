@@ -36,6 +36,13 @@ type CreateTotalExpenseRequest struct {
 	Items       []CreateExpenseItemRequest `json:"items"`
 }
 
+type UpdateTotalExpenseRequest struct {
+	Total       *float64 `json:"total"`
+	Cash        *float64 `json:"cash"`
+	Card        *float64 `json:"card"`
+	Description *string  `json:"description"`
+}
+
 type CreateExpenseItemRequest struct {
 	Name        string  `json:"name" binding:"required"`
 	Description string  `json:"description"`
