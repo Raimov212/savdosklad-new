@@ -212,6 +212,10 @@ export const translations = {
         "Lokal kod": "Lokal kod",
         "Begona": "Begona",
         "Ixtiyoriy": "Ixtiyoriy",
+        "Amallar": "Amallar",
+        "Yangi miqdorni kiriting:": "Yangi miqdorni kiriting:",
+        "Yangi narxni kiriting:": "Yangi narxni kiriting:",
+        "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?",
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"
     },
     'uz-cyrl': {
@@ -797,6 +801,9 @@ export const translations = {
         "Qarz summasi": "Қарз суммаси",
         "Qarz summasi qarzdan ko'p bo'lishi mumkin эмас!": "Қарз суммаси қарздан кўп бўлиши мумкин эмас!",
         "Qolgan qarz": "Қолган қарз",
+        "Yangi miqdorni kiriting:": "Янги миқдорни киритинг:",
+        "Yangi narxni kiriting:": "Янги нархни киритинг:",
+        "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Ушбу маҳсулотни сотувдан ўчиришни тасдиқлайсизми?",
         "Qarzdorlar topilmadi": "Қарздорлар топилмади",
         "Hech qanday to'langan qarz yo'q": "Ҳеч қандай тўланган қарз йўқ",
         "Muddat": "Муддат",
@@ -1464,6 +1471,10 @@ export const translations = {
         "O'zbekiston": "Узбекистан",
         "Lokal kod": "Локальный код",
         "Ixtiyoriy": "Необязательно",
+        "Amallar": "Действия",
+        "Yangi miqdorni kiriting:": "Введите новое количество:",
+        "Yangi narxni kiriting:": "Введите новую цену:",
+        "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Вы подтверждаете удаление этого товара из продажи?",
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Номер телефона в неправильном формате (Например: +998901234567)"
     },
     en: {
@@ -2077,6 +2088,9 @@ export const translations = {
         "demo_slide_4": "Maintain a customer database. Track purchase history, debts and payments. Manage debtors list.",
         "demo_slide_5": "Automatically calculate monthly income, expenses, salaries and taxes. Net profit at a glance.",
         "demo_slide_6": "Get sales notifications via Telegram bot. Monitor your business from your phone in real time.",
+        "Yangi miqdorni kiriting:": "Enter new quantity:",
+        "Yangi narxni kiriting:": "Enter new price:",
+        "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Are you sure you want to delete this product from the sale?",
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Phone number is in incorrect format (Example: +998901234567)"
     }
 };

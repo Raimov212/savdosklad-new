@@ -877,41 +877,54 @@ async function viewTransactionItems(ids) {
   try {
     showToast(t('Tafsilotlar yuklanmoqda...'), 'info');
 
-    // Fetch items for all IDs in the group and merge them
     const allItems = await Promise.all(ids.map(id => api.get(`/transactions/${id}/items`)));
     const list = allItems.filter(items => items !== null).flat();
 
     openModal(`
       <div class="modal-header">
-        <h3>${t("Sotuv tafsilotlari")}</h3>
-        <span style="opacity:0.6;">№: ${ids.join(', ')}</span>
+        <h3 style="color: var(--text);">${t("Sotuv tafsilotlari")}</h3>
+        <span style="opacity:0.6; color: var(--text-muted);">№: ${ids.join(', ')}</span>
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
       <div class="table-container">
         <table>
           <thead>
-            <tr><th>№</th><th style="text-align:center">${t("Mahsulot nomi")}</th><th style="text-align:center">${t("Narxi")}</th><th style="text-align:center">${t("Soni")}</th><th style="text-align:center">${t("Jami")}</th></tr>
+            <tr>
+              <th style="background: var(--accent-gradient) !important; color: white !important; width: 40px; text-align: center;">№</th>
+              <th style="text-align: center; color: white !important;">${t("Mahsulot nomi")}</th>
+              <th style="text-align: center; color: white !important;">${t("Narxi")}</th>
+              <th style="text-align: center; color: white !important;">${t("Soni")}</th>
+              <th style="text-align: center; color: white !important;">${t("Jami")}</th>
+              <th style="background: var(--accent-gradient) !important; text-align: center; color: white !important;">${t("Amallar")}</th>
+            </tr>
           </thead>
           <tbody>
-            ${list.length === 0 ? `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
+            ${list.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
         list.map((item, i) => {
           const pName = item.productName || `${t("Mahsulot")} #${item.productId}`;
           return `
                 <tr>
-                  <td>${i + 1}</td>
-                  <td style="font-weight:600;">${escapeHtml(pName)} ${item.productBarcode ? `<small style="opacity:0.5">(${item.productBarcode})</small>` : ''}</td>
-                  <td class="price" style="text-align:right">${formatPrice(item.productPrice)}</td>
-                  <td style="text-align:center">${item.productQuantity}</td>
-                  <td class="price" style="text-align:right"><strong>${formatPrice(item.productPrice * item.productQuantity)}</strong></td>
+                  <td style="color: var(--text);">${i + 1}</td>
+                  <td style="font-weight:600; color: var(--text);">${escapeHtml(pName)} ${item.productBarcode ? `<small style="opacity:0.5">(${item.productBarcode})</small>` : ''}</td>
+                  <td class="price" style="text-align:right; color: var(--text);">${formatPrice(item.productPrice)}</td>
+                  <td style="text-align:center; color: var(--text);">${item.productQuantity}</td>
+                  <td class="price" style="text-align:right; color: var(--text);"><strong>${formatPrice(item.productPrice * item.productQuantity)}</strong></td>
+                  <td style="text-align:center;">
+                    <div style="display:flex; gap:5px; justify-content:center;">
+                      <button class="btn btn-ghost btn-sm" onclick='editTransactionItem(${item.id}, ${JSON.stringify(ids)})' title="${t("Tahrirlash")}">✏️</button>
+                      <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick='deleteTransactionItem(${item.id}, ${JSON.stringify(ids)})' title="${t("O'chirish")}">🗑️</button>
+                    </div>
+                  </td>
                 </tr>`;
         }).join('')}
           </tbody>
           ${list.length > 0 ? `
           <tfoot>
-            <tr style="background: rgba(255, 255, 255, 0.05); font-weight: bold;">
-              <td colspan="3" style="text-align:right; font-size: 14px;">${t("Jami")}:</td>
-              <td style="text-align:center; font-size: 14px;">${list.reduce((sum, item) => sum + (item.productQuantity || 0), 0)}</td>
+            <tr style="background: rgba(0, 0, 0, 0.05); font-weight: bold;">
+              <td colspan="3" style="text-align:right; font-size: 14px; color: var(--text);">${t("Jami")}:</td>
+              <td style="text-align:center; font-size: 14px; color: var(--text);">${list.reduce((sum, item) => sum + (item.productQuantity || 0), 0)}</td>
               <td class="price" style="text-align:right; font-size: 14px; color: var(--success);">${formatPrice(list.reduce((sum, item) => sum + ((item.productPrice || 0) * (item.productQuantity || 0)), 0))}</td>
+              <td></td>
             </tr>
           </tfoot>` : ''}
         </table>
@@ -931,6 +944,45 @@ async function viewTransactionItems(ids) {
     showToast(err.message, 'error');
   }
 }
+
+async function editTransactionItem(itemId, transIds) {
+  try {
+    const item = await api.get(`/transactions/items/${itemId}`);
+    if (!item) return;
+
+    const newQty = prompt(t("Yangi miqdorni kiriting:"), item.productQuantity);
+    if (newQty === null) return;
+    
+    const newPrice = prompt(t("Yangi narxni kiriting:"), item.productPrice);
+    if (newPrice === null) return;
+
+    await api.put(`/transactions/items/${itemId}`, {
+      productQuantity: parseInt(newQty),
+      productPrice: parseFloat(newPrice)
+    });
+
+    showToast(t("Muvaffaqiyatli yangilandi"), 'success');
+    viewTransactionItems(transIds);
+    renderTransactions();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+window.editTransactionItem = editTransactionItem;
+
+async function deleteTransactionItem(itemId, transIds) {
+  if (!confirm(t("Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?"))) return;
+  try {
+    await api.delete(`/transactions/items/${itemId}`);
+    showToast(t("Muvaffaqiyatli o'chirildi"), 'success');
+    viewTransactionItems(transIds);
+    renderTransactions();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+window.deleteTransactionItem = deleteTransactionItem;
+
 
 async function downloadTransactionPdf(ids, groupedTrans = null) {
   if (!Array.isArray(ids)) ids = [ids];

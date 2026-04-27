@@ -52,6 +52,7 @@ type ProductRepository interface {
 	CreateBulkDeleteRequest(req *entity.BulkDeleteRequest) (int, error)
 	GetBulkDeleteRequests() ([]entity.BulkDeleteRequest, error)
 	UpdateBulkDeleteRequestStatus(id int, status string) error
+	UpdateQuantity(id int, diff int) error
 }
 
 type ClientRepository interface {
@@ -79,6 +80,9 @@ type TransactionRepository interface {
 	GetRecentTransactionsByClientID(clientID int, limit int) ([]entity.TotalTransaction, error)
 	GetStats(bid int, start, end *time.Time) (entity.TransactionStats, error)
 	UpdateTotalTransaction(tt *entity.TotalTransaction) error
+	GetTransactionByID(id int) (*entity.Transaction, error)
+	UpdateTransaction(t *entity.Transaction) error
+	DeleteTransaction(id int) error
 }
 
 type RefundRepository interface {

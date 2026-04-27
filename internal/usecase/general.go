@@ -170,13 +170,14 @@ func (uc *ClientUseCase) UpdateLanguage(id int, lang string) error {
 func (uc *ClientUseCase) Delete(id int) error { return uc.repo.Delete(id) }
 
 type TransactionUseCase struct {
-	repo       repository.TransactionRepository
-	clientRepo repository.ClientRepository
-	notifier   *notifier.TelegramNotifier
+	repo        repository.TransactionRepository
+	clientRepo  repository.ClientRepository
+	productRepo repository.ProductRepository
+	notifier    *notifier.TelegramNotifier
 }
 
-func NewTransactionUseCase(r repository.TransactionRepository, cr repository.ClientRepository, n *notifier.TelegramNotifier) *TransactionUseCase {
-	return &TransactionUseCase{repo: r, clientRepo: cr, notifier: n}
+func NewTransactionUseCase(r repository.TransactionRepository, cr repository.ClientRepository, pr repository.ProductRepository, n *notifier.TelegramNotifier) *TransactionUseCase {
+	return &TransactionUseCase{repo: r, clientRepo: cr, productRepo: pr, notifier: n}
 }
 func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTransactionRequest) (int, error) {
 	tt := &entity.TotalTransaction{
@@ -238,6 +239,9 @@ func (uc *TransactionUseCase) GetStats(bid int, start, end *time.Time) (entity.T
 }
 func (uc *TransactionUseCase) GetItems(totalID int) ([]entity.Transaction, error) {
 	return uc.repo.GetTransactionsByTotalID(totalID)
+}
+func (uc *TransactionUseCase) GetTransactionByID(id int) (*entity.Transaction, error) {
+	return uc.repo.GetTransactionByID(id)
 }
 func (uc *TransactionUseCase) GetByBusinessIDWithLimit(bid int, limit int) ([]entity.TotalTransaction, error) {
 	return uc.repo.GetRecentTransactionsByBusinessID(bid, limit)
@@ -334,6 +338,88 @@ func (uc *TransactionUseCase) SendReceipt(totalID int, pdfBytes, imgBytes []byte
 	uc.notifier.SendReceipt(*client.TelegramUserID, text, pdfBytes, imgBytes, pdfName, imgName)
 	return nil
 }
+
+func (uc *TransactionUseCase) UpdateItem(id int, req entity.UpdateTransactionItemRequest) error {
+	item, err := uc.repo.GetTransactionByID(id)
+	if err != nil {
+		return err
+	}
+
+	// Calculate difference in quantity
+	diff := item.ProductQuantity - req.ProductQuantity
+
+	// Update product quantity in store
+	if diff != 0 {
+		if err := uc.productRepo.UpdateQuantity(item.ProductID, diff); err != nil {
+			return err
+		}
+	}
+
+	// Calculate difference in total price
+	oldTotal := item.ProductPrice * float64(item.ProductQuantity)
+	newTotal := req.ProductPrice * float64(req.ProductQuantity)
+	priceDiff := newTotal - oldTotal
+
+	// Update item
+	item.ProductQuantity = req.ProductQuantity
+	item.ProductPrice = req.ProductPrice
+	if err := uc.repo.UpdateTransaction(item); err != nil {
+		return err
+	}
+
+	// Update TotalTransaction header
+	tt, err := uc.repo.GetTotalTransactionByID(item.TotalTransactionID)
+	if err != nil {
+		return err
+	}
+	tt.Total += priceDiff
+	// Simple logic: add/subtract from cash for now, or keep debt same
+	// Usually, if price changes, we update the total and potentially the debt or cash.
+	// For simplicity, we just update the total and debt if it's a debt sale.
+	if tt.Debt > 0 {
+		tt.Debt += priceDiff
+	} else {
+		tt.Cash += priceDiff
+	}
+
+	return uc.repo.UpdateTotalTransaction(tt)
+}
+
+func (uc *TransactionUseCase) DeleteItem(id int) error {
+	item, err := uc.repo.GetTransactionByID(id)
+	if err != nil {
+		return err
+	}
+
+	// Return product to stock
+	if err := uc.productRepo.UpdateQuantity(item.ProductID, item.ProductQuantity); err != nil {
+		return err
+	}
+
+	// Update TotalTransaction header
+	tt, err := uc.repo.GetTotalTransactionByID(item.TotalTransactionID)
+	if err != nil {
+		return err
+	}
+	itemTotal := item.ProductPrice * float64(item.ProductQuantity)
+	tt.Total -= itemTotal
+	if tt.Debt > 0 {
+		tt.Debt -= itemTotal
+		if tt.Debt < 0 {
+			tt.Cash += tt.Debt // Rebalance if debt becomes negative
+			tt.Debt = 0
+		}
+	} else {
+		tt.Cash -= itemTotal
+	}
+
+	if err := uc.repo.UpdateTotalTransaction(tt); err != nil {
+		return err
+	}
+
+	return uc.repo.DeleteTransaction(id)
+}
+
 
 type RefundUseCase struct {
 	repo     repository.RefundRepository

@@ -132,7 +132,7 @@ func main() {
 	categoryUC := usecase.NewCategoryUseCase(categoryRepo)
 	productUC := usecase.NewProductUseCase(productRepo)
 	clientUC := usecase.NewClientUseCase(clientRepo, userRepo)
-	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, tgNotifier)
+	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, productRepo, tgNotifier)
 	refundUC := usecase.NewRefundUseCase(refundRepo, tgNotifier)
 	expenseUC := usecase.NewExpenseUseCase(expenseRepo, tgNotifier)
 	moneyUC := usecase.NewMoneyUseCase(moneyRepo)

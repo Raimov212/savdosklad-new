@@ -742,7 +742,6 @@ func (h *TransactionHandler) GetItems(c *gin.Context) {
 // @Param id path int true "Total Transaction ID"
 // @Param input body entity.UpdateTotalTransactionRequest true "Update"
 // @Success 200 {object} map[string]string
-// @Router /transactions/{id} [put]
 func (h *TransactionHandler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var req entity.UpdateTotalTransactionRequest
@@ -756,6 +755,59 @@ func (h *TransactionHandler) Update(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
 }
+
+// @Summary Update individual sale item
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Item ID"
+// @Param input body entity.UpdateTransactionItemRequest true "Update"
+// @Success 200 {object} map[string]string
+// @Router /transactions/items/{id} [put]
+func (h *TransactionHandler) UpdateItem(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateTransactionItemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.UpdateItem(id, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "updated"})
+}
+
+// @Summary Delete individual sale item
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Item ID"
+// @Success 200 {object} map[string]string
+// @Router /transactions/items/{id} [delete]
+func (h *TransactionHandler) DeleteItem(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.uc.DeleteItem(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "deleted"})
+}
+
+// @Summary Get individual sale item
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Item ID"
+// @Success 200 {object} entity.Transaction
+// @Router /transactions/items/{id} [get]
+func (h *TransactionHandler) GetItem(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	item, err := h.uc.GetTransactionByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, item)
+}
+
 
 // @Summary Add items to transaction
 // @Tags Transactions
@@ -1286,6 +1338,9 @@ func RegisterRoutes(
 	r.PUT("/transactions/:id", transactionH.Update)
 	r.GET("/transactions/:id/items", transactionH.GetItems)
 	r.POST("/transactions/:id/items", transactionH.AddItems)
+	r.GET("/transactions/items/:id", transactionH.GetItem)
+	r.PUT("/transactions/items/:id", transactionH.UpdateItem)
+	r.DELETE("/transactions/items/:id", transactionH.DeleteItem)
 	r.POST("/transactions/:id/send-telegram", transactionH.SendTelegram)
 
 	// Refund Handlers

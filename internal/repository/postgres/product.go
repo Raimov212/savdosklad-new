@@ -340,3 +340,8 @@ func (r *ProductRepo) UpdateBulkDeleteRequestStatus(id int, status string) error
 	_, err := r.db.Exec(`UPDATE bulk_delete_requests SET status = $1, updated_at = $2 WHERE id = $3`, status, time.Now(), id)
 	return err
 }
+
+func (r *ProductRepo) UpdateQuantity(id int, diff int) error {
+	_, err := r.db.Exec(`UPDATE products SET quantity = quantity + $1, "updatedAt" = $2 WHERE id = $3`, diff, time.Now(), id)
+	return err
+}

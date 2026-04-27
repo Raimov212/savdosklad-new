@@ -237,3 +237,28 @@ func (r *TransactionRepo) UpdateTotalTransaction(tt *entity.TotalTransaction) er
 	)
 	return err
 }
+
+func (r *TransactionRepo) GetTransactionByID(id int) (*entity.Transaction, error) {
+	var t entity.Transaction
+	err := r.db.QueryRow(
+		`SELECT id, description, "productPrice", "productQuantity", "productId", "businessId", "totalTransactionId", "createdAt", "updatedAt"
+		 FROM transactions WHERE id = $1`, id,
+	).Scan(&t.ID, &t.Description, &t.ProductPrice, &t.ProductQuantity, &t.ProductID, &t.BusinessID, &t.TotalTransactionID, &t.CreatedAt, &t.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
+func (r *TransactionRepo) UpdateTransaction(t *entity.Transaction) error {
+	_, err := r.db.Exec(
+		`UPDATE transactions SET description=$1, "productPrice"=$2, "productQuantity"=$3, "updatedAt"=$4 WHERE id = $5`,
+		t.Description, t.ProductPrice, t.ProductQuantity, time.Now(), t.ID,
+	)
+	return err
+}
+
+func (r *TransactionRepo) DeleteTransaction(id int) error {
+	_, err := r.db.Exec(`DELETE FROM transactions WHERE id = $1`, id)
+	return err
+}

@@ -147,3 +147,7 @@ type UpdateTotalTransactionRequest struct {
 	Description   string     `json:"description"`
 	DebtLimitDate *time.Time `json:"debtLimitDate"`
 }
+type UpdateTransactionItemRequest struct {
+	ProductQuantity int     `json:"productQuantity"`
+	ProductPrice    float64 `json:"productPrice"`
+}
