@@ -257,7 +257,7 @@ async function openSaleModal() {
           <div id="cumulative-total" style="font-size: 11px; opacity: 0.6;"></div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+        <div class="payment-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
           <div class="form-group">
             <label>💵 ${t("Naqd")}</label>
             <input type="number" step="0.01" class="form-control form-control-lg" id="sale-cash" value="0" oninput="updateSalePayment()">
@@ -348,11 +348,15 @@ async function openSaleModal() {
           max-height: 250px; overflow-y: auto; z-index: 1100; box-shadow: var(--shadow-lg); display: none;
         }
         .search-result-item {
-          padding: 10px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+          padding: 14px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
           border-bottom: 1px solid var(--border); transition: 0.2s;
         }
         .search-result-item:hover { background: var(--bg-glass); }
-        .form-control-lg { padding: 12px; font-size: 16px; font-weight: 600; }
+        .btn-remove { 
+          background: rgba(239, 68, 68, 0.1); color: #EF4444; border: none; padding: 6px 12px; 
+          border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s;
+        }
+        .btn-remove:hover { background: #EF4444; color: white; }
       </style>
     `);
 
@@ -479,29 +483,31 @@ function renderSaleItems() {
           <tr>
             <th style="padding: 10px; text-align: left; font-size: 11px;">${t("Mahsulot")}</th>
             <th style="padding: 10px; text-align: center; font-size: 11px; width: 80px;">${t("Soni")}</th>
-            <th style="padding: 10px; text-align: right; font-size: 11px; width: 120px;">${t("Narxi")}</th>
-            <th style="padding: 10px; text-align: right; font-size: 11px; width: 120px;">${t("Jami")}</th>
-            <th style="padding: 10px; width: 40px;"></th>
+            <th style="padding: 10px; text-align: right; font-size: 11px; width: 140px;">${t("Narxi")}</th>
+            <th style="padding: 10px; text-align: right; font-size: 11px; width: 140px;">${t("Jami")}</th>
+            <th style="padding: 10px; width: 50px;"></th>
           </tr>
         </thead>
         <tbody>
           ${saleItems.map((item, idx) => `
-            <tr style="border-top: 1px solid var(--border);">
-              <td style="padding: 8px 10px;">
-                <div style="font-weight: 600; font-size: 14px;">${escapeHtml(item.name || 'Unknown')}</div>
-                <div style="font-size: 10px; opacity: 0.6;">🏢 ${escapeHtml(item.businessName)}</div>
+            <tr class="sale-item-row">
+              <td class="td-product" data-label="${t("Mahsulot")}">
+                <div class="product-info">
+                  <div class="product-name">${escapeHtml(item.name || 'Unknown')}</div>
+                  <div class="product-business">🏢 ${escapeHtml(item.businessName)}</div>
+                </div>
               </td>
-              <td style="padding: 8px 10px;">
-                <input type="number" class="form-control" style="padding: 6px; text-align: center;" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)">
+              <td class="td-qty" data-label="${t("Soni")}">
+                <input type="number" class="form-control sale-item-input" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)">
               </td>
-              <td style="padding: 8px 10px;">
-                <input type="number" step="0.01" class="form-control" style="padding: 6px; text-align: right;" value="${item.price}" oninput="onSalePriceChange(${idx}, this.value)">
+              <td class="td-price" data-label="${t("Narxi")}">
+                <input type="number" step="0.01" class="form-control sale-item-input" value="${item.price}" oninput="onSalePriceChange(${idx}, this.value)">
               </td>
-              <td style="padding: 8px 10px; text-align: right;">
-                <div id="item-total-${idx}" style="font-weight: 700; font-size: 14px;">${formatPrice(item.price * item.quantity)}</div>
+              <td class="td-total" data-label="${t("Jami")}">
+                <div id="item-total-${idx}" class="item-total-val">${formatPrice(item.price * item.quantity)}</div>
               </td>
-              <td style="padding: 8px 10px; text-align: center;">
-                <button type="button" class="btn-remove" onclick="removeSaleItem(${idx})">✕</button>
+              <td class="td-action">
+                <button type="button" class="btn-remove" onclick="removeSaleItem(${idx})" title="${t("O'chirish")}">🗑️</button>
               </td>
             </tr>
           `).join('')}
