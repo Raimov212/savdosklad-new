@@ -229,7 +229,7 @@ func (h *ExcelHandler) ExportProducts(c *gin.Context) {
 	f.SetSheetName("Sheet1", sheet)
 
 	// Headers
-	headers := []string{"№", "Nomi", "Qisqa tavsif", "To'liq tavsif", "Narxi", "Chegirma", "Miqdori", "Shtrixkod", "Davlat", "Kategoriya", "Kategoriya ID"}
+	headers := []string{"ID", "Nomi", "Qisqa tavsif", "To'liq tavsif", "Narxi", "Chegirma", "Miqdori", "Shtrixkod", "Davlat", "Kategoriya", "Kategoriya ID"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		f.SetCellValue(sheet, cell, h)
@@ -247,7 +247,7 @@ func (h *ExcelHandler) ExportProducts(c *gin.Context) {
 	// Data
 	for i, p := range products {
 		row := i + 2
-		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), i+1)
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), p.ID)
 		if p.Name != nil {
 			f.SetCellValue(sheet, fmt.Sprintf("B%d", row), *p.Name)
 		}
@@ -271,7 +271,7 @@ func (h *ExcelHandler) ExportProducts(c *gin.Context) {
 	}
 
 	// Column widths
-	widths := map[string]float64{"A": 8, "B": 25, "C": 20, "D": 30, "E": 12, "F": 10, "G": 10, "H": 18, "I": 15, "J": 20, "K": 14}
+	widths := map[string]float64{"A": 10, "B": 25, "C": 20, "D": 30, "E": 12, "F": 10, "G": 10, "H": 18, "I": 15, "J": 20, "K": 14}
 	for col, w := range widths {
 		f.SetColWidth(sheet, col, col, w)
 	}
@@ -329,6 +329,7 @@ func (h *ExcelHandler) ImportProducts(c *gin.Context) {
 	}
 
 	created := 0
+	updated := 0
 	skipped := 0
 	var importErrors []string
 
@@ -336,33 +337,71 @@ func (h *ExcelHandler) ImportProducts(c *gin.Context) {
 		if i == 0 { // skip header
 			continue
 		}
-		if len(row) < 5 {
-			importErrors = append(importErrors, fmt.Sprintf("Row %d: not enough columns (need at least 5)", i+1))
+		if len(row) < 2 {
 			continue
 		}
 
-		// Parse: Name(0), ShortDesc(1), FullDesc(2), Price(3), Discount(4), Quantity(5), Barcode(6), Country(7), CategoryID(8)
-		name := getCell(row, 0)
+		// Parse: ID(0), Name(1), ShortDesc(2), FullDesc(3), Price(4), Discount(5), Quantity(6), Barcode(7), Country(8), Category(9), CategoryID(10)
+		idStr := getCell(row, 0)
+		name := getCell(row, 1)
 		if name == "" {
 			continue
 		}
 
-		price, _ := strconv.ParseFloat(getCell(row, 3), 64)
-		discount, _ := strconv.ParseFloat(getCell(row, 4), 64)
-		quantity, _ := strconv.Atoi(getCell(row, 5))
-		barcode := getCell(row, 6)
-		country := getCell(row, 7)
-		categoryID, _ := strconv.Atoi(getCell(row, 8))
+		price, _ := strconv.ParseFloat(getCell(row, 4), 64)
+		discount, _ := strconv.ParseFloat(getCell(row, 5), 64)
+		quantity, _ := strconv.Atoi(getCell(row, 6))
+		barcode := getCell(row, 7)
+		country := getCell(row, 8)
+		categoryID, _ := strconv.Atoi(getCell(row, 10))
 
 		if categoryID == 0 {
 			importErrors = append(importErrors, fmt.Sprintf("Row %d (%s): categoryId is required", i+1, name))
 			continue
 		}
 
+		productID, _ := strconv.Atoi(idStr)
+
+		// If ID is provided, try to update existing product
+		if productID > 0 {
+			// Check if product exists in DB
+			existing, err := h.productUC.GetByID(productID)
+			if err == nil && existing != nil {
+				// Product exists — update it
+				shortDesc := getCell(row, 2)
+				fullDesc := getCell(row, 3)
+				qty := quantity
+				updReq := entity.UpdateProductRequest{
+					Name:             &name,
+					ShortDescription: &shortDesc,
+					FullDescription:  &fullDesc,
+					Price:            &price,
+					Discount:         &discount,
+					Quantity:         &qty,
+					CategoryID:       &categoryID,
+				}
+				if barcode != "" {
+					updReq.Barcode = &barcode
+				}
+				if country != "" {
+					updReq.Country = &country
+				}
+				if err := h.productUC.Update(productID, updReq); err != nil {
+					importErrors = append(importErrors, fmt.Sprintf("Row %d (ID:%d, %s): %v", i+1, productID, name, err))
+					skipped++
+				} else {
+					updated++
+				}
+				continue
+			}
+			// Product with this ID not found — create new
+		}
+
+		// Create new product (ID is empty or not found in DB)
 		req := entity.CreateProductRequest{
 			Name:             name,
-			ShortDescription: getCell(row, 1),
-			FullDescription:  getCell(row, 2),
+			ShortDescription: getCell(row, 2),
+			FullDescription:  getCell(row, 3),
 			Price:            price,
 			Discount:         discount,
 			Quantity:         quantity,
@@ -386,6 +425,7 @@ func (h *ExcelHandler) ImportProducts(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"created": created,
+		"updated": updated,
 		"skipped": skipped,
 		"errors":  importErrors,
 	})
@@ -405,7 +445,7 @@ func (h *ExcelHandler) ProductTemplate(c *gin.Context) {
 	sheet := "Products"
 	f.SetSheetName("Sheet1", sheet)
 
-	headers := []string{"Nomi", "Qisqa tavsif", "To'liq tavsif", "Narxi", "Chegirma", "Miqdori", "Shtrixkod (unique)", "Davlat", "Kategoriya ID"}
+	headers := []string{"ID (ixtiyoriy)", "Nomi", "Qisqa tavsif", "To'liq tavsif", "Narxi", "Chegirma", "Miqdori", "Shtrixkod (unique)", "Davlat", "Kategoriya", "Kategoriya ID"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		f.SetCellValue(sheet, cell, h)
@@ -420,17 +460,19 @@ func (h *ExcelHandler) ProductTemplate(c *gin.Context) {
 	f.SetCellStyle(sheet, "A1", headerEnd, style)
 
 	// Example row
-	f.SetCellValue(sheet, "A2", "Coca-Cola 1L")
-	f.SetCellValue(sheet, "B2", "Ichimlik")
-	f.SetCellValue(sheet, "C2", "Coca-Cola gazli ichimlik 1 litr")
-	f.SetCellValue(sheet, "D2", 12000)
-	f.SetCellValue(sheet, "E2", 0)
-	f.SetCellValue(sheet, "F2", 100)
-	f.SetCellValue(sheet, "G2", "4901234567890")
-	f.SetCellValue(sheet, "H2", "UZ")
-	f.SetCellValue(sheet, "I2", 1)
+	f.SetCellValue(sheet, "A2", "") // ID bo'sh = yangi tovar qo'shiladi
+	f.SetCellValue(sheet, "B2", "Coca-Cola 1L")
+	f.SetCellValue(sheet, "C2", "Ichimlik")
+	f.SetCellValue(sheet, "D2", "Coca-Cola gazli ichimlik 1 litr")
+	f.SetCellValue(sheet, "E2", 12000)
+	f.SetCellValue(sheet, "F2", 0)
+	f.SetCellValue(sheet, "G2", 100)
+	f.SetCellValue(sheet, "H2", "4901234567890")
+	f.SetCellValue(sheet, "I2", "UZ")
+	f.SetCellValue(sheet, "J2", "")
+	f.SetCellValue(sheet, "K2", 1)
 
-	widths := map[string]float64{"A": 22, "B": 18, "C": 30, "D": 12, "E": 10, "F": 10, "G": 20, "H": 12, "I": 15}
+	widths := map[string]float64{"A": 14, "B": 22, "C": 18, "D": 30, "E": 12, "F": 10, "G": 10, "H": 20, "I": 12, "J": 20, "K": 15}
 	for col, w := range widths {
 		f.SetColWidth(sheet, col, col, w)
 	}

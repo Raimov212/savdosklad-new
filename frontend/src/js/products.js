@@ -352,12 +352,70 @@ async function handleProductImport(input) {
     });
     const result = await resp.json();
     if (resp.ok) {
-      showToast(`${t("Muvaffaqiyatli")}: ${result.created} ${t("ta yaratildi")}`);
-      if (result.errors && result.errors.length > 0) {
-        console.error("Import errors:", result.errors);
-        showToast(`${t("Xatoliklar bor")}: ${result.errors.length} ${t("ta")}`, 'warning');
-      }
       closeModal();
+
+      const total = (result.created || 0) + (result.updated || 0) + (result.skipped || 0);
+      const hasErrors = result.errors && result.errors.length > 0;
+
+      const errorsHtml = hasErrors ? `
+        <div style="margin-top:16px; text-align:left;">
+          <details style="cursor:pointer;">
+            <summary style="font-size:13px; font-weight:600; color:#f59e0b; margin-bottom:8px;">
+              ⚠️ ${t("Xatoliklar bor")}: ${result.errors.length} ${t("ta")}
+            </summary>
+            <div style="max-height:150px; overflow-y:auto; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15); border-radius:10px; padding:10px; margin-top:8px;">
+              ${result.errors.map(e => `<div style="font-size:11px; color:#ef4444; padding:4px 0; border-bottom:1px solid rgba(239,68,68,0.08);">${escapeHtml(e)}</div>`).join('')}
+            </div>
+          </details>
+        </div>
+      ` : '';
+
+      const alertHtml = `
+        <div style="position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:9999; display:flex; align-items:center; justify-content:center; animation: fadeIn 0.2s ease;" id="import-result-alert">
+          <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:36px 32px 28px; max-width:420px; width:92%; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;">
+            
+            <div style="width:72px; height:72px; margin:0 auto 20px; border-radius:50%; background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(59,130,246,0.1)); display:flex; align-items:center; justify-content:center; font-size:36px;">
+              ${hasErrors ? '📊' : '✅'}
+            </div>
+
+            <h3 style="margin:0 0 6px; font-size:22px; font-weight:800; color:var(--text-primary); font-family:'Outfit',sans-serif;">
+              ${t("Import natijasi")}
+            </h3>
+            <p style="margin:0 0 24px; font-size:13px; color:var(--text-muted);">
+              ${t("Jami")}: ${total} ${t("ta")}
+            </p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr ${(result.skipped || 0) > 0 ? '1fr' : ''}; gap:12px; margin-bottom:20px;">
+              
+              <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:16px; padding:16px 12px;">
+                <div style="font-size:28px; font-weight:900; color:#10b981; font-family:'Outfit',sans-serif;">${result.created || 0}</div>
+                <div style="font-size:11px; color:#10b981; font-weight:600; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px;">➕ ${t("ta yaratildi")}</div>
+              </div>
+
+              <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); border-radius:16px; padding:16px 12px;">
+                <div style="font-size:28px; font-weight:900; color:#3b82f6; font-family:'Outfit',sans-serif;">${result.updated || 0}</div>
+                <div style="font-size:11px; color:#3b82f6; font-weight:600; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px;">🔄 ${t("ta yangilandi")}</div>
+              </div>
+
+              ${(result.skipped || 0) > 0 ? `
+              <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15); border-radius:16px; padding:16px 12px;">
+                <div style="font-size:28px; font-weight:900; color:#ef4444; font-family:'Outfit',sans-serif;">${result.skipped}</div>
+                <div style="font-size:11px; color:#ef4444; font-weight:600; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px;">❌ ${t("Xatolik")}</div>
+              </div>` : ''}
+            </div>
+
+            ${errorsHtml}
+
+            <button onclick="document.getElementById('import-result-alert').remove()" 
+              class="btn btn-primary" 
+              style="width:100%; padding:14px; border-radius:14px; font-size:15px; font-weight:700; margin-top:16px; box-shadow:0 4px 15px rgba(16,185,129,0.3);">
+              ${t("Yopish")}
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', alertHtml);
       renderProducts();
     } else {
       throw new Error(result.error || t("Importda xatolik"));
