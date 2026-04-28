@@ -43,7 +43,7 @@ func main() {
 	userUC := usecase.NewUserUseCase(userRepo, jwtManager, tgNotifier)
 	businessUC := usecase.NewBusinessUseCase(businessRepo)
 	productUC := usecase.NewProductUseCase(productRepo)
-	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, tgNotifier)
+	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, productRepo, tgNotifier)
 	refundUC := usecase.NewRefundUseCase(refundRepo, tgNotifier)
 	expenseUC := usecase.NewExpenseUseCase(expenseRepo, tgNotifier)
 	clientUC := usecase.NewClientUseCase(clientRepo, userRepo)
