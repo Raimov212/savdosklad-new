@@ -510,14 +510,13 @@ func (h *ProductHandler) ApproveBulkDeleteRequest(c *gin.Context) {
 		// For now, I'll assume the client sends the data back or I fetch it.
 		// Actually, I'll just implement a simple GetByID for requests.
 	}
-	
+
 	if err := h.uc.UpdateBulkDeleteRequestStatus(id, status); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated"})
 }
-
 
 // ---- Client Handler ----
 type ClientHandler struct {
@@ -720,6 +719,22 @@ func (h *TransactionHandler) GetByBusinessID(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
+// @Summary Get transactions by client ID
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Client ID"
+// @Success 200 {array} entity.TotalTransaction
+// @Router /transactions/client/{id} [get]
+func (h *TransactionHandler) GetByClientID(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	list, err := h.uc.GetByClientIDWithLimit(id, 1000)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
 // @Summary Get transaction items
 // @Tags Transactions
 // @Security BearerAuth
@@ -807,7 +822,6 @@ func (h *TransactionHandler) GetItem(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, item)
 }
-
 
 // @Summary Add items to transaction
 // @Tags Transactions
@@ -1342,6 +1356,7 @@ func RegisterRoutes(
 	r.PUT("/transactions/items/:id", transactionH.UpdateItem)
 	r.DELETE("/transactions/items/:id", transactionH.DeleteItem)
 	r.POST("/transactions/:id/send-telegram", transactionH.SendTelegram)
+	r.GET("/transactions/client/:id", transactionH.GetByClientID)
 
 	// Refund Handlers
 	r.POST("/refunds", refundH.Create)

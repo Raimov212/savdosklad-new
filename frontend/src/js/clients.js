@@ -1,4 +1,4 @@
-import { api, showToast, escapeHtml, getSelectedBusinessId, toggleAcc } from './api.js';
+import { api, showToast, escapeHtml, getSelectedBusinessId, toggleAcc, formatPrice, formatDateTime } from './api.js';
 import { t } from './i18n.js';
 
 // ==================== CLIENTS MODULE ====================
@@ -21,7 +21,7 @@ async function renderClients() {
       }
 
       const results = await Promise.all(
-        businesses.map(b => 
+        businesses.map(b =>
           api.get(`/clients?businessId=${b.id}`).catch(() => []).then(clients => {
             // Tag with business name
             clients.forEach(c => { c._businessName = b.name; c._businessId = b.id; });
@@ -98,6 +98,7 @@ function renderClientsTable(list, isAppend = false) {
               </div>
             </div>
             <div class="acc-actions">
+              <button class="btn btn-ghost btn-sm" onclick="showClientTransactions(${c.id}, '${escapeHtml(c.fullName)}')">🛍️ ${t("Sotuvlar")}</button>
               ${window.hasPermission('edit') ? `<button class="btn btn-success btn-sm" onclick='openClientModal(${JSON.stringify(c).replace(/'/g, "&#39;")})'>✏️ ${t("Tahrirlash")}</button>` : ''}
               ${window.hasPermission('delete') ? `<button class="btn btn-danger btn-sm" onclick="deleteClient(${c.id})">🗑️ ${t("O'chirish")}</button>` : ''}
             </div>
@@ -249,6 +250,180 @@ async function deleteClient(id) {
   }
 }
 
+window.toggleClientTransAcc = async function (transId, ids) {
+  toggleAcc('client-trans-acc-' + transId);
+  const itemsContainer = document.getElementById('client-trans-items-' + transId);
+  if (itemsContainer && !itemsContainer.dataset.loaded) {
+    itemsContainer.innerHTML = `<div class="loader" style="width:20px;height:20px;margin:10px auto;"></div>`;
+    try {
+      if (!Array.isArray(ids)) ids = [ids];
+      const promises = ids.map(id => api.get(`/transactions/${id}/items`));
+      const results = await Promise.all(promises);
+      const items = results.flat();
+
+      if (items.length === 0) {
+        itemsContainer.innerHTML = `<div style="text-align:center; padding:10px; color:var(--text-muted); font-size:12px;">${t("Ma'lumot yo'q")}</div>`;
+        itemsContainer.dataset.loaded = 'true';
+        return;
+      }
+
+      let html = `<div style="background:var(--bg-secondary); border-radius:10px; padding:10px; margin-top:10px;">
+        <table style="width:100%; font-size:12px; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border); opacity:0.7;">
+            <th style="text-align:left; padding-bottom:5px;">${t("Nomi")}</th>
+            <th style="text-align:center; padding-bottom:5px;">${t("Soni")}</th>
+            <th style="text-align:right; padding-bottom:5px;">${t("Narxi")}</th>
+            <th style="text-align:right; padding-bottom:5px;">${t("Jami")}</th>
+          </tr>
+        </thead>
+        <tbody>`;
+      items.forEach(it => {
+        html += `<tr>
+          <td style="padding:5px 0; font-weight:600;">${escapeHtml(it.productName)}</td>
+          <td style="text-align:center; padding:5px 0;">${it.productQuantity}</td>
+          <td style="text-align:right; padding:5px 0;">${formatPrice(it.productPrice)}</td>
+          <td style="text-align:right; padding:5px 0; font-weight:600; color:var(--accent);">${formatPrice(it.productQuantity * it.productPrice)}</td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+      itemsContainer.innerHTML = html;
+      itemsContainer.dataset.loaded = 'true';
+    } catch (e) {
+      itemsContainer.innerHTML = `<span style="color:red; font-size:12px;">${e.message}</span>`;
+    }
+  }
+};
+
+window.renderClientHistoryRows = function (transactions) {
+  let rows = '';
+  if (transactions.length === 0) {
+    rows = `<div style="text-align:center; padding:20px; color:var(--text-muted);">${t("Sotuvlar yo'q")}</div>`;
+  } else {
+    rows = transactions.map((trans) => {
+      const hasDebt = trans.debt > 0;
+      const idsJson = JSON.stringify(trans.ids);
+      return `
+        <div class="acc-item" id="client-trans-acc-${trans.id}">
+          <div class="acc-header" onclick='toggleClientTransAcc(${trans.id}, ${idsJson})'>
+            <div class="acc-header-left">
+              <div class="acc-avatar acc-avatar-indigo" style="${hasDebt ? 'background:linear-gradient(135deg,#EF4444,#DC2626)' : ''}">🛒</div>
+              <div>
+                <div class="acc-title">№ ${trans.ids.join(', ')} — ${formatDateTime(trans.createdAt)}</div>
+                <div class="acc-subtitle">
+                  ${hasDebt ? `<span class="badge badge-danger">${t("Qarz")}: ${formatPrice(trans.debt)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="acc-header-right">
+              <span class="acc-price" style="color:var(--success);">${formatPrice(trans.total)} ${t("so'm")}</span>
+              <span class="acc-chevron">▼</span>
+            </div>
+          </div>
+          <div class="acc-body">
+            <div class="acc-detail-grid" style="margin-bottom:10px;">
+              ${trans.cash > 0 ? `<div class="acc-detail-item">
+                <span class="acc-detail-icon">💵</span>
+                <div><div class="acc-detail-label">${t("Naqd")}</div><div class="acc-detail-value">${formatPrice(trans.cash)} ${t("so'm")}</div></div>
+              </div>` : ''}
+              ${trans.card > 0 ? `<div class="acc-detail-item">
+                <span class="acc-detail-icon">💳</span>
+                <div><div class="acc-detail-label">${t("Karta")}</div><div class="acc-detail-value">${formatPrice(trans.card)} ${t("so'm")}</div></div>
+              </div>` : ''}
+              ${trans.click > 0 ? `<div class="acc-detail-item">
+                <span class="acc-detail-icon">📱</span>
+                <div><div class="acc-detail-label">${t("Click")}</div><div class="acc-detail-value">${formatPrice(trans.click)} ${t("so'm")}</div></div>
+              </div>` : ''}
+              ${hasDebt ? `<div class="acc-detail-item" style="border-color:#FCA5A5;">
+                <span class="acc-detail-icon">⚠️</span>
+                <div><div class="acc-detail-label" style="color:#EF4444;">${t("Qarz")}</div><div class="acc-detail-value" style="color:#EF4444;">${formatPrice(trans.debt)} ${t("so'm")}</div></div>
+              </div>` : ''}
+            </div>
+            <div id="client-trans-items-${trans.id}"></div>
+            <div class="acc-actions" style="margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">
+              <button class="btn btn-ghost btn-sm" onclick='viewTransactionItems(${idsJson})'>👁️ ${t("Tafsilotlar")}</button>
+              <button class="btn btn-primary btn-sm" onclick='downloadTransactionPdf(${idsJson})'>📄 ${t("PDF")}</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const listContainer = document.getElementById('client-history-list');
+  if (listContainer) {
+    listContainer.innerHTML = rows;
+  }
+  return rows;
+};
+
+window.searchClientHistory = function (query) {
+  const q = query.toLowerCase();
+  const filtered = window.currentClientTransactions.filter(t =>
+    t.ids.join(', ').includes(q) || formatDateTime(t.createdAt).includes(q)
+  );
+  renderClientHistoryRows(filtered);
+};
+
+async function showClientTransactions(id, name) {
+  try {
+    showToast(t("Yuklanmoqda..."), 'info');
+    const list = await api.get(`/transactions/client/${id}`);
+
+    const groupedMap = new Map();
+    (list || []).forEach(trans => {
+      const date = trans.createdAt.substring(0, 10);
+      const key = `${date}`;
+      if (groupedMap.has(key)) {
+        const group = groupedMap.get(key);
+        group.ids.push(trans.id);
+        group.total += trans.total;
+        group.cash += trans.cash;
+        group.card += trans.card;
+        group.click += (trans.click || 0);
+        group.debt += trans.debt;
+        if (new Date(trans.createdAt) > new Date(group.createdAt)) {
+          group.createdAt = trans.createdAt;
+        }
+      } else {
+        groupedMap.set(key, { ...trans, ids: [trans.id] });
+      }
+    });
+
+    window.currentClientTransactions = Array.from(groupedMap.values());
+
+    let rowsHtml = window.renderClientHistoryRows(window.currentClientTransactions);
+
+    const html = `
+      <style>
+        .client-history-modal { max-width: 900px !important; width: 100% !important; }
+        @media (max-width: 1024px) { .client-history-modal { max-width: 95% !important; } }
+      </style>
+      <div class="modal-header">
+        <div>
+          <h3 style="margin:0; font-family:'Outfit';">${t("Xaridlar tarixi")}</h3>
+          <p style="margin:4px 0 0; font-size:13px; color:var(--text-muted);">👤 ${escapeHtml(name)}</p>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      
+      <div style="margin: 15px 0;">
+        <div class="search-box" style="max-width:100%;">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="${t("Qidirish (Sana yoki raqam)...")}" oninput="searchClientHistory(this.value)" class="form-control" autocomplete="off">
+        </div>
+      </div>
+      
+      <div style="max-height: calc(100vh - 220px); overflow-y: auto; padding-right: 5px;" class="custom-scroll">
+        <div class="acc-list" id="client-history-list">${rowsHtml}</div>
+      </div>
+    `;
+    openModal(html, null, 'client-history-modal');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
 // Global exports
 window.renderClients = renderClients;
 window.renderClientsTable = renderClientsTable;
@@ -256,6 +431,7 @@ window.filterClients = filterClients;
 window.openClientModal = openClientModal;
 window.saveClient = saveClient;
 window.deleteClient = deleteClient;
+window.showClientTransactions = showClientTransactions;
 window.clientPage = clientPage;
 window.allClientsList = allClientsList;
 window.currentClients = currentClients;

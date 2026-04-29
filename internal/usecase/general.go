@@ -246,9 +246,10 @@ func (uc *TransactionUseCase) GetTransactionByID(id int) (*entity.Transaction, e
 func (uc *TransactionUseCase) GetByBusinessIDWithLimit(bid int, limit int) ([]entity.TotalTransaction, error) {
 	return uc.repo.GetRecentTransactionsByBusinessID(bid, limit)
 }
-func (uc *TransactionUseCase) GetByClientIDWithLimit(clientID int, limit int) ([]entity.TotalTransaction, error) {
-	return uc.repo.GetRecentTransactionsByClientID(clientID, limit)
+func (r *TransactionUseCase) GetByClientIDWithLimit(clientID int, limit int) ([]entity.TotalTransaction, error) {
+	return r.repo.GetRecentTransactionsByClientID(clientID, limit)
 }
+
 
 func (uc *TransactionUseCase) AddItemsToSale(totalID int, bid int, items []entity.CreateTransactionItemRequest) error {
 	for _, item := range items {

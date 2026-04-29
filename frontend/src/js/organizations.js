@@ -182,7 +182,7 @@ async function loadOrganizations() {
             `;
         }).join('');
         
-        setTimeout(() => lucide.createIcons(), 50);
+        setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
     } catch (e) {
         container.innerHTML = `<p class="error">${e.message}</p>`;
     }

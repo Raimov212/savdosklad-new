@@ -101,6 +101,7 @@ export const translations = {
         "Sotilgan tovarlar": "Sotilgan tovarlar",
         "Qidirish": "Qidirish",
         "Qidirish (Nomi, Barcode)...": "Qidirish (Nomi, Barcode)...",
+        "Qidirish (Sana yoki raqam)...": "Qidirish (Sana yoki raqam)...",
         "Sotilgan tovarlar soni": "Sotilgan tovarlar soni",
         "Xodimlar": "Xodimlar",
         "Xodim qo'shish": "Xodim qo'shish",
@@ -177,6 +178,8 @@ export const translations = {
         "Ism Familiya": "Ism Familiya",
         "Qarz muvaffaqiyatli to'landi!": "Qarz muvaffaqiyatli to'landi!",
         "ta mahsulot kam qolgan": "ta mahsulot kam qolgan",
+        "Sotib olingan tovarlar": "Sotib olingan tovarlar",
+        "O'rtacha narx": "O'rtacha narx",
         "Rasmni o'chirish": "Rasmni o'chirish",
         "Telegramni ulash": "Telegramni ulash",
         "Telegram hisobingizni ulab, bot orqali boshqaring": "Telegram hisobingizni ulab, bot orqali boshqaring",
@@ -216,7 +219,9 @@ export const translations = {
         "Yangi miqdorni kiriting:": "Yangi miqdorni kiriting:",
         "Yangi narxni kiriting:": "Yangi narxni kiriting:",
         "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?",
-        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)",
+        "Xaridlar tarixi": "Xaridlar tarixi",
+        "Sotuvlar": "Sotuvlar"
     },
     'uz-cyrl': {
         "Biznesingizni": "Бизнесингизни",
@@ -539,6 +544,7 @@ export const translations = {
         "Qaytarishlar": "Қайтаришлар",
         "Qidirish...": "Қидириш...",
         "Qidirish (Nomi, Barcode)...": "Қидириш (Nomi, Barcode)...",
+        "Qidirish (Sana yoki raqam)...": "Қидириш (Sana yoki raqam)...",
         "Qisqa tavsif": "Қисқа тавсиф",
         "Qo'shilgan mablag'lar": "Қўшилган маблағлар",
         "Qo'shilgan": "Қўшилган",
@@ -819,6 +825,8 @@ export const translations = {
         "Ism Familiya": "Исm Фамилия",
         "Qarz muvaffaqiyatli to'landi!": "Қарз муваффақиятли тўланди!",
         "ta mahsulot kam qolgan": "та маҳсулот кам қолган",
+        "Sotib olingan tovarlar": "Сотиб олинган товарлар",
+        "O'rtacha narx": "Ўртача нарх",
         "Rasmni o'chirish": "Расмни ўчириш",
         "Telegramni ulash": "Телеграмни улаш",
         "Telegram hisobingizni ulab, bot orqali boshqaring": "Телеграм ҳисобингизни улаб, бот орқали бошқаринг",
@@ -847,6 +855,8 @@ export const translations = {
         "O'zbekiston": "Ўзбекистон",
         "Lokal kod": "Локал код",
         "Ixtiyoriy": "Ихтиёрий",
+        "Xaridlar tarixi": "Харидлар тарихи",
+        "Sotuvlar": "Сотувлар",
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Телефон рақами нотўғри форматда (Масалан: +998901234567)"
     },
     ru: {
@@ -1136,6 +1146,7 @@ export const translations = {
         "Qaytarishlar": "Возвраты",
         "Qidirish...": "Поиск...",
         "Qidirish (Nomi, Barcode)...": "Поиск (Название, Штрихкод)...",
+        "Qidirish (Sana yoki raqam)...": "Поиск (Дата или номер)...",
         "Qisqa tavsif": "Краткое описание",
         "Qo'shilgan mablag'lar": "Добавленные средства",
         "Qo'shilgan": "Добавлено",
@@ -1143,6 +1154,10 @@ export const translations = {
         "Rasm URLi": "URL изображения",
         "Rasm URLi": "URL изображения",
         "Rasm URLini kiriting": "Введите URL-адрес изображения",
+        "ta mahsulot kam qolgan": "товаров мало",
+        "Sotib olingan tovarlar": "Купленные товары",
+        "O'rtacha narx": "Средняя цена",
+        "Rasmni o'chirish": "Удалить фото",
         "Rasm": "Изображение",
         "Rasmni o'chirish": "Удалить изображение",
         "Rol": "Роль",
@@ -1479,6 +1494,8 @@ export const translations = {
         "Yangi miqdorni kiriting:": "Введите новое количество:",
         "Yangi narxni kiriting:": "Введите новую цену:",
         "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Вы подтверждаете удаление этого товара из продажи?",
+        "Xaridlar tarixi": "История покупок",
+        "Sotuvlar": "Продажи",
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Номер телефона в неправильном формате (Например: +998901234567)"
     },
     en: {
@@ -1570,8 +1587,10 @@ export const translations = {
         "Brend nomi": "Brand name",
         "Brend nomini kiriting": "Enter brand name",
         "Brend logotipi": "Brand logo",
-        "Biznes logotipi": "Business logo",
-        "Rasmni o'chirish": "Delete Image",
+        "ta mahsulot kam qolgan": "products low stock",
+        "Sotib olingan tovarlar": "Purchased Products",
+        "O'rtacha narx": "Average Price",
+        "Rasmni o'chirish": "Remove image",
         "Balans": "Balance",
         "Barcode": "Barcode",
         "Biznes tanlang": "Choose a business",
@@ -1760,6 +1779,7 @@ export const translations = {
         "Qaytarishlar": "Refunds",
         "Qidirish...": "Search...",
         "Qidirish (Nomi, Barcode)...": "Search (Name, Barcode)...",
+        "Qidirish (Sana yoki raqam)...": "Search (Date or Number)...",
         "Qisqa tavsif": "Short description",
         "Qo'shilgan mablag'lar": "Added amounts",
         "Qo'shilgan": "Added",
@@ -2097,6 +2117,8 @@ export const translations = {
         "Yangi miqdorni kiriting:": "Enter new quantity:",
         "Yangi narxni kiriting:": "Enter new price:",
         "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Are you sure you want to delete this product from the sale?",
+        "Xaridlar tarixi": "History of purchases",
+        "Sotuvlar": "Sales",
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Phone number is in incorrect format (Example: +998901234567)"
     }
 };

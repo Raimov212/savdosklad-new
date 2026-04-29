@@ -241,7 +241,7 @@ export function updateThemeIcon(theme) {
         const lucideIcon = btn.querySelector('i[data-lucide]');
         if (lucideIcon) {
             lucideIcon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
             // Fallback for non-lucide buttons (dashboard uses emoji for now)
             btn.textContent = theme === 'dark' ? '☀️' : '🌙';

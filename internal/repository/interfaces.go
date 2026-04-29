@@ -83,6 +83,7 @@ type TransactionRepository interface {
 	GetTransactionByID(id int) (*entity.Transaction, error)
 	UpdateTransaction(t *entity.Transaction) error
 	DeleteTransaction(id int) error
+
 }
 
 type RefundRepository interface {

@@ -245,7 +245,7 @@
 
         async function initMarketplace() {
             translateDOM();
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
             await loadCategories();
             await loadProducts();
         }
@@ -295,7 +295,7 @@
                     </div>
                 </div>
             `).join('');
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         window.filterByCategory = (id, name) => {

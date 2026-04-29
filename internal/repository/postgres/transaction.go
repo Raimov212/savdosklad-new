@@ -262,3 +262,4 @@ func (r *TransactionRepo) DeleteTransaction(id int) error {
 	_, err := r.db.Exec(`DELETE FROM transactions WHERE id = $1`, id)
 	return err
 }
+

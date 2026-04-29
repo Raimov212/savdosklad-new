@@ -32,7 +32,7 @@ export async function renderEmployees() {
         allEmployees = employees || [];
         allBusinesses = businesses || [];
         renderEmployeesTable();
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     } catch (err) {
         showToast(err.message, 'error');
         document.getElementById('employees-list').innerHTML = `<p style="text-align:center; color:var(--danger);">${err.message}</p>`;
@@ -141,7 +141,7 @@ function renderEmployeesTable(isAppend = false) {
         window.attachInfiniteScroll('employeesPage', totalPages, 'renderEmployeesTable');
     }
 
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 window.renderEmployeesTable = renderEmployeesTable;
@@ -491,7 +491,7 @@ window.openSalaryModal = async function(empId) {
             </div>
         `;
         window.openModal(`💸 ${emp.firstName} ${emp.lastName} — ${t("Ish haqi")}`, body);
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     } catch (err) {
         showToast(err.message, 'error');
     }

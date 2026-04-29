@@ -522,7 +522,7 @@ async function renderDashboard() {
 
     // Initialize Lucide icons
     setTimeout(() => {
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
       renderDashboardCharts(dashboardTransactions, dashboardProducts);
     }, 100);
 
@@ -1320,7 +1320,7 @@ window.openTrendChartSettings = function () {
         </div>
     `;
   openModal(title, body);
-  setTimeout(() => lucide.createIcons(), 50);
+  setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
 };
 
 window.setChartType = function (type) {

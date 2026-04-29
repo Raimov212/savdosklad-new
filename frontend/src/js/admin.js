@@ -1222,7 +1222,7 @@ function renderMpCategoriesTable(list) {
             ${renderPageControls('mpCategoryPage', totalPages, 'renderMpCategoriesTable(allMpCategoriesList)')}
         </div>
     `;
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function filterMpCategories(query) {
@@ -1324,7 +1324,7 @@ function renderMpProductsTable(list) {
             ${renderPageControls('mpProductPage', totalPages, 'renderMpProductsTable(allMpProductsList)')}
         </div>
     `;
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function filterMpProducts(query) {
@@ -1423,7 +1423,7 @@ function renderMpSalesTable(list) {
             ${renderPageControls('mpSalesPage', totalPages, 'renderMpSalesTable(allMpSalesList)')}
         </div>
     `;
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function filterMpSales(query) {
