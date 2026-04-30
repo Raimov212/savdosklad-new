@@ -331,3 +331,5 @@ window.toggleTheme = toggleTheme;
 window.updateThemeIcon = updateThemeIcon;
 window.toggleAcc = toggleAcc;
 window.showErrorBoundary = showErrorBoundary;
+
+console.log("%cSavdoSklad Frontend v1.0.6 (Defensive) Loaded", "color: #10b981; font-weight: bold; font-size: 12px;");

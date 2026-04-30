@@ -397,7 +397,7 @@ window.showIncomeBreakdown = async function(bid, month, year) {
     }
 
     let rows = '';
-    data.forEach(item => {
+    (data || []).forEach(item => {
       rows += `
         <tr>
           <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${item.productName}</td>
@@ -461,7 +461,7 @@ window.showExpenseBreakdown = async function(bid, month, year) {
     }
 
     let rows = '';
-    data.forEach(item => {
+    (data || []).forEach(item => {
       rows += `
         <tr>
           <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${formatDate(item.createdAt)}</td>
@@ -521,7 +521,7 @@ window.showFixedBreakdown = async function(bid) {
     }
 
     let rows = '';
-    data.forEach(item => {
+    (data || []).forEach(item => {
       rows += `
         <tr>
           <td style="padding:10px; border-bottom:1px solid var(--border); font-size:13px;">${escapeHtml(item.name)}</td>

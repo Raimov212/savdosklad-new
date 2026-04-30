@@ -278,7 +278,8 @@ window.toggleClientTransAcc = async function (transId, ids) {
           </tr>
         </thead>
         <tbody>`;
-      items.forEach(it => {
+      (items || []).forEach(it => {
+        if (!it) return;
         html += `<tr>
           <td style="padding:5px 0; font-weight:600;">${escapeHtml(it.productName)}</td>
           <td style="text-align:center; padding:5px 0;">${it.productQuantity}</td>
