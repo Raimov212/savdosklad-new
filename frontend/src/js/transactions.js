@@ -396,6 +396,10 @@ function searchSaleProduct(query) {
   }
 
   const q = query.toLowerCase();
+  
+  // Check for exact barcode match (Scanner support)
+  const exactBarcodeMatch = saleProducts.find(p => p.barcode === query.trim());
+  
   const filtered = saleProducts.filter(p =>
     p.name.toLowerCase().includes(q) || (p.barcode && p.barcode.includes(q))
   ).slice(0, 10);
@@ -424,6 +428,22 @@ function searchSaleProduct(query) {
   }
   dropdown.style.display = 'block';
 }
+
+// Barcode Scanner Event Listener (NETUM HID Support)
+document.addEventListener('keydown', (e) => {
+  const searchInput = document.getElementById('sale-product-search');
+  if (searchInput && document.activeElement === searchInput && e.key === 'Enter') {
+    const query = searchInput.value.trim();
+    if (query) {
+      const exactMatch = saleProducts.find(p => p.barcode === query);
+      if (exactMatch) {
+        e.preventDefault();
+        addSaleProductById(exactMatch.id);
+      }
+    }
+  }
+});
+
 
 function addSaleProductById(id) {
   const product = saleProducts.find(p => p.id === id);
