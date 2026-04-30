@@ -155,11 +155,12 @@ function renderProductsTable(list, isAppend = false) {
       </div>
       <div class="page-bottom-bar">
         <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
-          <input type="text" placeholder="${t("Qidirish...")}" id="product-search"
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="${t("Qidirish...")}" id="product-search" class="form-control"
             value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
             oninput="filterProducts(this.value)"
-            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;"
+            autocomplete="off">
         </div>
         <button class="btn btn-ghost" id="out-of-stock-btn" onclick="toggleOutOfStockFilter()" style="padding: 10px 15px; white-space:nowrap;" title="${t("Qolmagan mahsulotlar")}">📦 ${t("Qolmagan")}</button>
         ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}

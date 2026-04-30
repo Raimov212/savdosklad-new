@@ -2145,16 +2145,16 @@ export function t(key) {
     const lang = window.currentLang || currentLang || 'uz';
     const dict = translations[lang];
     if (dict) {
-        if (dict[key]) return dict[key];
+        if (dict[key] !== undefined) return dict[key];
 
         const upper = key.toUpperCase();
-        if (dict[upper]) return dict[upper];
+        if (dict[upper] !== undefined) return dict[upper];
 
         const lower = key.toLowerCase();
-        if (dict[lower]) return dict[lower];
+        if (dict[lower] !== undefined) return dict[lower];
 
         const cap = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-        if (dict[cap]) return dict[cap];
+        if (dict[cap] !== undefined) return dict[cap];
     }
     return key;
 }
