@@ -197,16 +197,16 @@ function filterTransactions(query) {
 async function openSaleModal() {
   const bid = getSelectedBusinessId();
   try {
-    const businesses = await api.get('/businesses/my').catch(() => []);
+    const businesses = (await api.get('/businesses/my').catch(() => [])) || [];
     const [products, clientsResults] = await Promise.all([
       api.get('/products/my'),
-      Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
+      Promise.all((businesses || []).filter(b => b).map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
     ]);
 
-    const clients = clientsResults.flat();
+    const clients = clientsResults.flat().filter(c => c);
 
-    saleProducts = (products || []).filter(p => !p.isDeleted && p.quantity > 0).map(p => {
-      const b = (businesses || []).find(bus => bus.id === p.businessId);
+    saleProducts = (products || []).filter(p => p && !p.isDeleted && p.quantity > 0).map(p => {
+      const b = (businesses || []).find(bus => bus && bus.id === p.businessId);
       return { ...p, businessName: b ? b.name : t("Noma'lum") };
     });
     globalClients = clients || [];

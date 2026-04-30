@@ -21,16 +21,16 @@ async function renderClients() {
       }
 
       const results = await Promise.all(
-        businesses.map(b =>
+        (businesses || []).filter(b => b).map(b =>
           api.get(`/clients?businessId=${b.id}`).catch(() => []).then(clients => {
             // Tag with business name
-            (clients || []).forEach(c => { c._businessName = b.name; c._businessId = b.id; });
-            return clients || [];
+            (clients || []).filter(c => c).forEach(c => { c._businessName = b.name; c._businessId = b.id; });
+            return (clients || []).filter(c => c);
           })
         )
       );
 
-      allClientsList = results.flat();
+      allClientsList = results.flat().filter(c => c);
     } else {
       const clients = await api.get(`/clients?businessId=${bid}`);
       allClientsList = clients || [];

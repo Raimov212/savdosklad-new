@@ -37,7 +37,7 @@ func NewProductUseCase(r repository.ProductRepository) *ProductUseCase {
 }
 func (uc *ProductUseCase) Create(req entity.CreateProductRequest) (int, error) {
 	p := &entity.Product{
-		Price: req.Price, Discount: req.Discount, Quantity: req.Quantity,
+		Price: *req.Price, Discount: req.Discount, Quantity: *req.Quantity,
 		CategoryID: req.CategoryID, BusinessID: req.BusinessID,
 	}
 	name := req.Name

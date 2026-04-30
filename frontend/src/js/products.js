@@ -21,21 +21,21 @@ async function renderProducts() {
       }
 
       const results = await Promise.all(
-        businesses.map(b =>
+        (businesses || []).filter(b => b).map(b =>
           Promise.all([
             api.get(`/products?businessId=${b.id}`).catch(() => []),
             api.get(`/categories?businessId=${b.id}`).catch(() => [])
           ]).then(([prods, cats]) => {
             // Tag with business name for UI
-            (prods || []).forEach(p => { p._businessName = b.name; p._businessId = b.id; });
-            (cats || []).forEach(c => { c._businessId = b.id; });
+            (prods || []).filter(p => p).forEach(p => { p._businessName = b.name; p._businessId = b.id; });
+            (cats || []).filter(c => c).forEach(c => { c._businessId = b.id; });
             return { prods: prods || [], cats: cats || [] };
           })
         )
       );
 
-      allProducts = results.flatMap(r => r.prods).filter(p => !p.isDeleted);
-      allCategories = results.flatMap(r => r.cats);
+      allProducts = results.flatMap(r => r.prods).filter(p => p && !p.isDeleted);
+      allCategories = results.flatMap(r => r.cats).filter(c => c);
     } else {
       const [products, categories] = await Promise.all([
         api.get(`/products?businessId=${bid}`),
