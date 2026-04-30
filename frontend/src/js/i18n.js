@@ -221,7 +221,10 @@ export const translations = {
         "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?",
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)",
         "Xaridlar tarixi": "Xaridlar tarixi",
-        "Sotuvlar": "Sotuvlar"
+        "Sotuvlar": "Sotuvlar",
+        "Kutilmagan xatolik yuz berdi": "Kutilmagan xatolik yuz berdi",
+        "Iltimos, sahifani yangilang yoki qo'llab-quvvatlash xizmatiga murojaat qiling.": "Iltimos, sahifani yangilang yoki qo'llab-quvvatlash xizmatiga murojaat qiling.",
+        "Sahifani yangilash": "Sahifani yangilash"
     },
     'uz-cyrl': {
         "Biznesingizni": "Бизнесингизни",
@@ -857,7 +860,10 @@ export const translations = {
         "Ixtiyoriy": "Ихтиёрий",
         "Xaridlar tarixi": "Харидлар тарихи",
         "Sotuvlar": "Сотувлар",
-        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Телефон рақами нотўғри форматда (Масалан: +998901234567)"
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Телефон рақами нотўғри форматда (Масалан: +998901234567)",
+        "Kutilmagan xatolik yuz berdi": "Кутилмаган хатолик юз берди",
+        "Iltimos, sahifani yangilang yoki qo'llab-quvvatlash xizmatiga murojaat qiling.": "Илтимос, саҳифани янгиланг ёки қўллаб-қувватлаш хизматига мурожаат қилинг.",
+        "Sahifani yangilash": "Саҳифани янгилаш"
     },
     ru: {
         "Biznesingizni": "Управляйте бизнесом",
@@ -1496,7 +1502,10 @@ export const translations = {
         "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Вы подтверждаете удаление этого товара из продажи?",
         "Xaridlar tarixi": "История покупок",
         "Sotuvlar": "Продажи",
-        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Номер телефона в неправильном формате (Например: +998901234567)"
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Номер телефона в неправильном формате (Например: +998901234567)",
+        "Kutilmagan xatolik yuz berdi": "Произошла непредвиденная ошибка",
+        "Iltimos, sahifani yangilang yoki qo'llab-quvvatlash xizmatiga murojaat qiling.": "Пожалуйста, обновите страницу или обратитесь в службу поддержки.",
+        "Sahifani yangilash": "Обновить страницу"
     },
     en: {
         "Biznesingizni": "Manage your business",
@@ -2119,7 +2128,10 @@ export const translations = {
         "Ushbu mahsulotni sotuvdan o'chirishni tasdiqlaysizmi?": "Are you sure you want to delete this product from the sale?",
         "Xaridlar tarixi": "History of purchases",
         "Sotuvlar": "Sales",
-        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Phone number is in incorrect format (Example: +998901234567)"
+        "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Phone number is in incorrect format (Example: +998901234567)",
+        "Kutilmagan xatolik yuz berdi": "An unexpected error occurred",
+        "Iltimos, sahifani yangilang yoki qo'llab-quvvatlash xizmatiga murojaat qiling.": "Please refresh the page or contact support.",
+        "Sahifani yangilash": "Refresh page"
     }
 };
 

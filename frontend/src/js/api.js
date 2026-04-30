@@ -95,12 +95,63 @@ window.onerror = function (message, source, lineno, colno, error) {
         console.error("CORS Script Error: Details hidden by browser. Check network tab or use 'crossorigin' attribute.");
         return false;
     }
-    const stack = error?.stack ? `\nStack: ${error.stack.split('\n').slice(0, 2).join('\n')}` : '';
-    const fullMsg = `JS Error: ${message} | ${source?.split('/').pop()} ${lineno}:${colno}${stack}`;
+    const stack = error?.stack ? `\nStack: ${error.stack}` : '';
+    const fullMsg = `JS Error: ${message} | ${source?.split('/').pop()} ${lineno}:${colno}`;
     console.error(fullMsg, error);
-    showToast(`Xatolik: ${message}`, 'error');
+
+    if (window.showErrorBoundary) {
+        window.showErrorBoundary(message, error?.stack || fullMsg);
+    } else {
+        showToast(`Xatolik: ${message}`, 'error');
+    }
     return false;
 };
+
+// Catch unhandled promise rejections
+window.addEventListener('unhandledrejection', function (event) {
+    console.error("Unhandled promise rejection:", event.reason);
+    const msg = event.reason?.message || event.reason || "Noma'lum xatolik (Promise)";
+    const stack = event.reason?.stack || '';
+
+    if (window.showErrorBoundary) {
+        window.showErrorBoundary(msg, stack);
+    } else {
+        showToast(`Xatolik: ${msg}`, 'error');
+    }
+});
+
+// ==================== ERROR BOUNDARY ====================
+export function showErrorBoundary(message, stack) {
+    if (document.getElementById('error-boundary-modal')) return;
+
+    const translate = window.t || (str => str);
+
+    const modalHtml = `
+      <div id="error-boundary-modal" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:99999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); padding: 20px;">
+        <div style="background:var(--bg-card, #fff); color:var(--text-primary, #333); border-radius:16px; width:100%; max-width:550px; box-shadow:0 10px 40px rgba(0,0,0,0.5); overflow:hidden; border: 1px solid var(--danger, #ef4444); animation: slideDown 0.3s ease;">
+          <div style="background:rgba(239, 68, 68, 0.1); padding: 20px; border-bottom: 1px solid rgba(239, 68, 68, 0.2); display: flex; align-items: center; gap: 12px;">
+            <div style="font-size:32px;">⚠️</div>
+            <div>
+              <h2 style="margin:0; font-size:18px; color:var(--danger, #ef4444);">${escapeHtml(translate('Kutilmagan xatolik yuz berdi'))}</h2>
+              <p style="margin:4px 0 0; font-size:13px; opacity:0.8;">${escapeHtml(translate('Iltimos, sahifani yangilang yoki qo\'llab-quvvatlash xizmatiga murojaat qiling.'))}</p>
+            </div>
+          </div>
+          <div style="padding: 20px;">
+            <div style="background:var(--bg-input, #f3f4f6); padding:12px; border-radius:8px; font-family:monospace; font-size:13px; color:var(--danger, #ef4444); margin-bottom: 16px; word-break: break-all; border-left: 4px solid var(--danger, #ef4444);">
+              <strong>${escapeHtml(message)}</strong>
+            </div>
+            ${stack ? `<div style="background:var(--bg-input, #f3f4f6); padding:12px; border-radius:8px; font-family:monospace; font-size:11px; white-space:pre-wrap; max-height:200px; overflow-y:auto; opacity:0.8; border: 1px solid var(--border, #e5e7eb);">${escapeHtml(stack)}</div>` : ''}
+          </div>
+          <div style="padding: 16px 20px; border-top: 1px solid var(--border, #e5e7eb); display:flex; justify-content:flex-end; gap:10px; background:var(--bg-secondary, #fafafa);">
+            <button onclick="document.getElementById('error-boundary-modal').remove()" class="btn btn-ghost" style="padding: 8px 16px;">${escapeHtml(translate('Yopish'))}</button>
+            <button onclick="window.location.reload()" class="btn btn-danger" style="padding: 8px 16px; background:var(--danger, #ef4444); color:#fff; border:none; border-radius:6px; cursor:pointer;">${escapeHtml(translate('Sahifani yangilash'))}</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
 
 // ==================== TOAST NOTIFICATIONS ====================
 export function showToast(message, type = 'success') {
@@ -171,7 +222,7 @@ export function getDatePeriod() {
     if (stored) {
         try {
             return JSON.parse(stored);
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // Default: Last 7 days
@@ -279,3 +330,4 @@ window.hasPermission = hasPermission;
 window.toggleTheme = toggleTheme;
 window.updateThemeIcon = updateThemeIcon;
 window.toggleAcc = toggleAcc;
+window.showErrorBoundary = showErrorBoundary;
