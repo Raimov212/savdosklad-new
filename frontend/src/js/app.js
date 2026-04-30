@@ -714,48 +714,69 @@ function renderDashboardCharts(transactions, products) {
     });
   }
 
-  // 2. Sales Source Chart (Doughnut)
+  // 2. Sales Source Chart (Pie)
   const canvasSource = document.getElementById('salesSourceChart');
   if (canvasSource) {
     const totalCash = transactions.reduce((s, t) => s + (t.cash || 0), 0);
     const totalCard = transactions.reduce((s, t) => s + (t.card || 0), 0);
+    const totalClick = transactions.reduce((s, t) => s + (t.click || 0), 0);
     const totalDebt = transactions.reduce((s, t) => s + (t.debt || 0), 0);
 
-    const sourceData = [totalCash, totalCard, totalDebt];
-    const sourceLabels = [t('Naqd'), t('Karta'), t('Qarz')];
-    const sourceColors = ['#10b981', '#3b82f6', '#ef4444'];
+    const hasData = (totalCash + totalCard + totalClick + totalDebt) > 0;
+    
+    const sourceData = hasData ? [totalCash, totalCard, totalClick, totalDebt] : [1];
+    const sourceLabels = hasData ? [t('Naqd'), t('Karta'), t('Click'), t('Qarz')] : [t('Ma\'lumot yo\'q')];
+    const sourceColors = hasData ? ['#10b981', '#3b82f6', '#8b5cf6', '#ef4444'] : ['rgba(100, 116, 139, 0.2)'];
 
     const existingChart = Chart.getChart(canvasSource);
     if (existingChart) existingChart.destroy();
 
     currentSourceChart = new Chart(canvasSource, {
-      type: 'doughnut',
+      type: 'pie',
       data: {
         labels: sourceLabels,
         datasets: [{
           data: sourceData,
           backgroundColor: sourceColors,
-          borderWidth: 0,
-          hoverOffset: 15
+          borderWidth: hasData ? 2 : 0,
+          borderColor: 'var(--bg-card)',
+          hoverOffset: hasData ? 15 : 0
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '75%',
-        plugins: { legend: { display: false } }
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            enabled: hasData,
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                return `${label}: ${formatPrice(value)} (${percentage}%)`;
+              }
+            }
+          }
+        }
       }
     });
 
     // Populate legend
     const legendContainer = document.getElementById('sales-sources-legend');
     if (legendContainer) {
-      const total = sourceData.reduce((a, b) => a + b, 0) || 1;
-      legendContainer.innerHTML = sourceLabels.map((l, i) => `
+      const total = hasData ? (totalCash + totalCard + totalClick + totalDebt) : 0;
+      const displayLabels = [t('Naqd'), t('Karta'), t('Click'), t('Qarz')];
+      const displayColors = ['#10b981', '#3b82f6', '#8b5cf6', '#ef4444'];
+      const displayData = [totalCash, totalCard, totalClick, totalDebt];
+
+      legendContainer.innerHTML = displayLabels.map((l, i) => `
         <div style="display:flex; align-items:center; gap:8px;">
-           <div style="width:8px; height:8px; border-radius:50%; background:${sourceColors[i]};"></div>
+           <div style="width:8px; height:8px; border-radius:50%; background:${displayColors[i]};"></div>
            <div style="flex:1; font-size:12px; color:var(--text-muted);">${l}</div>
-           <div style="font-weight:700; font-size:12px; color:#fff;">${Math.round((sourceData[i] / total) * 100)}%</div>
+           <div style="font-weight:700; font-size:12px; color:var(--text-primary);">${total > 0 ? Math.round((displayData[i] / total) * 100) : 0}%</div>
         </div>
       `).join('');
     }

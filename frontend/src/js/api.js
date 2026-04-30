@@ -225,10 +225,10 @@ export function getDatePeriod() {
         } catch (e) { }
     }
 
-    // Default: Last 7 days
+    // Default: Current Month
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
     const end = new Date();
-    const start = new Date();
-    start.setDate(end.getDate() - 7);
 
     return {
         start: start.toISOString().split('T')[0],
