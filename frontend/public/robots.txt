@@ -1,0 +1,13 @@
+# SavdoSklad Robots.txt
+# https://savdosklad.uz
+
+User-agent: *
+Allow: /
+Allow: /marketplace.html
+Disallow: /dashboard.html
+Disallow: /src/js/
+Disallow: /src/css/
+Disallow: /dist/
+
+# Sitemap
+Sitemap: https://savdosklad.uz/sitemap.xml

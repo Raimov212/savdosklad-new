@@ -1,12 +1,52 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" dir="ltr">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-i18n="SavdoSklad — Biznes Boshqaruv Tizimi">SavdoSklad — Biznes Boshqaruv Tizimi</title>
   <meta name="description" data-i18n="SavdoSklad biznes boshqaruv tizimi — kirish sahifasi"
-    content="SavdoSklad biznes boshqaruv tizimi — kirish sahifasi">
+    content="SavdoSklad — kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv tizimi. Mahsulotlarni kuzating, sotuvlarni tahlil qiling, Telegram bot orqali boshqaring.">
+  <meta name="keywords" content="SavdoSklad, biznes boshqaruv, ombor tizimi, savdo dasturi, CRM, moliya hisoboti, Telegram bot, O'zbekiston, склад, учет товаров, бизнес управление, warehouse management">
+  <meta name="author" content="SavdoSklad">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#10b981">
+  <meta name="color-scheme" content="light dark">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://savdosklad.uz/">
+
+  <!-- Hreflang alternates for multilingual SEO -->
+  <link rel="alternate" hreflang="uz" href="https://savdosklad.uz/?lang=uz">
+  <link rel="alternate" hreflang="ru" href="https://savdosklad.uz/?lang=ru">
+  <link rel="alternate" hreflang="en" href="https://savdosklad.uz/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://savdosklad.uz/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://savdosklad.uz/">
+  <meta property="og:title" content="SavdoSklad — Biznes Boshqaruv Tizimi">
+  <meta property="og:description" content="Kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv platformasi. Mahsulotlarni kuzating, sotuvlarni tahlil qiling.">
+  <meta property="og:image" content="https://savdosklad.uz/og-image.png">
+  <meta property="og:locale" content="uz_UZ">
+  <meta property="og:locale:alternate" content="ru_RU">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:site_name" content="SavdoSklad">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SavdoSklad — Biznes Boshqaruv Tizimi">
+  <meta name="twitter:description" content="Kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv platformasi.">
+  <meta name="twitter:image" content="https://savdosklad.uz/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="/src/css/style.css">
   <link rel="stylesheet" href="/src/css/auth.css">
   <link rel="stylesheet" href="/src/css/responsive.css">
@@ -15,6 +55,52 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SavdoSklad",
+    "url": "https://savdosklad.uz",
+    "description": "Kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv tizimi",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "UZS"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "SavdoSklad",
+      "url": "https://savdosklad.uz",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+998886473377",
+          "contactType": "customer support"
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+998935532428",
+          "contactType": "customer support"
+        }
+      ]
+    },
+    "featureList": [
+      "Ombor boshqaruvi",
+      "Savdo va sotuvlar",
+      "Moliya hisoboti",
+      "CRM tizimi",
+      "Telegram bot integratsiyasi",
+      "Excel import/export",
+      "PDF cheklar"
+    ],
+    "inLanguage": ["uz", "ru", "en"]
+  }
+  </script>
+
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     // Init theme immediately
@@ -49,6 +135,25 @@
 </head>
 
 <body>
+  <!-- Noscript fallback for SEO and accessibility -->
+  <noscript>
+    <div style="padding: 40px; text-align: center; font-family: sans-serif;">
+      <h1>SavdoSklad — Biznes Boshqaruv Tizimi</h1>
+      <p>SavdoSklad — kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv platformasi.</p>
+      <p>Ushbu sahifani to'liq ko'rish uchun JavaScript yoqilgan bo'lishi kerak.</p>
+      <h2>Imkoniyatlar</h2>
+      <ul style="list-style: none; padding: 0;">
+        <li>📊 Boshqaruv paneli — Real vaqtda statistika va grafiklar</li>
+        <li>📦 Ombor nazorati — Mahsulotlarni kategoriya bo'yicha boshqarish</li>
+        <li>🛒 Savdo va sotuvlar — Tez sotuv va PDF cheklar</li>
+        <li>👥 CRM tizimi — Mijozlar bazasi va qarzlar nazorati</li>
+        <li>📉 Moliya hisoboti — Daromad, xarajat va sof foyda</li>
+        <li>🤖 Telegram bot — Real vaqtda xabarnomalar</li>
+      </ul>
+      <p>Bog'lanish: <a href="tel:+998886473377">+998 88 647 33 77</a> | <a href="https://t.me/JascoDev">@JascoDev</a></p>
+    </div>
+  </noscript>
+
   <div class="auth-page">
     <!-- Left Sidebar (Branding & Features) -->
     <div class="auth-sidebar" style="position: relative; overflow: hidden;">
