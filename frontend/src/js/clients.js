@@ -24,8 +24,8 @@ async function renderClients() {
         businesses.map(b =>
           api.get(`/clients?businessId=${b.id}`).catch(() => []).then(clients => {
             // Tag with business name
-            clients.forEach(c => { c._businessName = b.name; c._businessId = b.id; });
-            return clients;
+            (clients || []).forEach(c => { c._businessName = b.name; c._businessId = b.id; });
+            return clients || [];
           })
         )
       );

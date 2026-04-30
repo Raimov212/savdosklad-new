@@ -1041,7 +1041,7 @@ async function openCreateMpProductModal() {
         const bizEndpoint = (user && user.role === 2) ? '/businesses' : '/businesses/my';
         const businesses = await api.get(bizEndpoint);
         const select = document.getElementById('mp-biz-id');
-        businesses.forEach(b => {
+        (businesses || []).forEach(b => {
             const opt = document.createElement('option');
             opt.value = b.id;
             opt.textContent = b.name;

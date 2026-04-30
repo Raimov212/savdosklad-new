@@ -27,9 +27,9 @@ async function renderProducts() {
             api.get(`/categories?businessId=${b.id}`).catch(() => [])
           ]).then(([prods, cats]) => {
             // Tag with business name for UI
-            prods.forEach(p => { p._businessName = b.name; p._businessId = b.id; });
-            cats.forEach(c => { c._businessId = b.id; });
-            return { prods, cats };
+            (prods || []).forEach(p => { p._businessName = b.name; p._businessId = b.id; });
+            (cats || []).forEach(c => { c._businessId = b.id; });
+            return { prods: prods || [], cats: cats || [] };
           })
         )
       );

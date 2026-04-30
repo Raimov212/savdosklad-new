@@ -132,7 +132,7 @@ async function loadBusinesses() {
     selector.innerHTML = `<option value="" data-i18n="${labelKey}">${t(labelKey)}</option>`;
 
     if (businesses && businesses.length > 0) {
-      businesses.forEach(b => {
+      (businesses || []).forEach(b => {
         const opt = document.createElement('option');
         opt.value = b.id;
         opt.textContent = b.name || `Biznes #${b.id}`;
@@ -538,7 +538,7 @@ function renderInventoryPreview(products) {
 
   // Group by category
   const groups = {};
-  products.forEach(p => {
+  (products || []).forEach(p => {
     const cat = p.categoryName || t("Boshqa");
     if (!groups[cat]) groups[cat] = [];
     groups[cat].push(p);
@@ -628,7 +628,7 @@ function renderTopProductsList(products) {
 
   // Mock sparklines
   setTimeout(() => {
-    products.forEach((p, i) => {
+    (products || []).forEach((p, i) => {
       const canvas = document.getElementById(`mini-sparkline-${i}`);
       if (canvas) {
         // Destroy existing chart if it exists on this canvas
@@ -1777,7 +1777,7 @@ function renderAdminBulkDeleteForm() {
     api.get(`/categories?businessId=${bid}`).then(categories => {
         const selector = document.getElementById('bulk-category-selector');
         if (selector) {
-            categories.forEach(c => {
+            (categories || []).forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
                 opt.textContent = c.name;
