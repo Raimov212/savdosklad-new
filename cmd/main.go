@@ -186,28 +186,6 @@ func main() {
 		log.Printf("Migration error: %v", err)
 	}
 
-	// Bozorlar (markets) bo'sh bo'lsa, tumanlar asosida avtomatik to'ldirish
-	var marketCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM markets").Scan(&marketCount)
-	if err == nil && marketCount == 0 {
-		log.Println("Geography: Markets table is empty, seeding from districts...")
-		_, seedErr := db.Exec(`
-			INSERT INTO markets ("districtId", name, address, "createdAt", "updatedAt")
-			SELECT id, 
-			       TRIM(REPLACE(REPLACE(name, ' tumani', ''), ' shahri', '')) || ' markaziy bozori', 
-			       'Asosiy bozor hududi', 
-			       NOW(), NOW()
-			FROM districts 
-			LIMIT 500
-			ON CONFLICT DO NOTHING;
-		`)
-		if seedErr != nil {
-			log.Printf("Geography: Failed to seed markets: %v", seedErr)
-		} else {
-			log.Println("Geography: Successfully seeded default markets.")
-		}
-	}
-
 	// Handlers
 	userH := handler.NewUserHandler(userUC)
 	businessH := handler.NewBusinessHandler(businessUC)
