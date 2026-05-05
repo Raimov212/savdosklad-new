@@ -41,8 +41,8 @@ func (uc *MarketplaceAdminUseCase) CreateProduct(req *entity.CreateMarketplacePr
 	return uc.repo.CreateProduct(req)
 }
 
-func (uc *MarketplaceAdminUseCase) GetAllProducts() ([]entity.MarketplaceProduct, error) {
-	return uc.repo.GetAllProducts()
+func (uc *MarketplaceAdminUseCase) GetAllProducts(userID int, isSuperAdmin bool, bizID *int) ([]entity.MarketplaceProduct, error) {
+	return uc.repo.GetAllProducts(userID, isSuperAdmin, bizID)
 }
 
 func (uc *MarketplaceAdminUseCase) GetProductByID(id int) (*entity.MarketplaceProduct, error) {

@@ -39,6 +39,7 @@ type User struct {
 	BusinessIDs         []int                `json:"businessIds"`
 	BusinessPermissions []BusinessPermission `json:"businessPermissions"`
 	ExpirationDate      time.Time            `json:"expirationDate"`
+	IsMarketplaceEnabled bool                `json:"isMarketplaceEnabled"`
 	CreatedAt           time.Time            `json:"createdAt"`
 	UpdatedAt           time.Time            `json:"updatedAt"`
 }
@@ -86,6 +87,7 @@ type UpdateUserRequest struct {
 	BusinessPermissions []BusinessPermission `json:"businessPermissions"`
 	CreatedBy           *int                 `json:"createdBy"`
 	ExpirationDate      *time.Time           `json:"expirationDate"`
+	IsMarketplaceEnabled *bool               `json:"isMarketplaceEnabled"`
 }
 
 type ExtendSubscriptionRequest struct {

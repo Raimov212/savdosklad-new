@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -68,6 +69,34 @@ func SubscriptionCheck(repo repository.UserRepository) gin.HandlerFunc {
 				"expired": true,
 			})
 			return
+		}
+
+		// Foydalanuvchining birinchi biznes IDsini kontekstga qo'yish
+		var businessID int
+		if qBid := c.GetHeader("X-Business-ID"); qBid != "" {
+			if bid, err := strconv.Atoi(qBid); err == nil && bid > 0 {
+				businessID = bid
+			}
+		}
+
+		if businessID == 0 {
+			if len(user.BusinessIDs) > 0 {
+				businessID = user.BusinessIDs[0]
+			} else if user.MarketID != nil {
+				businessID = *user.MarketID
+			}
+		}
+
+		c.Set("businessID", businessID)
+
+		// Check marketplace access for Admin (Role 1)
+		if user.Role == 1 && strings.Contains(c.Request.URL.Path, "/admin/marketplace") {
+			if !user.IsMarketplaceEnabled {
+				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+					"error": "Marketplace xizmati siz uchun yoqilmagan. Iltimos, Super Admin bilan bog'laning.",
+				})
+				return
+			}
 		}
 
 		c.Next()

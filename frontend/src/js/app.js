@@ -116,6 +116,20 @@ function loadUserInfo() {
         brandLogoEl.innerHTML = `<img src="${user.brandImage}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">`;
       }
     }
+
+    // Update UI visibility
+    document.querySelectorAll('.owner-only').forEach(el => {
+        el.style.display = (role >= 1) ? 'flex' : 'none';
+    });
+    document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = (role === 2) ? 'flex' : 'none';
+    });
+    document.querySelectorAll('.mp-only').forEach(el => {
+        el.style.display = (role >= 1) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.admin-only-mp').forEach(el => {
+        el.style.display = (role === 2) ? 'flex' : 'none';
+    });
   }
 }
 
@@ -125,7 +139,7 @@ async function loadBusinesses() {
     const selector = document.getElementById('business-selector');
     if (!selector) return;
 
-    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales'];
+    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales', 'mp-orders', 'admin'];
     const isRequired = pagesRequiringSelection.includes(window.currentPage || 'dashboard');
     const labelKey = isRequired ? "Biznes tanlang" : "Hammasi";
     
@@ -167,8 +181,8 @@ function navigateTo(page) {
   const role = user ? parseInt(user.role) : 0;
 
   // RBAC for navigation
-  const ownerPages = ['employees', 'expenses', 'businesses', 'calculations', 'bulk-delete'];
-  const adminPages = ['admin', 'mp-stats', 'mp-categories', 'mp-products', 'mp-sales'];
+  const ownerPages = ['employees', 'expenses', 'businesses', 'calculations', 'bulk-delete', 'mp-stats', 'mp-categories', 'mp-products', 'mp-sales', 'mp-orders'];
+  const adminPages = ['admin'];
 
   if (role < 1 && (ownerPages.includes(page) || adminPages.includes(page))) {
     console.warn("RBAC: Access denied to", page);
@@ -207,7 +221,8 @@ function navigateTo(page) {
     'mp-stats': 'Marketplace: Statistika',
     'mp-categories': 'Marketplace: Kategoriyalar',
     'mp-products': 'Marketplace: Mahsulotlar',
-    'mp-sales': 'Marketplace: Sotilgan tovarlar'
+    'mp-sales': 'Marketplace: Sotilgan tovarlar',
+    'mp-orders': 'Marketplace: Buyurtmalar'
   };
 
   document.getElementById('page-title').textContent = t(titles[page] || page);
@@ -216,7 +231,7 @@ function navigateTo(page) {
   // Dynamic business selector label
   const selector = document.getElementById('business-selector');
   if (selector && selector.options.length > 0) {
-    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales'];
+    const pagesRequiringSelection = ['categories', 'transactions', 'refunds', 'debts', 'expenses', 'calculations', 'mp-categories', 'mp-stats', 'mp-products', 'mp-sales', 'mp-orders', 'admin'];
     const isRequired = pagesRequiringSelection.includes(page);
     const labelKey = isRequired ? "Biznes tanlang" : "Hammasi";
     selector.options[0].textContent = t(labelKey);
@@ -276,6 +291,7 @@ function navigateTo(page) {
     case 'mp-categories': renderMpCategories(); break;
     case 'mp-products': renderMpProducts(); break;
     case 'mp-sales': renderMpSales(); break;
+    case 'mp-orders': renderMpOrders(); break;
     default: content.innerHTML = `<div class="empty-state"><h4>${t("Sahifa topilmadi")}</h4></div>`;
   }
 }// ==================== DASHBOARD HOME (PREMIUM DESIGN) ====================

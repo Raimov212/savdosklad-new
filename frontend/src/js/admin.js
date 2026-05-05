@@ -6,12 +6,16 @@ let activeAdminTab = 'users';
 
 async function renderAdmin() {
     const content = document.getElementById('page-content');
+    const me = api.getUser() || {};
+    const isSuperAdmin = me.role === 2;
     content.innerHTML = `
         <div class="admin-tabs">
             <button class="btn btn-secondary active" onclick="showAdminTab('users')" id="tab-users">👥 ${t("Foydalanuvchilar")}</button>
+            ${isSuperAdmin ? `
             <button class="btn btn-secondary" onclick="showAdminTab('regions')" id="tab-regions">🗺️ ${t("Viloyatlar")}</button>
             <button class="btn btn-secondary" onclick="showAdminTab('districts')" id="tab-districts">🏘️ ${t("Tumanlar")}</button>
             <button class="btn btn-secondary" onclick="showAdminTab('markets')" id="tab-markets">🏪 ${t("Bozorlar")}</button>
+            ` : ''}
         </div>
         <div id="admin-content"></div>
     `;
@@ -19,6 +23,11 @@ async function renderAdmin() {
 }
 
 function showAdminTab(tab) {
+    // Admin (role=1) faqat 'users' tabini ko'ra oladi
+    const me = api.getUser() || {};
+    if (me.role !== 2 && ['regions', 'districts', 'markets'].includes(tab)) {
+        tab = 'users';
+    }
     activeAdminTab = tab;
     document.querySelectorAll('.admin-tabs .btn').forEach(b => {
         b.classList.remove('active');
@@ -48,7 +57,15 @@ async function loadAdminUsers() {
     container.innerHTML = '<div class="loader"></div>';
 
     try {
-        const users = await api.get('/admin/users');
+        const me = api.getUser() || {};
+        let users;
+        if (me.role === 2) {
+            // Super Admin — barcha foydalanuvchilar
+            users = await api.get('/admin/users');
+        } else {
+            // Admin — faqat o'zining xodimlari
+            users = await api.get('/users/my-employees');
+        }
         allAdminUsersList = users || [];
         renderAdminUsersTable(allAdminUsersList);
     } catch (e) {
@@ -68,8 +85,12 @@ let mpSalesPage = 1;
 let allMpSalesList = [];
 let filteredMpSalesList = [];
 
-function renderAdminUsersTable(list) {
-    if (list) {
+function renderAdminUsersTable(list, isAppend = false) {
+    if (list === true) {
+        isAppend = true;
+        list = null;
+    }
+    if (Array.isArray(list)) {
         currentAdminUsers = list;
         adminUserPage = 1;
     }
@@ -79,6 +100,49 @@ function renderAdminUsersTable(list) {
     if (adminUserPage > totalPages) adminUserPage = totalPages || 1;
     const start = (adminUserPage - 1) * limit;
     const paginated = currentAdminUsers.slice(start, start + limit);
+    
+    const me = api.getUser() || {};
+    const isSuperAdmin = me.role === 2;
+    const colCount = isSuperAdmin ? 10 : 9;
+
+    const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="${colCount}" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
+        paginated.map((u, i) => {
+            const roleName = u.role === 2 ? 'Super Admin' : u.role === 1 ? 'Admin' : u.role === 3 ? 'Client' : 'Employee';
+            return `
+                <tr>
+                    <td style="text-align:center">${start + i + 1}</td>
+                    <td style="text-align:center">${u.id}</td>
+                    <td>${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}</td>
+                    <td>${escapeHtml(u.userName)}</td>
+                    <td style="text-align:center">${u.phoneNumber || '—'}</td>
+                    <td style="text-align:center"><span class="badge ${u.role === 2 ? 'badge-success' : u.role === 1 ? 'badge-warning' : u.role === 3 ? 'badge-info' : ''}">${t(roleName)}</span></td>
+                    <td style="text-align:center">${formatDate(u.expirationDate)}</td>
+                    <td style="text-align:center">${(u.isExpired && u.role !== 2) ? `<span class="badge badge-danger">${t("Muddati tugagan")}</span>` : `<span class="badge badge-success">${t("Faol")}</span>`}</td>
+                    ${isSuperAdmin ? `
+                    <td style="text-align:center">
+                        ${u.role === 1 ? `
+                            <button class="btn btn-sm ${u.isMarketplaceEnabled ? 'btn-success' : 'btn-secondary'}" 
+                                onclick="toggleMarketplaceAccess(${u.id}, ${u.isMarketplaceEnabled})">
+                                ${u.isMarketplaceEnabled ? '✅ MP' : '❌ MP'}
+                            </button>
+                        ` : '—'}
+                    </td>
+                    ` : ''}
+                    <td class="actions" style="justify-content:center">
+                        <button class="btn-icon" onclick='openEditUserModal(${u.id}, ${JSON.stringify(JSON.stringify(u)).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
+                        <button class="btn-icon danger" onclick="deleteAdminUser(${u.id})" title="${t("O'chirish")}">🗑️</button>
+                    </td>
+                </tr>
+            `}).join('');
+
+    if (isAppend) {
+        const tbody = document.querySelector('#admin-content tbody');
+        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const sentinel = document.getElementById('adminUserPage-sentinel');
+        if (sentinel) sentinel.outerHTML = renderPageControls('adminUserPage', totalPages, 'renderAdminUsersTable');
+        setTimeout(() => { attachInfiniteScroll('adminUserPage', totalPages, 'renderAdminUsersTable'); }, 100);
+        return;
+    }
 
     const container = document.getElementById('admin-content');
     container.innerHTML = `
@@ -92,47 +156,31 @@ function renderAdminUsersTable(list) {
                 <button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">${t("Qo'shish")}</button>
               </div>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead>
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                <table style="min-width: 1000px; white-space: nowrap; width: 100%;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);">
                         <tr>
-                            <th style="text-align:center">№</th>
-                            <th style="text-align:center">ID</th>
-                            <th style="text-align:center">${t("Ism")}</th>
-                            <th style="text-align:center">${t("Foydalanuvchi nomi")}</th>
-                            <th style="text-align:center">${t("Telefon")}</th>
-                            <th style="text-align:center">${t("Rol")}</th>
-                            <th style="text-align:center">${t("Muddati")}</th>
-                            <th style="text-align:center">${t("Holati")}</th>
-                            <th style="text-align:center">${t("Amallar")}</th>
+                            <th style="text-align:center; color: white; border: none;">№</th>
+                            <th style="text-align:center; color: white; border: none;">ID</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Ism")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Foydalanuvchi nomi")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Telefon")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Rol")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Muddati")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Holati")}</th>
+                            ${isSuperAdmin ? `<th style="text-align:center; color: white; border: none;">Marketplace</th>` : ''}
+                            <th style="text-align:center; color: white; border: none;">${t("Amallar")}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${paginated.length === 0 ? `<tr><td colspan="9" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
-            paginated.map((u, i) => {
-                const roleName = u.role === 2 ? 'Super Admin' : u.role === 1 ? 'Admin' : u.role === 3 ? 'Client' : 'Employee';
-                return `
-                            <tr>
-                                <td style="text-align:center">${start + i + 1}</td>
-                                <td style="text-align:center">${u.id}</td>
-                                <td>${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}</td>
-                                <td>${escapeHtml(u.userName)}</td>
-                                <td style="text-align:center">${u.phoneNumber || '—'}</td>
-                                <td style="text-align:center"><span class="badge ${u.role === 2 ? 'badge-success' : u.role === 1 ? 'badge-warning' : u.role === 3 ? 'badge-info' : ''}">${t(roleName)}</span></td>
-                                <td style="text-align:center">${formatDate(u.expirationDate)}</td>
-                                <td style="text-align:center">${(u.isExpired && u.role !== 2) ? `<span class="badge badge-danger">${t("Muddati tugagan")}</span>` : `<span class="badge badge-success">${t("Faol")}</span>`}</td>
-                                <td class="actions" style="justify-content:center">
-                                    <button class="btn-icon" onclick='openEditUserModal(${u.id}, ${JSON.stringify(JSON.stringify(u)).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
-                                    <button class="btn-icon danger" onclick="deleteAdminUser(${u.id})" title="${t("O'chirish")}">🗑️</button>
-                                </td>
-                            </tr>
-                        `}).join('')}
+                        ${rowsHtml}
                     </tbody>
                 </table>
+                ${renderPageControls('adminUserPage', totalPages, 'renderAdminUsersTable')}
             </div>
         </div>
-        ${renderPageControls('adminUserPage', totalPages, 'renderAdminUsersTable()')}
     `;
+    setTimeout(() => { attachInfiniteScroll('adminUserPage', totalPages, 'renderAdminUsersTable'); }, 100);
 }
 
 function filterAdminUsers(query) {
@@ -239,7 +287,7 @@ async function createAdminUser(e) {
         closeModal();
         loadAdminUsers();
     } catch (e) {
-        showToast(e.message, 'error');
+        showToast(t(e.message), 'error');
     }
 }
 
@@ -288,6 +336,12 @@ function openEditUserModal(id, userJson) {
                 </div>
             </div>
             <div class="form-group">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; background:var(--bg-glass); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                    <input type="checkbox" id="edit-mp-enabled" ${u.isMarketplaceEnabled ? 'checked' : ''}>
+                    <span style="font-weight:600;">🛒 ${t("Marketplace xizmatini yoqish")}</span>
+                </label>
+            </div>
+            <div class="form-group">
                 <label>${t("Yangi parol")}</label>
                 <input type="password" id="edit-password" class="form-control" placeholder="${t("Yangi parol")}">
             </div>
@@ -333,6 +387,7 @@ async function saveAdminUser(e, id) {
         phoneNumber: document.getElementById('edit-phone').value,
         role: parseInt(document.getElementById('edit-role').value),
         isExpired: document.getElementById('edit-expired').value === 'true',
+        isMarketplaceEnabled: document.getElementById('edit-mp-enabled').checked,
     };
 
     const expDate = document.getElementById('edit-expiration').value;
@@ -353,7 +408,7 @@ async function saveAdminUser(e, id) {
         closeModal();
         loadAdminUsers();
     } catch (e) {
-        showToast(e.message, 'error');
+        showToast(t(e.message), 'error');
     }
 }
 
@@ -376,6 +431,16 @@ async function previewAdminBrandImage(input) {
     previewAdminImage(input, 'edit-brandImage', 'admin-brand-preview');
 }
 
+async function toggleMarketplaceAccess(id, current) {
+    try {
+        await api.put('/admin/users/' + id, { isMarketplaceEnabled: !current });
+        showToast(t('Marketplace ruxsati o\'zgartirildi'), 'success');
+        loadAdminUsers();
+    } catch (e) {
+        showToast(t(e.message), 'error');
+    }
+}
+
 async function deleteAdminUser(id) {
     if (!confirm(t('Foydalanuvchini o\'chirishni xohlaysizmi?'))) return;
     try {
@@ -383,7 +448,7 @@ async function deleteAdminUser(id) {
         showToast(t('Foydalanuvchi o\'chirildi'), 'success');
         loadAdminUsers();
     } catch (e) {
-        showToast(e.message, 'error');
+        showToast(t(e.message), 'error');
     }
 }
 
@@ -405,8 +470,12 @@ async function loadAdminRegions() {
     }
 }
 
-function renderAdminRegionsTable(list) {
-    if (list) {
+function renderAdminRegionsTable(list, isAppend = false) {
+    if (list === true) {
+        isAppend = true;
+        list = null;
+    }
+    if (Array.isArray(list)) {
         currentAdminRegions = list;
         adminRegionPage = 1;
     }
@@ -416,6 +485,27 @@ function renderAdminRegionsTable(list) {
     if (adminRegionPage > totalPages) adminRegionPage = totalPages || 1;
     const start = (adminRegionPage - 1) * limit;
     const paginated = currentAdminRegions.slice(start, start + limit);
+
+    const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
+        paginated.map((r, i) => `
+            <tr>
+                <td style="text-align:center">${start + i + 1}</td>
+                <td style="text-align:center">${escapeHtml(r.name)}</td>
+                <td class="actions" style="justify-content:center">
+                    <button class="btn-icon" onclick="openRegionModal(${r.id}, '${escapeHtml(r.name)}')" title="${t("Tahrirlash")}">✏️</button>
+                    <button class="btn-icon danger" onclick="deleteRegion(${r.id})" title="${t("O'chirish")}">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+    if (isAppend) {
+        const tbody = document.querySelector('#admin-content tbody');
+        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const sentinel = document.getElementById('adminRegionPage-sentinel');
+        if (sentinel) sentinel.outerHTML = renderPageControls('adminRegionPage', totalPages, 'renderAdminRegionsTable');
+        setTimeout(() => { attachInfiniteScroll('adminRegionPage', totalPages, 'renderAdminRegionsTable'); }, 100);
+        return;
+    }
 
     const container = document.getElementById('admin-content');
     container.innerHTML = `
@@ -429,27 +519,18 @@ function renderAdminRegionsTable(list) {
                 <button class="btn btn-primary btn-sm" onclick="openRegionModal()">${t("Qo'shish")}</button>
               </div>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th style="text-align:center">№</th><th style="text-align:center">${t("Nomi")}</th><th style="text-align:center">${t("Amallar")}</th></tr></thead>
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                <table style="min-width: 500px; white-space: nowrap; width: 100%;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);"><tr><th style="text-align:center; color: white; border: none;">№</th><th style="text-align:center; color: white; border: none;">${t("Nomi")}</th><th style="text-align:center; color: white; border: none;">${t("Amallar")}</th></tr></thead>
                     <tbody>
-                        ${paginated.length === 0 ? `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
-            paginated.map((r, i) => `
-                            <tr>
-                                <td style="text-align:center">${start + i + 1}</td>
-                                <td style="text-align:center">${escapeHtml(r.name)}</td>
-                                <td class="actions" style="justify-content:center">
-                                    <button class="btn-icon" onclick="openRegionModal(${r.id}, '${escapeHtml(r.name)}')" title="${t("Tahrirlash")}">✏️</button>
-                                    <button class="btn-icon danger" onclick="deleteRegion(${r.id})" title="${t("O'chirish")}">🗑️</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${rowsHtml}
                     </tbody>
                 </table>
+                ${renderPageControls('adminRegionPage', totalPages, 'renderAdminRegionsTable')}
             </div>
         </div>
-        ${renderPageControls('adminRegionPage', totalPages, 'renderAdminRegionsTable()')}
     `;
+    setTimeout(() => { attachInfiniteScroll('adminRegionPage', totalPages, 'renderAdminRegionsTable'); }, 100);
 }
 
 function filterAdminRegions(query) {
@@ -540,8 +621,12 @@ async function loadAdminDistricts() {
     }
 }
 
-function renderAdminDistrictsTable(list) {
-    if (list) {
+function renderAdminDistrictsTable(list, isAppend = false) {
+    if (list === true) {
+        isAppend = true;
+        list = null;
+    }
+    if (Array.isArray(list)) {
         currentAdminDistricts = list;
         adminDistrictPage = 1;
     }
@@ -551,6 +636,28 @@ function renderAdminDistrictsTable(list) {
     if (adminDistrictPage > totalPages) adminDistrictPage = totalPages || 1;
     const start = (adminDistrictPage - 1) * limit;
     const paginated = currentAdminDistricts.slice(start, start + limit);
+
+    const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
+        paginated.map((d, i) => `
+            <tr>
+                <td style="text-align:center">${start + i + 1}</td>
+                <td style="text-align:center">${escapeHtml(d.name)}</td>
+                <td style="text-align:center">${escapeHtml(d.regionName || '')}</td>
+                <td class="actions" style="justify-content:center">
+                    <button class="btn-icon" onclick='openDistrictModal(${d.id}, "${escapeHtml(d.name)}", ${d.regionId}, ${JSON.stringify(JSON.stringify(allAdminRegionsRef)).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
+                    <button class="btn-icon danger" onclick="deleteDistrict(${d.id})" title="${t("O'chirish")}">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+    if (isAppend) {
+        const tbody = document.querySelector('#admin-content tbody');
+        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const sentinel = document.getElementById('adminDistrictPage-sentinel');
+        if (sentinel) sentinel.outerHTML = renderPageControls('adminDistrictPage', totalPages, 'renderAdminDistrictsTable');
+        setTimeout(() => { attachInfiniteScroll('adminDistrictPage', totalPages, 'renderAdminDistrictsTable'); }, 100);
+        return;
+    }
 
     const container = document.getElementById('admin-content');
     container.innerHTML = `
@@ -564,28 +671,18 @@ function renderAdminDistrictsTable(list) {
                 <button class="btn btn-primary btn-sm" onclick='openDistrictModal(null, null, null, ${JSON.stringify(JSON.stringify(allAdminRegionsRef)).replace(/'/g, "&#39;")})'>${t("Qo'shish")}</button>
               </div>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th style="text-align:center">№</th><th style="text-align:center">${t("Nomi")}</th><th style="text-align:center">${t("Viloyat")}</th><th style="text-align:center">${t("Amallar")}</th></tr></thead>
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                <table style="min-width: 600px; white-space: nowrap; width: 100%;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);"><tr><th style="text-align:center; color: white; border: none;">№</th><th style="text-align:center; color: white; border: none;">${t("Nomi")}</th><th style="text-align:center; color: white; border: none;">${t("Viloyat")}</th><th style="text-align:center; color: white; border: none;">${t("Amallar")}</th></tr></thead>
                     <tbody>
-                        ${paginated.length === 0 ? `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
-            paginated.map((d, i) => `
-                            <tr>
-                                <td style="text-align:center">${start + i + 1}</td>
-                                <td style="text-align:center">${escapeHtml(d.name)}</td>
-                                <td style="text-align:center">${escapeHtml(d.regionName || '')}</td>
-                                <td class="actions" style="justify-content:center">
-                                    <button class="btn-icon" onclick='openDistrictModal(${d.id}, "${escapeHtml(d.name)}", ${d.regionId}, ${JSON.stringify(JSON.stringify(allAdminRegionsRef)).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
-                                    <button class="btn-icon danger" onclick="deleteDistrict(${d.id})" title="${t("O'chirish")}">🗑️</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${rowsHtml}
                     </tbody>
                 </table>
+                ${renderPageControls('adminDistrictPage', totalPages, 'renderAdminDistrictsTable')}
             </div>
         </div>
-        ${renderPageControls('adminDistrictPage', totalPages, 'renderAdminDistrictsTable()')}
     `;
+    setTimeout(() => { attachInfiniteScroll('adminDistrictPage', totalPages, 'renderAdminDistrictsTable'); }, 100);
 }
 
 function filterAdminDistricts(query) {
@@ -691,8 +788,12 @@ async function loadAdminMarkets() {
     }
 }
 
-function renderAdminMarketsTable(list) {
-    if (list) {
+function renderAdminMarketsTable(list, isAppend = false) {
+    if (list === true) {
+        isAppend = true;
+        list = null;
+    }
+    if (Array.isArray(list)) {
         currentAdminMarkets = list;
         adminMarketPage = 1;
     }
@@ -702,6 +803,29 @@ function renderAdminMarketsTable(list) {
     if (adminMarketPage > totalPages) adminMarketPage = totalPages || 1;
     const start = (adminMarketPage - 1) * limit;
     const paginated = currentAdminMarkets.slice(start, start + limit);
+
+    const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
+        paginated.map((m, i) => `
+            <tr>
+                <td style="text-align:center">${start + i + 1}</td>
+                <td style="text-align:center">${escapeHtml(m.name)}</td>
+                <td style="text-align:center">${escapeHtml(m.address || '—')}</td>
+                <td style="text-align:center">${escapeHtml(m.districtName || '')}</td>
+                <td class="actions" style="justify-content:center">
+                    <button class="btn-icon" onclick='openMarketModal(${m.id}, "${escapeHtml(m.name)}", "${escapeHtml(m.address || '')}", ${m.districtId}, ${JSON.stringify(JSON.stringify(allAdminDistrictsRef)).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
+                    <button class="btn-icon danger" onclick="deleteMarket(${m.id})" title="${t("O'chirish")}">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+    if (isAppend) {
+        const tbody = document.querySelector('#admin-content tbody');
+        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const sentinel = document.getElementById('adminMarketPage-sentinel');
+        if (sentinel) sentinel.outerHTML = renderPageControls('adminMarketPage', totalPages, 'renderAdminMarketsTable');
+        setTimeout(() => { attachInfiniteScroll('adminMarketPage', totalPages, 'renderAdminMarketsTable'); }, 100);
+        return;
+    }
 
     const container = document.getElementById('admin-content');
     container.innerHTML = `
@@ -715,29 +839,18 @@ function renderAdminMarketsTable(list) {
                 <button class="btn btn-primary btn-sm" onclick='openMarketModal(null, null, null, null, ${JSON.stringify(JSON.stringify(allAdminDistrictsRef)).replace(/'/g, "&#39;")})'>${t("Qo'shish")}</button>
               </div>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th style="text-align:center">№</th><th style="text-align:center">${t("Nomi")}</th><th style="text-align:center">${t("Manzil")}</th><th style="text-align:center">${t("Tuman")}</th><th style="text-align:center">${t("Amallar")}</th></tr></thead>
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                <table style="min-width: 700px; white-space: nowrap; width: 100%;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);"><tr><th style="text-align:center; color: white; border: none;">№</th><th style="text-align:center; color: white; border: none;">${t("Nomi")}</th><th style="text-align:center; color: white; border: none;">${t("Manzil")}</th><th style="text-align:center; color: white; border: none;">${t("Tuman")}</th><th style="text-align:center; color: white; border: none;">${t("Amallar")}</th></tr></thead>
                     <tbody>
-                        ${paginated.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
-            paginated.map((m, i) => `
-                            <tr>
-                                <td style="text-align:center">${start + i + 1}</td>
-                                <td style="text-align:center">${escapeHtml(m.name)}</td>
-                                <td style="text-align:center">${escapeHtml(m.address || '—')}</td>
-                                <td style="text-align:center">${escapeHtml(m.districtName || '')}</td>
-                                <td class="actions" style="justify-content:center">
-                                    <button class="btn-icon" onclick='openMarketModal(${m.id}, "${escapeHtml(m.name)}", "${escapeHtml(m.address || '')}", ${m.districtId}, ${JSON.stringify(JSON.stringify(allAdminDistrictsRef)).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
-                                    <button class="btn-icon danger" onclick="deleteMarket(${m.id})" title="${t("O'chirish")}">🗑️</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${rowsHtml}
                     </tbody>
                 </table>
+                ${renderPageControls('adminMarketPage', totalPages, 'renderAdminMarketsTable')}
             </div>
         </div>
-        ${renderPageControls('adminMarketPage', totalPages, 'renderAdminMarketsTable()')}
     `;
+    setTimeout(() => { attachInfiniteScroll('adminMarketPage', totalPages, 'renderAdminMarketsTable'); }, 100);
 }
 
 function filterAdminMarkets(query) {
@@ -904,7 +1017,7 @@ async function loadAdminMarketplace() {
             </div>
         `;
     } catch (e) {
-        container.innerHTML = `<p class="error">${t("Xatolik")}: ${e.message}</p>`;
+        container.innerHTML = `<p class="error">${t("Xatolik")}: ${t(e.message)}</p>`;
     }
 }
 
@@ -1047,7 +1160,7 @@ async function openCreateMpProductModal() {
             opt.textContent = b.name;
             select.appendChild(opt);
         });
-    } catch (e) { showToast(e.message, 'error'); }
+    } catch (e) { showToast(t(e.message), 'error'); }
 }
 
 async function loadMpCategories(bizId) {
@@ -1064,7 +1177,7 @@ async function loadMpCategories(bizId) {
         });
         document.getElementById('mp-cat-container').style.display = 'block';
         document.getElementById('mp-prod-form').style.display = 'none';
-    } catch (e) { showToast(e.message, 'error'); }
+    } catch (e) { showToast(t(e.message), 'error'); }
 }
 
 function showMpForm() {
@@ -1153,7 +1266,7 @@ async function renderMpStats() {
             </div>
         `;
     } catch (e) {
-        content.innerHTML = `<p class="error">${e.message}</p>`;
+        content.innerHTML = `<p class="error">${t(e.message)}</p>`;
     }
 }
 
@@ -1167,17 +1280,47 @@ async function renderMpCategories() {
         mpCategoryPage = 1;
         renderMpCategoriesTable(allMpCategoriesList);
     } catch (e) {
-        content.innerHTML = `<p class="error">${e.message}</p>`;
+        content.innerHTML = `<p class="error">${t(e.message)}</p>`;
     }
 }
 
-function renderMpCategoriesTable(list) {
+function renderMpCategoriesTable(list, isAppend = false) {
+    if (list === true) {
+        isAppend = true;
+        list = null;
+    }
+    if (Array.isArray(list)) {
+        filteredMpCategoriesList = list;
+        mpCategoryPage = 1;
+    }
+
     const content = document.getElementById('page-content');
     const limit = 10;
-    const totalPages = Math.ceil(list.length / limit);
+    const totalPages = Math.ceil(filteredMpCategoriesList.length / limit);
     if (mpCategoryPage > totalPages) mpCategoryPage = totalPages || 1;
     const start = (mpCategoryPage - 1) * limit;
-    const paginated = list.slice(start, start + limit);
+    const paginated = filteredMpCategoriesList.slice(start, start + limit);
+
+    const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="3" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
+        paginated.map((c, i) => `
+            <tr>
+                <td style="text-align:center; font-weight:600;">${start + i + 1}</td>
+                <td style="text-align:center">${escapeHtml(c.name)}</td>
+                <td class="actions" style="justify-content: center;">
+                    <button class="btn-icon" onclick='openMpCategoryModal(${c.id}, "${escapeHtml(c.name)}")' title="${t("Tahrirlash")}">✏️</button>
+                    <button class="btn-icon danger" onclick="deleteMpCategory(${c.id})" title="${t("O'chirish")}">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+    if (isAppend) {
+        const tbody = document.querySelector('#page-content tbody');
+        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const sentinel = document.getElementById('mpCategoryPage-sentinel');
+        if (sentinel) sentinel.outerHTML = renderPageControls('mpCategoryPage', totalPages, 'renderMpCategoriesTable');
+        setTimeout(() => { attachInfiniteScroll('mpCategoryPage', totalPages, 'renderMpCategoriesTable'); }, 100);
+        return;
+    }
 
     content.innerHTML = `
         <div class="card">
@@ -1196,33 +1339,25 @@ function renderMpCategoriesTable(list) {
                 </div>
             </div>
 
-            <div class="table-container">
-                <table class="premium-table">
-                    <thead>
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                <table style="min-width: 800px; white-space: nowrap; width: 100%;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);">
                         <tr>
-                            <th style="text-align:center">№</th>
-                            <th style="text-align:center">${t("Nomi")}</th>
-                            <th style="text-align:center">${t("Amallar")}</th>
+                            <th style="text-align:center; color: white; border: none;">№</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Nomi")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Amallar")}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${list.length === 0 ? `<tr><td colspan="3" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` : paginated.map((c, i) => `
-                            <tr>
-                                <td style="text-align:center; font-weight:600;">${start + i + 1}</td>
-                                <td style="text-align:center">${escapeHtml(c.name)}</td>
-                                <td class="actions" style="justify-content: center;">
-                                    <button class="btn-icon" onclick='openMpCategoryModal(${c.id}, "${escapeHtml(c.name)}")' title="${t("Tahrirlash")}">✏️</button>
-                                    <button class="btn-icon danger" onclick="deleteMpCategory(${c.id})" title="${t("O'chirish")}">🗑️</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${rowsHtml}
                     </tbody>
                 </table>
+                ${renderPageControls('mpCategoryPage', totalPages, 'renderMpCategoriesTable')}
             </div>
-            ${renderPageControls('mpCategoryPage', totalPages, 'renderMpCategoriesTable(allMpCategoriesList)')}
         </div>
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    setTimeout(() => { attachInfiniteScroll('mpCategoryPage', totalPages, 'renderMpCategoriesTable'); }, 100);
 }
 
 function filterMpCategories(query) {
@@ -1247,22 +1382,72 @@ async function renderMpProducts() {
     content.innerHTML = '<div class="loader"></div>';
 
     try {
-        const mpProducts = await api.get('/admin/marketplace/products');
+        const bid = getSelectedBusinessId();
+        const mpProducts = await api.get(`/admin/marketplace/products?businessId=${bid}`);
         allMpProductsList = mpProducts || [];
         mpProductPage = 1;
         renderMpProductsTable(allMpProductsList);
     } catch (e) {
-        content.innerHTML = `<p class="error">${e.message}</p>`;
+        content.innerHTML = `<p class="error">${t(e.message)}</p>`;
     }
 }
 
-function renderMpProductsTable(list) {
+function renderMpProductsTable(list, isAppend = false) {
+    if (list === true) {
+        isAppend = true;
+        list = null;
+    }
+    if (Array.isArray(list)) {
+        filteredMpProductsList = list;
+        mpProductPage = 1;
+    }
+
     const content = document.getElementById('page-content');
     const limit = 10;
-    const totalPages = Math.ceil(list.length / limit);
+    const totalPages = Math.ceil(filteredMpProductsList.length / limit);
     if (mpProductPage > totalPages) mpProductPage = totalPages || 1;
     const start = (mpProductPage - 1) * limit;
-    const paginated = list.slice(start, start + limit);
+    const paginated = filteredMpProductsList.slice(start, start + limit);
+
+    const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
+        paginated.map((p, i) => `
+            <tr>
+                <td style="text-align:center; font-weight:600;">${start + i + 1}</td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        ${p.images ? `<img src="${p.images}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">` : `<div style="width:40px;height:40px;border-radius:8px;background:var(--bg-glass);display:flex;align-items:center;justify-content:center;font-size:18px;">📦</div>`}
+                        <div>
+                            <div style="font-weight:600;">${escapeHtml(p.name)}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${escapeHtml(p.shortDescription || '')}</div>
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align:center">${escapeHtml(p.businessName)}</td>
+                <td style="text-align:center">${escapeHtml(p.categoryName || '—')}</td>
+                <td style="text-align:center; font-weight:700;">${p.price.toLocaleString()}</td>
+                <td style="text-align:center">
+                   <span style="background:var(--bg-glass); padding:2px 8px; border-radius:12px; font-weight:700;">${p.quantity}</span>
+                </td>
+                <td style="text-align:center">
+                    <span class="badge ${p.isVisible ? 'badge-success' : 'badge-danger'}" style="cursor:pointer" onclick="toggleMpProductVisibility(${p.id}, ${p.isVisible})">
+                        ${p.isVisible ? t("Faol") : t("Yopiq")}
+                    </span>
+                </td>
+                <td class="actions" style="justify-content:center">
+                    <button class="btn-icon" onclick="toggleMpProductVisibility(${p.id}, ${p.isVisible})" title="${p.isVisible ? t("Yashirish") : t("Ko'rsatish")}">${p.isVisible ? '👁️' : '🚫'}</button>
+                    <button class="btn-icon danger" onclick="deleteMpProduct(${p.id})" title="${t("O'chirish")}">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+    if (isAppend) {
+        const tbody = document.querySelector('#page-content tbody');
+        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const sentinel = document.getElementById('mpProductPage-sentinel');
+        if (sentinel) sentinel.outerHTML = renderPageControls('mpProductPage', totalPages, 'renderMpProductsTable');
+        setTimeout(() => { attachInfiniteScroll('mpProductPage', totalPages, 'renderMpProductsTable'); }, 100);
+        return;
+    }
 
     content.innerHTML = `
         <div class="card">
@@ -1279,52 +1464,29 @@ function renderMpProductsTable(list) {
                 </div>
             </div>
 
-            <div class="table-container">
-                <table class="premium-table">
-                    <thead>
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                <table style="min-width: 1000px; white-space: nowrap; width: 100%;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);">
                         <tr>
-                            <th style="text-align:center">№</th>
-                            <th style="text-align:center">${t("Biznes")}</th>
-                            <th style="text-align:center">${t("Mahsulot")}</th>
-                            <th style="text-align:center">${t("Narxi")}</th>
-                            <th style="text-align:center">${t("Qoldiq")}</th>
-                            <th style="text-align:center">${t("Holati")}</th>
-                            <th style="text-align:center">${t("Amallar")}</th>
+                            <th style="text-align:center; color: white; border: none;">№</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Biznes")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Mahsulot")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Narxi")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Qoldiq")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Holati")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Amallar")}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${list.length === 0 ? `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">${t("Mahsulotlar yo'q")}</td></tr>` : paginated.map((p, i) => `
-                            <tr>
-                                <td style="text-align:center; font-weight:600;">${start + i + 1}</td>
-                                <td>
-                                    <div style="font-weight:600; font-size:14px;">${escapeHtml(p.businessName || '—')}</div>
-                                </td>
-                                <td>
-                                    <div style="font-weight:600; color:var(--primary);">${escapeHtml(p.name)}</div>
-                                    <div style="font-size:11px; color:var(--text-muted);">${escapeHtml(p.shortDescription || '')}</div>
-                                </td>
-                                <td style="text-align:center; font-weight:700;">${p.price.toLocaleString()} UZS</td>
-                                <td style="text-align:center;">
-                                   <span style="background:var(--bg-glass); padding:2px 8px; border-radius:12px; font-weight:700;">${p.quantity}</span>
-                                </td>
-                                <td style="text-align:center">
-                                    <span class="badge ${p.isVisible ? 'badge-success' : 'badge-danger'}" style="cursor:pointer" onclick="toggleMpProductVisibility(${p.id}, ${p.isVisible})">
-                                        ${p.isVisible ? t("Faol") : t("Yopiq")}
-                                    </span>
-                                </td>
-                                <td class="actions" style="justify-content:center">
-                                    <button class="btn-icon" onclick="toggleMpProductVisibility(${p.id}, ${p.isVisible})" title="${p.isVisible ? t("Yashirish") : t("Ko'rsatish")}">${p.isVisible ? '👁️' : '🚫'}</button>
-                                    <button class="btn-icon danger" onclick="deleteMpProduct(${p.id})" title="${t("O'chirish")}">🗑️</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${rowsHtml}
                     </tbody>
                 </table>
+                ${renderPageControls('mpProductPage', totalPages, 'renderMpProductsTable')}
             </div>
-            ${renderPageControls('mpProductPage', totalPages, 'renderMpProductsTable(allMpProductsList)')}
         </div>
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    setTimeout(() => { attachInfiniteScroll('mpProductPage', totalPages, 'renderMpProductsTable'); }, 100);
 }
 
 function filterMpProducts(query) {
@@ -1351,24 +1513,74 @@ async function renderMpSales() {
     content.innerHTML = '<div class="loader"></div>';
 
     try {
-        // Placeholder for real sales API call
-        // const sales = await api.get('/admin/marketplace/sales');
-        const sales = [];
-        allMpSalesList = sales || [];
+        const bid = getSelectedBusinessId();
+        // Fetch only confirmed/delivered orders as 'sales'
+        const orders = await api.get(`/admin/marketplace/orders?businessId=${bid}&status=CONFIRMED,DELIVERED`);
+        
+        // Map order structure to what sales table expects
+        const sales = (orders || []).map(o => ({
+            id: o.id,
+            createdAt: o.createdAt,
+            customerName: `${o.customer?.firstName || ''} ${o.customer?.lastName || ''}`,
+            productNames: (o.items || []).map(item => item.product?.name).join(', '),
+            total: o.totalSum,
+            status: o.status
+        }));
+
+        allMpSalesList = sales;
         mpSalesPage = 1;
         renderMpSalesTable(allMpSalesList);
     } catch (e) {
-        content.innerHTML = `<p class="error">${e.message}</p>`;
+        content.innerHTML = `<p class="error">${t(e.message)}</p>`;
     }
 }
 
-function renderMpSalesTable(list) {
+function renderMpSalesTable(list, isAppend = false) {
+    if (list === true) {
+        isAppend = true;
+        list = null;
+    }
+    if (Array.isArray(list)) {
+        filteredMpSalesList = list;
+        mpSalesPage = 1;
+    }
+
     const content = document.getElementById('page-content');
     const limit = 10;
-    const totalPages = Math.ceil(list.length / limit);
+    const totalPages = Math.ceil(filteredMpSalesList.length / limit);
     if (mpSalesPage > totalPages) mpSalesPage = totalPages || 1;
     const start = (mpSalesPage - 1) * limit;
-    const paginated = list.slice(start, start + limit);
+    const paginated = filteredMpSalesList.slice(start, start + limit);
+
+    const rowsHtml = paginated.length === 0 && !isAppend ? `
+        <tr>
+            <td colspan="6" style="text-align:center; padding:100px; color:var(--text-muted);">
+                <div style="font-size:48px; margin-bottom:15px;">📦</div>
+                <h4>${t("Hozircha sotuvlar yo'q")}</h4>
+                <p>${t("Marketplace orqali buyurtmalar kelib tushganda bu erda paydo bo'ladi.")}</p>
+            </td>
+        </tr>
+    ` : paginated.map((s, i) => `
+        <tr>
+            <td style="text-align:center; font-weight:600;">${start + i + 1}</td>
+            <td style="text-align:center">${formatDateTime(s.createdAt)}</td>
+            <td>${escapeHtml(s.customerName)}</td>
+            <td>${escapeHtml(s.productNames)}</td>
+            <td style="text-align:center; font-weight:700;">${s.total.toLocaleString()} UZS</td>
+            <td style="text-align:center">
+                <span class="badge badge-info">${t(s.status || "Kutilmoqda")}</span>
+            </td>
+        </tr>
+    `).join('');
+
+    if (isAppend) {
+        const tbody = document.querySelector('#page-content tbody');
+        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const sentinel = document.getElementById('mpSalesPage-sentinel');
+        if (sentinel) sentinel.outerHTML = renderPageControls('mpSalesPage', totalPages, 'renderMpSalesTable');
+        setTimeout(() => { attachInfiniteScroll('mpSalesPage', totalPages, 'renderMpSalesTable'); }, 100);
+        return;
+    }
 
     content.innerHTML = `
         <div class="card">
@@ -1384,46 +1596,28 @@ function renderMpSalesTable(list) {
                 </div>
             </div>
 
-            <div class="table-container">
-                <table class="premium-table">
-                    <thead>
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                <table style="min-width: 1000px; white-space: nowrap; width: 100%;">
+                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);">
                         <tr>
-                            <th style="text-align:center">№</th>
-                            <th style="text-align:center">${t("Sana")}</th>
-                            <th style="text-align:center">${t("Mijoz")}</th>
-                            <th style="text-align:center">${t("Mahsulot")}</th>
-                            <th style="text-align:center">${t("Summa")}</th>
-                            <th style="text-align:center">${t("Holati")}</th>
+                            <th style="text-align:center; color: white; border: none;">№</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Sana")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Mijoz")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Mahsulot")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Summa")}</th>
+                            <th style="text-align:center; color: white; border: none;">${t("Holati")}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${list.length === 0 ? `
-                            <tr>
-                                <td colspan="6" style="text-align:center; padding:100px; color:var(--text-muted);">
-                                    <div style="font-size:48px; margin-bottom:15px;">📦</div>
-                                    <h4>${t("Hozircha sotuvlar yo'q")}</h4>
-                                    <p>${t("Marketplace orqali buyurtmalar kelib tushganda bu erda paydo bo'ladi.")}</p>
-                                </td>
-                            </tr>
-                        ` : paginated.map((s, i) => `
-                            <tr>
-                                <td style="text-align:center; font-weight:600;">${start + i + 1}</td>
-                                <td style="text-align:center">${formatDateTime(s.createdAt)}</td>
-                                <td>${escapeHtml(s.customerName)}</td>
-                                <td>${escapeHtml(s.productNames)}</td>
-                                <td style="text-align:center; font-weight:700;">${s.total.toLocaleString()} UZS</td>
-                                <td style="text-align:center">
-                                    <span class="badge badge-info">${t(s.status || "Kutilmoqda")}</span>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${rowsHtml}
                     </tbody>
                 </table>
+                ${renderPageControls('mpSalesPage', totalPages, 'renderMpSalesTable')}
             </div>
-            ${renderPageControls('mpSalesPage', totalPages, 'renderMpSalesTable(allMpSalesList)')}
         </div>
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    setTimeout(() => { attachInfiniteScroll('mpSalesPage', totalPages, 'renderMpSalesTable'); }, 100);
 }
 
 function filterMpSales(query) {
@@ -1509,3 +1703,85 @@ window.openMarketModal = openMarketModal;
 window.createMarket = createMarket;
 window.updateMarket = updateMarket;
 window.deleteMarket = deleteMarket;
+async function renderMpOrders() {
+    const container = document.getElementById('page-content');
+    container.innerHTML = '<div class="loader"></div>';
+
+    try {
+        const bid = getSelectedBusinessId();
+        const orders = await api.get(`/admin/marketplace/orders?businessId=${bid}`);
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <h3>📦 ${t("Marketplace buyurtmalari")}</h3>
+                </div>
+                <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
+                    <table style="min-width: 1200px; white-space: nowrap; width: 100%;">
+                        <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);">
+                            <tr>
+                                <th style="text-align:center; color: white; border: none;">№</th>
+                                <th style="text-align:center; color: white; border: none;">${t("Mijoz")}</th>
+                                <th style="text-align:center; color: white; border: none;">${t("Mahsulotlar")}</th>
+                                <th style="text-align:center; color: white; border: none;">${t("Summa")}</th>
+                                <th style="text-align:center; color: white; border: none;">${t("Sana")}</th>
+                                <th style="text-align:center; color: white; border: none;">${t("Holati")}</th>
+                                <th style="text-align:center; color: white; border: none;">${t("Amallar")}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(orders || []).length === 0 ? `<tr><td colspan="7" style="text-align:center; padding: 20px;">${t("Hozircha buyurtmalar yo'q")}</td></tr>` : orders.map(o => `
+                                <tr>
+                                    <td style="text-align:center; font-weight:600;">#${o.id}</td>
+                                    <td>
+                                        <div style="font-weight:600;">${escapeHtml(o.customer?.firstName)} ${escapeHtml(o.customer?.lastName)}</div>
+                                        <div style="font-size:12px; color:var(--text-muted);">${escapeHtml(o.customer?.phoneNumber)}</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-size:13px;">
+                                            ${(o.items || []).map(item => `
+                                                <div style="margin-bottom:4px; display:flex; justify-content:space-between; gap:10px;">
+                                                    <span>• ${escapeHtml(item.product?.name)} <small>(${item.quantity} ta)</small></span>
+                                                    <span style="color:var(--text-muted);">${(item.price * item.quantity).toLocaleString()}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </td>
+                                    <td style="text-align:center; font-weight:700; color:var(--primary);">${o.totalSum.toLocaleString()}</td>
+                                    <td style="text-align:center; font-size:13px;">${new Date(o.createdAt).toLocaleString()}</td>
+                                    <td style="text-align:center">
+                                        <span class="badge ${o.status === 'PENDING' ? 'badge-warning' : o.status === 'CONFIRMED' ? 'badge-success' : 'badge-danger'}">
+                                            ${t(o.status)}
+                                        </span>
+                                    </td>
+                                    <td class="actions" style="justify-content:center">
+                                        ${o.status === 'PENDING' ? `
+                                            <button class="btn btn-primary btn-sm" onclick="updateMpOrderStatus(${o.id}, 'CONFIRMED')" title="${t("Tasdiqlash")}">✓</button>
+                                            <button class="btn btn-danger btn-sm" onclick="updateMpOrderStatus(${o.id}, 'REJECTED')" title="${t("Rad etish")}">✕</button>
+                                        ` : '—'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        container.innerHTML = `<div class="error-state">${t(e.message)}</div>`;
+    }
+}
+
+async function updateMpOrderStatus(id, status) {
+    if (!confirm(t(`Buyurtmani ${status === 'CONFIRMED' ? 'tasdiqlashni' : 'rad etishni'} xohlaysizmi?`))) return;
+    try {
+        await api.put(`/admin/marketplace/orders/${id}/status`, { status });
+        showToast(t("Holat yangilandi"), 'success');
+        renderMpOrders();
+    } catch (e) {
+        showToast(t(e.message), 'error');
+    }
+}
+
+window.renderMpOrders = renderMpOrders;
+window.updateMpOrderStatus = updateMpOrderStatus;
+window.toggleMarketplaceAccess = toggleMarketplaceAccess;

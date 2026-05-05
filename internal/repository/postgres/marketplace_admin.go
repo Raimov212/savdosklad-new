@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -200,17 +201,44 @@ func (r *MarketplaceAdminRepo) CreateProduct(req *entity.CreateMarketplaceProduc
 	return mp, nil
 }
 
-func (r *MarketplaceAdminRepo) GetAllProducts() ([]entity.MarketplaceProduct, error) {
-	query := `SELECT mp.id, mp."productId", mp."businessId", mp."marketplaceCategoryId", mp.name, mp."shortDescription", mp."fullDescription",
-		mp.price, mp.discount, mp.quantity, mp.images, mp."isVisible", mp."createdAt", mp."updatedAt",
-		COALESCE(biz_direct.name, biz_product.name, '') as business_name
-		FROM marketplace_products mp
-		LEFT JOIN businesses biz_direct ON mp."businessId" = biz_direct.id
-		LEFT JOIN products p ON mp."productId" = p.id
-		LEFT JOIN businesses biz_product ON p."businessId" = biz_product.id
-		ORDER BY mp."createdAt" DESC`
-	rows, err := r.db.Query(query)
+func (r *MarketplaceAdminRepo) GetAllProducts(userID int, isSuperAdmin bool, bizID *int) ([]entity.MarketplaceProduct, error) {
+	var query string
+	var rows *sql.Rows
+	var err error
+
+	log.Printf("[MarketplaceRepo] GetAllProducts: userID=%d, isSuperAdmin=%v, bizID=%v", userID, isSuperAdmin, bizID)
+
+	if isSuperAdmin {
+		query = `
+			SELECT mp.id, mp."productId", mp."businessId", mp."marketplaceCategoryId", mp.name, 
+			       mp."shortDescription", mp."fullDescription", mp.price, mp.discount, mp.quantity, 
+			       mp.images, mp."isVisible", mp."createdAt", mp."updatedAt",
+			       COALESCE(biz.name, '') as businessName,
+			       COALESCE(cat.name, '') as categoryName
+			FROM marketplace_products mp
+			LEFT JOIN businesses biz ON mp."businessId" = biz.id
+			LEFT JOIN marketplace_categories cat ON mp."marketplaceCategoryId" = cat.id
+			WHERE ($1::int IS NULL OR mp."businessId" = $1)
+			ORDER BY mp."createdAt" DESC`
+		rows, err = r.db.Query(query, bizID)
+	} else {
+		query = `
+			SELECT mp.id, mp."productId", mp."businessId", mp."marketplaceCategoryId", mp.name, 
+			       mp."shortDescription", mp."fullDescription", mp.price, mp.discount, mp.quantity, 
+			       mp.images, mp."isVisible", mp."createdAt", mp."updatedAt",
+			       COALESCE(biz.name, '') as businessName,
+			       COALESCE(cat.name, '') as categoryName
+			FROM marketplace_products mp
+			LEFT JOIN businesses biz ON mp."businessId" = biz.id
+			LEFT JOIN marketplace_categories cat ON mp."marketplaceCategoryId" = cat.id
+			WHERE (mp."businessId" IN (SELECT business_id FROM user_businesses WHERE user_id = $1)
+			       OR mp."businessId" IN (SELECT id FROM businesses WHERE "userId" = $1))
+			AND ($2::int IS NULL OR mp."businessId" = $2)
+			ORDER BY mp."createdAt" DESC`
+		rows, err = r.db.Query(query, userID, bizID)
+	}
 	if err != nil {
+		log.Printf("[MarketplaceRepo] GetAllProducts Query Error: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -221,7 +249,7 @@ func (r *MarketplaceAdminRepo) GetAllProducts() ([]entity.MarketplaceProduct, er
 		if err := rows.Scan(
 			&p.ID, &p.ProductID, &p.BusinessID, &p.MarketplaceCategoryID, &p.Name, &p.ShortDescription, &p.FullDescription,
 			&p.Price, &p.Discount, &p.Quantity, &p.Images, &p.IsVisible, &p.CreatedAt, &p.UpdatedAt,
-			&p.BusinessName,
+			&p.BusinessName, &p.CategoryName,
 		); err != nil {
 			return nil, err
 		}

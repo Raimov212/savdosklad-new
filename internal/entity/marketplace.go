@@ -42,6 +42,7 @@ type MarketplaceProduct struct {
 	CreatedAt             time.Time `json:"createdAt"`
 	UpdatedAt             time.Time `json:"updatedAt"`
 	BusinessName          string    `json:"businessName"`
+	CategoryName          string    `json:"categoryName"`
 }
 
 type CreateMarketplaceProductRequest struct {

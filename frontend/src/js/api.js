@@ -1,11 +1,15 @@
 export const API_BASE = '/api/v1';
 export const api = {
     getToken() {
-        return localStorage.getItem('token');
+        return localStorage.getItem('customer_token') || localStorage.getItem('token');
     },
 
     setToken(token) {
         localStorage.setItem('token', token);
+    },
+
+    setCustomerToken(token) {
+        localStorage.setItem('customer_token', token);
     },
 
     setUser(user) {
@@ -14,6 +18,11 @@ export const api = {
 
     getUser() {
         const u = localStorage.getItem('user');
+        return u ? JSON.parse(u) : null;
+    },
+
+    getCustomerUser() {
+        const u = localStorage.getItem('customer_user');
         return u ? JSON.parse(u) : null;
     },
 
@@ -35,6 +44,9 @@ export const api = {
 
         const lang = localStorage.getItem('appLang') || 'uz';
         headers['Accept-Language'] = lang;
+
+        const bid = getSelectedBusinessId();
+        if (bid) headers['X-Business-ID'] = bid.toString();
 
         // Timeout: 10 soniya
         const controller = new AbortController();
@@ -196,13 +208,15 @@ export function formatDateTime(dateStr) {
 }
 
 export function getSelectedBusinessId() {
+    // First, try the global selected business ID to maintain consistency across pages
+    const globalVal = localStorage.getItem('selectedBusinessId');
+    if (globalVal !== null && globalVal !== "0" && globalVal !== "") {
+        return parseInt(globalVal);
+    }
+
     const page = window.currentPage || 'dashboard';
     const key = `selectedBusinessId_${page}`;
     const val = localStorage.getItem(key);
-    if (val === null) {
-        // Fallback to global if page-specific doesn't exist
-        return parseInt(localStorage.getItem('selectedBusinessId')) || 0;
-    }
     return parseInt(val) || 0;
 }
 

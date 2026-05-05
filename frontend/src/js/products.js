@@ -310,6 +310,108 @@ function openProductModal(p = null) {
       </form>
     </div>
   `);
+
+  // Attach barcode lookup logic
+  setTimeout(attachBarcodeLookup, 100);
+}
+
+function fillProductForm(p) {
+  const fields = {
+    'prod-name': p.name,
+    'prod-price': p.price,
+    'prod-buy-price': p.buyPrice || p.buy_price,
+    'prod-cat': p.categoryId || p.category_id,
+    'prod-country': p.country,
+    'prod-short': p.shortDescription || p.short_description,
+    'prod-lcode': p.lokalCode || p.lokal_code
+  };
+
+  for (const id in fields) {
+    const el = document.getElementById(id);
+    if (el && fields[id] !== undefined && fields[id] !== null) {
+      el.value = fields[id];
+    }
+  }
+
+  if (p.images || p.image_url) {
+    const url = p.images || p.image_url;
+    document.getElementById('prod-image-url').value = url;
+    document.getElementById('prod-image-preview').innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:cover;">`;
+  }
+}
+
+async function attachBarcodeLookup() {
+  const barcodeInput = document.getElementById('prod-barcode');
+  if (!barcodeInput) return;
+
+  const bid = getSelectedBusinessId();
+  if (!bid) return;
+
+  // We need business settings. 
+  let business = (window.allBusinessesList || []).find(b => b.id == bid);
+
+  // If not found (e.g. user didn't visit Businesses page yet), fetch it
+  if (!business) {
+    try {
+      const businesses = await api.get('/businesses/my');
+      window.allBusinessesList = businesses || [];
+      business = (businesses || []).find(b => b.id == bid);
+    } catch (e) {
+      console.error("Failed to fetch business for lookup settings", e);
+    }
+  }
+
+  if (!business) return;
+
+  let lookupTimeout = null;
+
+  barcodeInput.addEventListener('input', (e) => {
+    const barcode = e.target.value.trim();
+    if (barcode.length < 8) return;
+
+    if (lookupTimeout) clearTimeout(lookupTimeout);
+
+    lookupTimeout = setTimeout(async () => {
+      // 1. Local Lookup
+      if (business.localBarcodeLookup) {
+        const existing = allProducts.find(p => p.barcode === barcode);
+        if (existing) {
+          fillProductForm(existing);
+          showToast(t("Ma'lumotlar topildi va to'ldirildi"), 'success');
+          return;
+        }
+      }
+
+      // 2. Global Lookup
+      if (business.globalBarcodeLookup) {
+        try {
+          const resp = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+          const data = await resp.json();
+          if (data.status === 1 && data.product) {
+            const p = data.product;
+            const nameEl = document.getElementById('prod-name');
+            // Only fill name if it's empty to avoid overwriting user input
+            if (!nameEl.value) {
+              nameEl.value = p.product_name || p.product_name_uz || p.product_name_ru || p.product_name_en || '';
+            }
+            
+            const countryEl = document.getElementById('prod-country');
+            if (!countryEl.value && p.countries_tags && p.countries_tags.length > 0) {
+              countryEl.value = p.countries_tags[0].split(':').pop().charAt(0).toUpperCase() + p.countries_tags[0].split(':').pop().slice(1);
+            }
+
+            if (!document.getElementById('prod-image-url').value && p.image_url) {
+              document.getElementById('prod-image-url').value = p.image_url;
+              document.getElementById('prod-image-preview').innerHTML = `<img src="${p.image_url}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+            showToast(t("Global bazadan ma'lumot olindi"), 'success');
+          }
+        } catch (err) {
+          console.error("Global lookup failed", err);
+        }
+      }
+    }, 500); // 500ms debounce
+  });
 }
 
 async function handleProductExport() {

@@ -27,6 +27,7 @@ func main() {
 		"migrations/000023_create_marketplace_products.up.sql",
 		"migrations/000024_update_cart_items_reference.up.sql",
 		"migrations/000032_create_organizations.up.sql",
+		"migrations/000039_add_barcode_lookup_to_businesses.up.sql",
 	}
 
 	for _, m := range migrations {

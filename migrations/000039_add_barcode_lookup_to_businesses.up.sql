@@ -1,0 +1,2 @@
+ALTER TABLE businesses ADD COLUMN "localBarcodeLookup" BOOLEAN DEFAULT TRUE;
+ALTER TABLE businesses ADD COLUMN "globalBarcodeLookup" BOOLEAN DEFAULT FALSE;

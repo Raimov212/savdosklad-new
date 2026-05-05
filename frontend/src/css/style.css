@@ -186,6 +186,14 @@ a:hover {
   background: var(--accent);
 }
 
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
 /* ==================== LOGIN PAGE ==================== */
 .login-split {
   display: flex;

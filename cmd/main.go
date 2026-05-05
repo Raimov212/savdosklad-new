@@ -71,6 +71,7 @@ func main() {
 	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "language" TEXT DEFAULT 'uz';`)
 	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "marketId" INTEGER;`)
 	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "createdBy" INTEGER;`)
+	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "isMarketplaceEnabled" BOOLEAN DEFAULT FALSE;`)
 
 	// Junction table for multiple businesses per user (especially employees)
 	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS user_businesses (
@@ -105,6 +106,7 @@ func main() {
 
 	// Add businessId column to marketplace_products for direct business tracking
 	_, _ = db.Exec(`ALTER TABLE marketplace_products ADD COLUMN IF NOT EXISTS "businessId" INTEGER REFERENCES businesses(id) ON DELETE SET NULL;`)
+	_, _ = db.Exec(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS "businessId" INTEGER REFERENCES businesses(id) ON DELETE SET NULL;`)
 
 	// Tracking who created the records
 	_, _ = db.Exec(`ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "createdBy" INTEGER REFERENCES users(id);`)
@@ -121,6 +123,7 @@ func main() {
 	cartRepo := postgres.NewCartRepo(db)
 	marketplaceRepo := postgres.NewMarketplaceRepo(db)
 	marketplaceAdminRepo := postgres.NewMarketplaceAdminRepo(db)
+	orderRepo := postgres.NewOrderRepo(db)
 
 	var tgNotifier *notifier.TelegramNotifier
 	if cfg.Telegram.Token != "" {
@@ -145,7 +148,7 @@ func main() {
 
 	// Marketplace use cases
 	customerUC := usecase.NewCustomerUseCase(customerRepo, jwtManager)
-	marketplaceUC := usecase.NewMarketplaceUseCase(marketplaceRepo, cartRepo, addressRepo)
+	marketplaceUC := usecase.NewMarketplaceUseCase(marketplaceRepo, cartRepo, addressRepo, orderRepo)
 	marketplaceAdminUC := usecase.NewMarketplaceAdminUseCase(marketplaceAdminRepo)
 
 	// Organizations table
@@ -165,7 +168,7 @@ func main() {
 	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "organizationId" INTEGER REFERENCES organizations(id);`)
 	_, _ = db.Exec(`ALTER TABLE organizations ADD COLUMN IF NOT EXISTS "inn" VARCHAR(20);`) // Ensure inn exists if old schema
 
-	// Employee Salaries table
+	// Migrations
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS employee_salaries (
 			id SERIAL PRIMARY KEY,
@@ -178,6 +181,65 @@ func main() {
 			"createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 			"updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 		);
+
+		CREATE TABLE IF NOT EXISTS customers (
+			id SERIAL PRIMARY KEY,
+			"firstName" VARCHAR(50) NOT NULL,
+			"lastName" VARCHAR(50) NOT NULL,
+			"phoneNumber" TEXT NOT NULL UNIQUE,
+			email TEXT,
+			password TEXT NOT NULL,
+			image TEXT DEFAULT '',
+			"createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			"updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		);
+
+		CREATE TABLE IF NOT EXISTS marketplace_categories (
+			id SERIAL PRIMARY KEY,
+			"categoryId" INTEGER REFERENCES categories(id) ON DELETE CASCADE,
+			name VARCHAR(255) NOT NULL,
+			image TEXT,
+			"isVisible" BOOLEAN NOT NULL DEFAULT TRUE,
+			"createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			"updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		);
+
+		CREATE TABLE IF NOT EXISTS marketplace_products (
+			id SERIAL PRIMARY KEY,
+			"productId" INTEGER REFERENCES products(id) ON DELETE CASCADE,
+			"businessId" INTEGER REFERENCES businesses(id) ON DELETE SET NULL,
+			"marketplaceCategoryId" INTEGER REFERENCES marketplace_categories(id) ON DELETE SET NULL,
+			name VARCHAR(255) NOT NULL,
+			"shortDescription" TEXT,
+			"fullDescription" TEXT,
+			price NUMERIC(15,2) NOT NULL DEFAULT 0,
+			discount NUMERIC(5,2) NOT NULL DEFAULT 0,
+			quantity INTEGER NOT NULL DEFAULT 0,
+			images TEXT,
+			"isVisible" BOOLEAN NOT NULL DEFAULT TRUE,
+			"createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			"updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		);
+
+		CREATE TABLE IF NOT EXISTS orders (
+			id SERIAL PRIMARY KEY,
+			"customerId" INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+			"businessId" INTEGER REFERENCES businesses(id) ON DELETE SET NULL,
+			status VARCHAR(20) DEFAULT 'PENDING',
+			"totalSum" NUMERIC(15,2) NOT NULL DEFAULT 0,
+			"createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+			"updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		);
+
+		CREATE TABLE IF NOT EXISTS order_items (
+			id SERIAL PRIMARY KEY,
+			"orderId" INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+			"marketplaceProductId" INTEGER NOT NULL REFERENCES marketplace_products(id) ON DELETE CASCADE,
+			quantity INTEGER NOT NULL DEFAULT 1,
+			price NUMERIC(15,2) NOT NULL,
+			"createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+		);
+
 		ALTER TABLE products ADD COLUMN IF NOT EXISTS "buyPrice" NUMERIC(15,2) DEFAULT 0;
 		ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "discount" NUMERIC(15,2) DEFAULT 0;
 		ALTER TABLE total_refunds ADD COLUMN IF NOT EXISTS "discount" NUMERIC(15,2) DEFAULT 0;
@@ -295,6 +357,9 @@ func main() {
 				adminMp.POST("/categories", marketplaceAdminH.CreateCategory)
 				adminMp.PUT("/categories/:id", marketplaceAdminH.UpdateCategory)
 				adminMp.DELETE("/categories/:id", marketplaceAdminH.DeleteCategory)
+
+				adminMp.GET("/orders", marketplaceH.AdminGetOrders)
+				adminMp.PUT("/orders/:id/status", marketplaceH.AdminUpdateOrderStatus)
 			}
 		}
 
@@ -316,6 +381,14 @@ func main() {
 			{
 				mpAuth.POST("/register", customerH.Register)
 				mpAuth.POST("/login", customerH.Login)
+			}
+
+			// Orders (Requires Customer Auth)
+			mpOrders := mp.Group("/orders")
+			mpOrders.Use(middleware.CustomerAuth(jwtManager))
+			{
+				mpOrders.POST("", marketplaceH.CreateOrder)
+				mpOrders.GET("/my", marketplaceH.GetMyOrders)
 			}
 		}
 	}

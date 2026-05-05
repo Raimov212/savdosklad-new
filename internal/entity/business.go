@@ -19,6 +19,8 @@ type Business struct {
 	DistrictName          string    `json:"districtName,omitempty"`
 	MarketID              *int      `json:"marketId"`
 	MarketName            string    `json:"marketName,omitempty"`
+	LocalBarcodeLookup    bool      `json:"localBarcodeLookup"`
+	GlobalBarcodeLookup   bool      `json:"globalBarcodeLookup"`
 }
 
 type CreateBusinessRequest struct {
@@ -43,4 +45,6 @@ type UpdateBusinessRequest struct {
 	DistrictID            *int     `json:"districtId"`
 	MarketID              *int     `json:"marketId"`
 	Address               *string  `json:"address"`
+	LocalBarcodeLookup    *bool    `json:"localBarcodeLookup"`
+	GlobalBarcodeLookup   *bool    `json:"globalBarcodeLookup"`
 }

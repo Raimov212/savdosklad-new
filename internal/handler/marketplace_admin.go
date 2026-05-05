@@ -171,7 +171,20 @@ func (h *MarketplaceAdminHandler) CreateProduct(c *gin.Context) {
 // @Success      200 {array} entity.MarketplaceProduct
 // @Router       /admin/marketplace/products [get]
 func (h *MarketplaceAdminHandler) GetProducts(c *gin.Context) {
-	products, err := h.uc.GetAllProducts()
+	role := c.GetInt("role")
+	userID := c.GetInt("userID")
+	isSuperAdmin := (role == 2)
+
+	bizIDStr := c.Query("businessId")
+	var bizID *int
+	if bizIDStr != "" {
+		id, err := strconv.Atoi(bizIDStr)
+		if err == nil {
+			bizID = &id
+		}
+	}
+
+	products, err := h.uc.GetAllProducts(userID, isSuperAdmin, bizID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

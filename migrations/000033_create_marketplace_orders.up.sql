@@ -1,0 +1,18 @@
+-- Marketplace buyurtmalari uchun jadvallar
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    "customerId" INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, CONFIRMED, REJECTED, DELIVERED
+    "totalSum" NUMERIC(15,2) NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+    id SERIAL PRIMARY KEY,
+    "orderId" INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    "marketplaceProductId" INTEGER NOT NULL REFERENCES marketplace_products(id) ON DELETE CASCADE,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    price NUMERIC(15,2) NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

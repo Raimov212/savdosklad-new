@@ -3,93 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="SavdoSklad Marketplace | Sifatli Mahsulotlar Markazi">SavdoSklad Marketplace | Sifatli Mahsulotlar Markazi</title>
-    <meta name="description" content="SavdoSklad Marketplace — barcha do'konlardagi eng sara mahsulotlar bitta katalogda. Sifatli tovarlarni arzon narxlarda xarid qiling.">
-    <meta name="keywords" content="SavdoSklad Marketplace, onlayn do'kon, mahsulotlar, xarid, O'zbekiston, интернет магазин, товары, online shop">
-    <meta name="author" content="SavdoSklad">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#4f46e5">
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://savdosklad.uz/marketplace.html">
-
-    <!-- Hreflang -->
-    <link rel="alternate" hreflang="uz" href="https://savdosklad.uz/marketplace.html?lang=uz">
-    <link rel="alternate" hreflang="ru" href="https://savdosklad.uz/marketplace.html?lang=ru">
-    <link rel="alternate" hreflang="en" href="https://savdosklad.uz/marketplace.html?lang=en">
-    <link rel="alternate" hreflang="x-default" href="https://savdosklad.uz/marketplace.html">
-
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://savdosklad.uz/marketplace.html">
-    <meta property="og:title" content="SavdoSklad Marketplace | Sifatli Mahsulotlar Markazi">
-    <meta property="og:description" content="Barcha do'konlardagi eng sara mahsulotlar bitta katalogda. Sifatli tovarlarni arzon narxlarda xarid qiling.">
-    <meta property="og:image" content="https://savdosklad.uz/og-image.png">
-    <meta property="og:locale" content="uz_UZ">
-    <meta property="og:site_name" content="SavdoSklad">
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="SavdoSklad Marketplace">
-    <meta name="twitter:description" content="Barcha do'konlardagi eng sara mahsulotlar bitta katalogda.">
-    <meta name="twitter:image" content="https://savdosklad.uz/og-image.png">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="apple-touch-icon" href="/favicon.svg">
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="/manifest.json">
-
-    <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "SavdoSklad Marketplace",
-      "url": "https://savdosklad.uz/marketplace.html",
-      "description": "Barcha do'konlardagi eng sara mahsulotlar bitta katalogda",
-      "isPartOf": {
-        "@type": "WebSite",
-        "name": "SavdoSklad",
-        "url": "https://savdosklad.uz"
-      },
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Bosh sahifa",
-            "item": "https://savdosklad.uz/"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Marketplace",
-            "item": "https://savdosklad.uz/marketplace.html"
-          }
-        ]
-      }
-    }
-    </script>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Scripts -->
+    <title data-i18n="SavdoSklad Marketplace">SavdoSklad Marketplace</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="src/css/style.css">
     <link rel="stylesheet" href="src/css/responsive.css">
     <style>
         :root {
-            --mp-primary: #4f46e5;
+            --mp-primary: #10b981;
             --mp-secondary: #0ea5e9;
             --mp-bg: #03040b;
             --mp-card: rgba(255, 255, 255, 0.03);
-            --mp-border: rgba(255, 255, 255, 0.08);
+            --mp-border: rgba(255, 255, 255, 0.1);
             --mp-text: #f8fafc;
+        }
+
+        [data-theme="light"] {
+            --mp-bg: #f8fafc;
+            --mp-card: #ffffff;
+            --mp-border: #cbd5e1;
+            --mp-text: #0f172a;
         }
 
         body {
@@ -98,14 +30,74 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
             overflow-x: hidden;
+            transition: 0.3s;
         }
 
-        /* Hero / Header */
+        /* Centered Auth Modal with Backdrop Blur */
+        #auth-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-content {
+            background: #0f172a;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            border-radius: 28px;
+            border: 1px solid var(--mp-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Orders Separate Layout */
+        #orders-layout {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--mp-bg);
+            z-index: 5000;
+            padding: 40px 5%;
+            overflow-y: auto;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .layout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        /* Navbar & Content blur when modal open */
+        body.modal-active #main-content {
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
         .mp-navbar {
             padding: 20px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--mp-bg);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--mp-border);
             position: sticky;
@@ -115,298 +107,475 @@
 
         .mp-logo {
             font-family: 'Outfit', sans-serif;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 800;
-            background: linear-gradient(to right, #6366f1, #06b6d4);
+            background: linear-gradient(to right, #10b981, #06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            cursor: pointer;
         }
 
-        .mp-search-container {
-            flex: 0 1 500px;
-            position: relative;
-        }
-
-        .mp-search-input {
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 13px; opacity: 0.7; }
+        .form-control {
             width: 100%;
-            padding: 12px 20px 12px 45px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--mp-border);
-            border-radius: 14px;
-            color: white;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .mp-search-input:focus {
-            border-color: var(--mp-primary);
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
-        }
-
-        /* Products Grid */
-        .mp-container {
-            padding: 40px 5%;
-        }
-
-        .mp-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 24px;
-        }
-
-        .mp-item-card {
+            padding: 14px 18px;
             background: var(--mp-card);
             border: 1px solid var(--mp-border);
-            border-radius: 20px;
-            padding: 16px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mp-item-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--mp-primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .mp-item-image {
-            width: 100%;
-            aspect-ratio: 1;
-            background: #111;
             border-radius: 14px;
-            margin-bottom: 16px;
-            object-fit: cover;
+            color: var(--mp-text);
+            box-sizing: border-box;
+            font-family: inherit;
         }
+        .form-control:focus { border-color: var(--mp-primary); outline: none; }
 
-        .mp-item-title {
-            font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .mp-item-price {
-            font-family: 'Outfit', sans-serif;
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--mp-secondary);
-        }
-
-        .mp-badge {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: var(--mp-primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 800;
-        }
-
-        .btn-add-cart {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: var(--mp-primary);
+        .btn {
+            padding: 12px 24px;
+            border-radius: 14px;
             border: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             cursor: pointer;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
             transition: 0.3s;
         }
+        .btn-primary { background: var(--mp-primary); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); }
+        .btn-ghost { background: transparent; color: var(--mp-text); }
+        .btn-ghost:hover { background: var(--mp-border); }
 
-        .btn-add-cart:hover {
-            transform: scale(1.1);
+        .mp-container { padding: 40px 5%; display: flex; gap: 30px; }
+        .mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; flex: 1; }
+        .product-card { background: var(--mp-card); border: 1px solid var(--mp-border); border-radius: 24px; padding: 18px; transition: 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .product-card:hover { transform: translateY(-8px); border-color: var(--mp-primary); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .product-img { width: 100%; aspect-ratio: 1; border-radius: 18px; object-fit: cover; margin-bottom: 15px; }
+
+        .mp-drawer {
+            position: fixed; top: 0; right: -420px; width: 420px; height: 100%;
+            background: #080911; border-left: 1px solid var(--mp-border);
+            z-index: 1000; transition: 0.4s; display: flex; flex-direction: column;
+            box-shadow: -20px 0 40px rgba(0,0,0,0.5);
         }
+        .mp-drawer.open { right: 0; }
 
-        /* Decorative Blur */
-        .bg-glow {
-            position: fixed;
-            width: 50vw;
-            height: 50vw;
-            background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 70%);
-            top: -10vw;
-            right: -10vw;
-            pointer-events: none;
-            z-index: -1;
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        .status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .status-confirmed { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .status-rejected { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+        aside { transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        aside.hidden { width: 0 !important; opacity: 0; margin-right: 0 !important; overflow: hidden; pointer-events: none; }
+
+        @media (max-width: 600px) {
+            .mp-drawer { width: 100%; right: -100%; }
         }
     </style>
 </head>
 <body>
-    <!-- Noscript fallback for SEO -->
-    <noscript>
-      <div style="padding: 40px; text-align: center; font-family: sans-serif; color: #f8fafc; background: #03040b;">
-        <h1>SavdoSklad Marketplace</h1>
-        <p>Barcha do'konlardagi eng sara mahsulotlar bitta katalogda. Sifatli tovarlarni arzon narxlarda xarid qiling.</p>
-        <p>Sahifani to'liq ko'rish uchun JavaScript yoqilgan bo'lishi kerak.</p>
-        <a href="/" style="color: #6366f1;">Bosh sahifaga qaytish</a>
-      </div>
-    </noscript>
-
-    <div class="bg-glow"></div>
-
-    <nav class="mp-navbar">
-        <div class="mp-logo">SavdoSklad MP</div>
-        <div class="mp-search-container">
-            <i data-lucide="search" style="position:absolute; left:15px; top:50%; transform:translateY(-50%); width:18px; color:rgba(255,255,255,0.4)"></i>
-            <input type="text" class="mp-search-input" data-i18n="Mahsulotlarni qidirish..." placeholder="Mahsulotlarni qidirish..." id="mp-search">
-        </div>
-        <div style="display:flex; gap:15px; align-items:center;">
-            <div style="position:relative; cursor:pointer;" id="cart-btn">
-                <i data-lucide="shopping-cart"></i>
-                <span id="cart-count" style="position:absolute; top:-5px; right:-8px; background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:800;">0</span>
+    <div id="main-content">
+        <nav class="mp-navbar">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <button class="btn btn-ghost" onclick="toggleSidebar()" title="Kategoriyalarni ko'rsatish/yashirish" style="padding:8px;">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="mp-logo" onclick="location.reload()">SavdoSklad MP</div>
             </div>
-            <button class="btn btn-secondary btn-sm" onclick="location.href='index.html'" data-i18n="Kirish">Kirish</button>
-        </div>
-    </nav>
-
-    <div class="mp-container" style="display:flex; gap:30px;">
-        <!-- Sidebar Categories -->
-        <aside style="width:240px; flex-shrink:0;">
-            <h3 style="font-size:18px; margin-bottom:20px; color:rgba(255,255,255,0.6)" data-i18n="Kategoriyalar">Kategoriyalar</h3>
-            <div id="mp-categories-list" style="display:flex; flex-direction:column; gap:10px;">
-                <button class="cat-item active" onclick="filterByCategory(null)" id="cat-all" data-i18n="Barchasi">Barchasi</button>
-                <!-- Categories will be injected here -->
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main style="flex:1;">
-            <div style="margin-bottom:32px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <h1 style="font-family:'Outfit'; font-size:32px; font-weight:800; margin-bottom:10px;">Marketplace</h1>
-                  <p style="color:rgba(255,255,255,0.5)" data-i18n="Barcha do'konlardagi eng sara mahsulotlar bitta katalogda">Barcha do'konlardagi eng sara mahsulotlar bitta katalogda</p>
+            <div style="display:flex; gap:20px; align-items:center;">
+                <button class="btn btn-ghost" onclick="showOrdersLayout()">
+                    <i data-lucide="package"></i> <span data-i18n="Buyurtmalarim">Buyurtmalarim</span>
+                </button>
+                <div style="position:relative; cursor:pointer;" onclick="toggleCart()">
+                    <i data-lucide="shopping-cart"></i>
+                    <span id="cart-count" style="position:absolute; top:-8px; right:-10px; background:#ef4444; color:white; font-size:10px; padding:3px 7px; border-radius:12px; font-weight:900;">0</span>
                 </div>
-                <div id="category-title" style="font-size:14px; color:var(--mp-secondary); font-weight:700;" data-i18n="Barcha mahsulotlar">Barcha mahsulotlar</div>
+                <div id="mp-auth-section">
+                    <button class="btn btn-primary" onclick="openAuthModal('login')" data-i18n="Kirish">Kirish</button>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; border-left:1px solid var(--mp-border); padding-left:20px; margin-left:10px;">
+                    <button class="btn btn-ghost theme-toggle" onclick="toggleTheme()" title="Mavzuni o'zgartirish">
+                        <i data-lucide="sun" style="width:20px;"></i>
+                    </button>
+                    <select id="mp-lang-selector" class="form-control" style="width:auto; padding:5px 12px; height:auto; background:var(--mp-card); border-color:var(--mp-border); color:var(--mp-text);" onchange="setAppLang(this.value)">
+                        <option value="uz">O'zbek</option>
+                        <option value="uz-cyrl">Ўзбекча</option>
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
             </div>
+        </nav>
 
-            <div id="mp-grid" class="mp-grid">
-                <!-- Products will be injected here -->
-                <div class="loader"></div>
-            </div>
-        </main>
+        <div class="mp-container">
+            <aside id="mp-sidebar" style="width:240px; flex-shrink:0; margin-right:30px;">
+                <h3 data-i18n="Kategoriyalar" style="margin-bottom:20px;">Kategoriyalar</h3>
+                <div id="mp-categories-list" style="display:flex; flex-direction:column; gap:10px;">
+                    <button class="btn btn-ghost" style="justify-content:start; width:100%" onclick="filterByCategory(null)" data-i18n="Barchasi">Barchasi</button>
+                </div>
+            </aside>
+            <main class="mp-grid" id="products-grid">
+                <!-- Dynamic Products -->
+            </main>
+        </div>
     </div>
 
-    <style>
-        .cat-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--mp-border);
-            padding: 12px 16px;
-            border-radius: 12px;
-            color: white;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 14px;
-        }
-        .cat-item:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: var(--mp-primary);
-        }
-        .cat-item.active {
-            background: var(--mp-primary);
-            border-color: var(--mp-primary);
-            font-weight: 700;
-        }
-    </style>
+    <!-- Centered Auth Modal -->
+    <div id="auth-modal">
+        <div class="auth-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <h2 id="auth-modal-title" style="margin:0;">Kirish</h2>
+                <button class="btn btn-ghost" onclick="closeAuthModal()" style="padding:5px;"><i data-lucide="x"></i></button>
+            </div>
 
+            <form id="mp-login-form">
+                <div class="form-group">
+                    <label data-i18n="Telefon raqam">Telefon raqam</label>
+                    <input type="tel" id="login-phone" placeholder="+998XXXXXXXXX" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Parol">Parol</label>
+                    <input type="password" id="login-password" placeholder="••••••" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;">
+                    <span data-i18n="Kirish">Kirish</span>
+                </button>
+                <p style="text-align:center; margin-top:20px; font-size:14px; opacity:0.6;">
+                    <span data-i18n="Hisobingiz yo'qmi?">Hisobingiz yo'qmi?</span> 
+                    <a href="javascript:void(0)" onclick="openAuthModal('register')" style="color:var(--mp-secondary); font-weight:700;" data-i18n="Ro'yxatdan o'tish">Ro'yxatdan o'tish</a>
+                </p>
+            </form>
+
+            <form id="mp-register-form" style="display:none">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                    <div class="form-group">
+                        <label data-i18n="Ism">Ism</label>
+                        <input type="text" id="reg-firstname" placeholder="Ali" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="Familiya">Familiya</label>
+                        <input type="text" id="reg-lastname" placeholder="Valiyev" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Telefon raqam">Telefon raqam</label>
+                    <input type="tel" id="reg-phone" placeholder="+998XXXXXXXXX" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Parol">Parol</label>
+                    <input type="password" id="reg-password" placeholder="••••••" class="form-control" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Parolni tasdiqlang">Parolni tasdiqlang</label>
+                    <input type="password" id="reg-confirm" placeholder="••••••" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;">
+                    <span data-i18n="Ro'yxatdan o'tish">Ro'yxatdan o'tish</span>
+                </button>
+                <p style="text-align:center; margin-top:20px; font-size:14px; opacity:0.6;">
+                    <span data-i18n="Hisobingiz bormi?">Hisobingiz bormi?</span> 
+                    <a href="javascript:void(0)" onclick="openAuthModal('login')" style="color:var(--mp-secondary); font-weight:700;" data-i18n="Kirish">Kirish</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Layout (Separate View) -->
+    <div id="orders-layout">
+        <div class="layout-header">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <button class="btn btn-ghost" onclick="hideOrdersLayout()"><i data-lucide="arrow-left"></i></button>
+                <h1 style="margin:0;" data-i18n="Mening buyurtmalarim">Mening buyurtmalarim</h1>
+            </div>
+        </div>
+        <div id="orders-list-container" style="max-width:900px; margin:0 auto;">
+            <!-- Dynamic Orders -->
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div id="cart-drawer" class="mp-drawer">
+        <div style="padding:25px; border-bottom:1px solid var(--mp-border); display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0;" data-i18n="Savat">Savat</h3>
+            <button class="btn btn-ghost" onclick="toggleCart()" style="padding:5px;"><i data-lucide="x"></i></button>
+        </div>
+        <div id="cart-items" style="flex:1; overflow-y:auto; padding:25px;"></div>
+        <div style="padding:25px; border-top:1px solid var(--mp-border); background:rgba(255,255,255,0.02);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:18px; font-weight:800;">
+                <span data-i18n="Jami:">Jami:</span>
+                <span id="cart-total">0 so'm</span>
+            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="handleCheckout()" data-i18n="Buyurtma berish">Buyurtma berish</button>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/i18n.js"></script>
+    <script type="module" src="/src/js/api.js"></script>
     <script type="module">
-        import { api } from './src/js/api.js';
-        import { t, translateDOM } from './src/js/i18n.js';
-
         let allProducts = [];
+        let cart = [];
         let currentCategory = null;
 
-        async function initMarketplace() {
-            translateDOM();
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-            await loadCategories();
-            await loadProducts();
+        async function init() {
+            console.log("Marketplace initializing...");
+            try {
+                // Initialize sidebar state
+                const sidebarHidden = localStorage.getItem('mpSidebarHidden') === 'true';
+                if (sidebarHidden) document.getElementById('mp-sidebar').classList.add('hidden');
+
+                // Initialize theme
+                const savedTheme = localStorage.getItem('appTheme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                if (typeof updateThemeIcon === 'function') updateThemeIcon(savedTheme);
+
+                // Initialize language
+                const savedLang = localStorage.getItem('appLang') || 'uz';
+                document.getElementById('mp-lang-selector').value = savedLang;
+
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                updateAuthUI();
+                await loadCategories();
+                await loadProducts();
+                console.log("Marketplace initialization complete");
+            } catch (e) {
+                console.error("Marketplace init error:", e);
+            }
+            
+            document.getElementById('mp-login-form').onsubmit = handleLogin;
+            document.getElementById('mp-register-form').onsubmit = handleRegister;
         }
 
-        async function loadCategories() {
+        // --- AUTH ---
+        window.openAuthModal = (mode) => {
+            const modal = document.getElementById('auth-modal');
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-active');
+            
+            const isLogin = mode === 'login';
+            document.getElementById('auth-modal-title').textContent = t(isLogin ? "Kirish" : "Ro'yxatdan o'tish");
+            document.getElementById('mp-login-form').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('mp-register-form').style.display = isLogin ? 'none' : 'block';
+        };
+
+        window.closeAuthModal = () => {
+            document.getElementById('auth-modal').style.display = 'none';
+            document.body.classList.remove('modal-active');
+        };
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const phoneNumber = document.getElementById('login-phone').value;
+            const password = document.getElementById('login-password').value;
             try {
-                const categories = await api.get('/marketplace/categories');
-                const list = document.getElementById('mp-categories-list');
-                const html = (categories || []).map(c => `
-                    <button class="cat-item" onclick="filterByCategory(${c.id}, '${c.name}')" id="cat-${c.id}">${c.name}</button>
-                `).join('');
-                list.innerHTML += html;
-            } catch (e) { console.error(e); }
+                const res = await api.post('/marketplace/auth/login', { phoneNumber, password });
+                api.setCustomerToken(res.token);
+                localStorage.setItem('customer_user', JSON.stringify(res.customer));
+                closeAuthModal();
+                updateAuthUI();
+                alert(t("Xush kelibsiz!"));
+            } catch (err) { alert(err.message); }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('reg-firstname').value;
+            const lastName = document.getElementById('reg-lastname').value;
+            const phoneNumber = document.getElementById('reg-phone').value;
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+
+            if (password !== confirm) return alert(t("Parollar mos kelmadi"));
+            if (!/^\+998\d{9}$/.test(phoneNumber)) return alert(t("Telefon raqami noto'g'ri formatda"));
+
+            try {
+                await api.post('/marketplace/auth/register', { firstName, lastName, phoneNumber, password });
+                alert(t("Muvaffaqiyatli ro'yxatdan o'tdingiz. Endi tizimga kiring."));
+                openAuthModal('login');
+            } catch (err) { alert(err.message); }
+        }
+
+        function updateAuthUI() {
+            const section = document.getElementById('mp-auth-section');
+            const user = api.getCustomerUser();
+            if (user) {
+                section.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-weight:700;">${user.firstName}</span>
+                        <button class="btn btn-ghost" style="padding:8px;" onclick="logout()" title="Chiqish">
+                            <i data-lucide="log-out" style="width:18px;"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                section.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal('login')" data-i18n="Kirish">Kirish</button>`;
+            }
+            lucide.createIcons();
+        }
+
+        window.logout = () => {
+            localStorage.removeItem('customer_token');
+            localStorage.removeItem('customer_user');
+            location.reload();
+        };
+
+        // --- LAYOUTS ---
+        window.showOrdersLayout = async () => {
+            if (!api.getCustomerUser()) return openAuthModal('login');
+            document.getElementById('orders-layout').style.display = 'block';
+            await loadOrders();
+        };
+        window.hideOrdersLayout = () => document.getElementById('orders-layout').style.display = 'none';
+
+        async function loadOrders() {
+            const container = document.getElementById('orders-list-container');
+            container.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.5;">Yuklanmoqda...</div>';
+            try {
+                const orders = await api.get('/marketplace/orders/my');
+                container.innerHTML = (orders || []).map(o => `
+                    <div style="background:var(--mp-card); border:1px solid var(--mp-border); border-radius:24px; padding:30px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:20px;">
+                            <div>
+                                <div style="font-size:20px; font-weight:800;">Buyurtma №${o.id}</div>
+                                <div style="font-size:14px; color:var(--mp-primary); font-weight:700; margin-top:5px;">${o.businessName || ''}</div>
+                                <div style="opacity:0.5; font-size:13px; margin-top:2px;">${new Date(o.createdAt).toLocaleString()}</div>
+                            </div>
+                            <span class="status-badge status-${o.status.toLowerCase()}">${t(o.status)}</span>
+                        </div>
+                        <div style="border-top:1px dashed var(--mp-border); padding:20px 0;">
+                            ${(o.items || []).map(i => `
+                                <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
+                                    <img src="${i.product?.images || 'https://via.placeholder.com/80'}" style="width:80px; height:80px; border-radius:15px; object-fit:cover; background:rgba(255,255,255,0.05);">
+                                    <div style="flex:1;">
+                                        <div style="font-size:16px; font-weight:700;">${i.product?.name}</div>
+                                        <div style="font-size:13px; opacity:0.5; margin-top:4px;">${i.product?.categoryName || t("Turkumlanmagan")}</div>
+                                        <div style="font-size:14px; margin-top:8px;">${i.quantity} x ${i.price.toLocaleString()} so'm</div>
+                                    </div>
+                                    <div style="font-weight:800; color:var(--mp-secondary);">
+                                        ${(i.price * i.quantity).toLocaleString()} so'm
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="text-align:right; font-size:18px; font-weight:900; color:var(--mp-secondary);">
+                            Jami: ${o.totalSum.toLocaleString()} so'm
+                        </div>
+                    </div>
+                `).join('') || `<div style="text-align:center; padding:100px; opacity:0.3;">${t("Hozircha buyurtmalar yo'q")}</div>`;
+            } catch (e) { container.innerHTML = `<div class="error">${e.message}</div>`; }
+        }
+
+        // --- CATALOG ---
+        async function loadCategories() {
+            const cats = await api.get('/marketplace/categories').catch(() => []);
+            const list = document.getElementById('mp-categories-list');
+            list.innerHTML += cats.map(c => `<button class="btn btn-ghost" style="justify-content:start; width:100%" onclick="filterByCategory(${c.id})">${c.name}</button>`).join('');
         }
 
         async function loadProducts() {
-            const grid = document.getElementById('mp-grid');
+            console.log("Loading products...");
             try {
-                const data = await api.get('/marketplace/products');
-                allProducts = data.products || [];
-                renderProducts(allProducts);
+                const res = await api.get('/marketplace/products');
+                console.log("Products response:", res);
+                allProducts = res.products || [];
+                renderProducts();
             } catch (e) {
-                grid.innerHTML = `<p class="error">${t("Xatolik")}: ${e.message}</p>`;
+                console.error("Load products error:", e);
+                allProducts = [];
+                renderProducts();
             }
         }
 
-        function renderProducts(products) {
-            const grid = document.getElementById('mp-grid');
-            if (products.length === 0) {
-                grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:100px;opacity:0.5;">${t("Mahsulotlar topilmadi")}</p>`;
-                return;
-            }
-
-            grid.innerHTML = products.map(p => `
-                <div class="mp-item-card">
-                    ${p.discount > 0 ? `<div class="mp-badge">-${p.discount}% OFF</div>` : ''}
-                    <img src="${p.images || 'https://via.placeholder.com/300'}" class="mp-item-image" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
-                    <div class="mp-item-title">${p.name}</div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                        <div>
-                            <div style="font-size:11px; opacity:0.4; margin-bottom:4px;">${t("Narxi")}</div>
-                            <div class="mp-item-price">${p.price.toLocaleString()} ${t("so'm")}</div>
-                        </div>
-                        <button class="btn-add-cart" onclick="addToCart(${p.id})">
-                            <i data-lucide="plus" style="width:20px"></i>
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            const filtered = currentCategory ? allProducts.filter(p => p.marketplaceCategoryId === currentCategory) : allProducts;
+            grid.innerHTML = filtered.map(p => `
+                <div class="product-card">
+                    <div style="position:relative;">
+                        <img src="${p.images || 'https://via.placeholder.com/300'}" class="product-img" onerror="this.src='https://via.placeholder.com/300'">
+                        <span style="position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); padding:4px 12px; border-radius:10px; font-size:11px; font-weight:700; color:var(--mp-primary); border:1px solid rgba(255,255,255,0.1);">
+                            ${p.categoryName || t("Turkumlanmagan")}
+                        </span>
+                    </div>
+                    <h3 style="margin:0 0 5px 0; font-size:17px;">${p.name}</h3>
+                    <p style="font-size:12px; opacity:0.6; margin:0 0 15px 0; font-weight:600;">${p.businessName || ''}</p>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                        <span style="font-size:18px; font-weight:800; color:var(--mp-secondary);">${(p.price || 0).toLocaleString()} so'm</span>
+                        <button class="btn btn-primary" style="padding:8px 12px;" onclick="addToCart(${p.id})" title="${t("Savatga qo'shish")}">
+                            <i data-lucide="plus" style="width:20px;"></i>
                         </button>
                     </div>
                 </div>
             `).join('');
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            lucide.createIcons();
         }
 
-        window.filterByCategory = (id, name) => {
+        window.filterByCategory = (id) => {
             currentCategory = id;
-            document.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(id ? 'cat-' + id : 'cat-all').classList.add('active');
-            document.getElementById('category-title').textContent = name || t('Barcha mahsulotlar');
-            
-            applyFilters();
+            renderProducts();
         };
 
-        document.getElementById('mp-search').oninput = () => applyFilters();
+        // --- CART ---
+        window.toggleCart = () => document.getElementById('cart-drawer').classList.toggle('open');
 
-        function applyFilters() {
-            const search = document.getElementById('mp-search').value.toLowerCase();
-            const filtered = allProducts.filter(p => {
-                const matchSearch = p.name.toLowerCase().includes(search);
-                const matchCat = currentCategory ? p.marketplaceCategoryId === currentCategory : true;
-                return matchSearch && matchCat;
-            });
-            renderProducts(filtered);
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('mp-sidebar');
+            sidebar.classList.toggle('hidden');
+            localStorage.setItem('mpSidebarHidden', sidebar.classList.contains('hidden'));
+        };
+
+        window.addToCart = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            const item = cart.find(x => x.id === id);
+            if (item) item.qty++;
+            else cart.push({ ...p, qty: 1 });
+            updateCartUI();
+            toggleCart();
+        };
+
+        function updateCartUI() {
+            const list = document.getElementById('cart-items');
+            const count = cart.reduce((a, b) => a + b.qty, 0);
+            document.getElementById('cart-count').textContent = count;
+
+            let total = 0;
+            list.innerHTML = cart.map(item => {
+                total += item.price * item.qty;
+                return `
+                    <div style="display:flex; gap:15px; margin-bottom:20px; align-items:center;">
+                        <img src="${item.images || ''}" style="width:50px; height:50px; border-radius:10px; object-fit:cover;">
+                        <div style="flex:1;">
+                            <div style="font-size:14px; font-weight:700;">${item.name}</div>
+                            <div style="font-size:11px; opacity:0.5; margin-bottom:2px;">${item.businessName || ''}</div>
+                            <div style="font-size:12px; color:var(--mp-secondary);">${item.price.toLocaleString()} so'm</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:4px; border-radius:10px;">
+                            <button class="btn btn-ghost" style="padding:2px;" onclick="changeQty(${item.id}, -1)">-</button>
+                            <span style="min-width:20px; text-align:center;">${item.qty}</span>
+                            <button class="btn btn-ghost" style="padding:2px;" onclick="changeQty(${item.id}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') || `<div style="text-align:center; padding:50px; opacity:0.3;">${t("Savat bo'sh")}</div>`;
+            document.getElementById('cart-total').textContent = `${total.toLocaleString()} so'm`;
         }
 
-        let cart = [];
-        window.addToCart = (id) => {
-            cart.push(id);
-            document.getElementById('cart-count').textContent = cart.length;
-            // toast or animation
+        window.changeQty = (id, d) => {
+            const i = cart.find(x => x.id === id);
+            i.qty += d;
+            if (i.qty <= 0) cart = cart.filter(x => x.id !== id);
+            updateCartUI();
         };
 
-        initMarketplace();
+        window.handleCheckout = async () => {
+            if (cart.length === 0) return;
+            if (!api.getCustomerUser()) return openAuthModal('login');
+            try {
+                await api.post('/marketplace/orders', { items: cart.map(i => ({ marketplaceProductId: i.id, quantity: i.qty })) });
+                alert(t("Buyurtma qabul qilindi!"));
+                cart = []; updateCartUI(); toggleCart();
+            } catch (e) { alert(e.message); }
+        };
+
+        init();
     </script>
 </body>
 </html>

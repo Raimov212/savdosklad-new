@@ -11,18 +11,89 @@ type MarketplaceUseCase struct {
 	marketplaceRepo *postgres.MarketplaceRepo
 	cartRepo        *postgres.CartRepo
 	addressRepo     *postgres.AddressRepo
+	orderRepo       *postgres.OrderRepo
 }
 
 func NewMarketplaceUseCase(
 	marketplaceRepo *postgres.MarketplaceRepo,
 	cartRepo *postgres.CartRepo,
 	addressRepo *postgres.AddressRepo,
+	orderRepo *postgres.OrderRepo,
 ) *MarketplaceUseCase {
 	return &MarketplaceUseCase{
 		marketplaceRepo: marketplaceRepo,
 		cartRepo:        cartRepo,
 		addressRepo:     addressRepo,
+		orderRepo:       orderRepo,
 	}
+}
+
+// Order operations
+func (uc *MarketplaceUseCase) CreateOrder(customerID int, req *entity.CreateOrderRequest) ([]entity.Order, error) {
+	// Group items by business
+	businessItems := make(map[int][]entity.OrderItem)
+	for _, itemReq := range req.Items {
+		prod, err := uc.marketplaceRepo.GetProductByID(itemReq.MarketplaceProductID)
+		if err != nil {
+			return nil, err
+		}
+		bizID := 0
+		if prod.BusinessID != nil {
+			bizID = *prod.BusinessID
+		}
+		
+		item := entity.OrderItem{
+			MarketplaceProductID: itemReq.MarketplaceProductID,
+			Quantity:             itemReq.Quantity,
+			Price:                prod.Price,
+		}
+		businessItems[bizID] = append(businessItems[bizID], item)
+	}
+
+	var createdOrders []entity.Order
+	for bizID, items := range businessItems {
+		var bID *int
+		if bizID != 0 {
+			val := bizID
+			bID = &val
+		}
+
+		order := &entity.Order{
+			CustomerID: customerID,
+			BusinessID: bID,
+			Status:     entity.OrderStatusPending,
+			Items:      items,
+		}
+
+		var totalSum float64
+		for _, item := range items {
+			totalSum += item.Price * float64(item.Quantity)
+		}
+		order.TotalSum = totalSum
+
+		if err := uc.orderRepo.Create(order); err != nil {
+			return nil, err
+		}
+		createdOrders = append(createdOrders, *order)
+	}
+
+	return createdOrders, nil
+}
+
+func (uc *MarketplaceUseCase) GetOrdersByCustomer(customerID int) ([]entity.Order, error) {
+	return uc.orderRepo.GetByCustomerID(customerID)
+}
+
+func (uc *MarketplaceUseCase) AdminGetOrders(status string) ([]entity.Order, error) {
+	return uc.orderRepo.GetAll(status)
+}
+
+func (uc *MarketplaceUseCase) BusinessGetOrders(businessID int, userID int, status string) ([]entity.Order, error) {
+	return uc.orderRepo.GetByBusinessID(businessID, userID, status)
+}
+
+func (uc *MarketplaceUseCase) UpdateOrderStatus(id int, status entity.OrderStatus) error {
+	return uc.orderRepo.UpdateStatus(id, status)
 }
 
 // Public product listing

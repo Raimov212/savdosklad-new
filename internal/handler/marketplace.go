@@ -348,3 +348,115 @@ func (h *MarketplaceHandler) DeleteAddress(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgAddressDeleted)})
 }
+
+// ==================== ORDER ENDPOINTS ====================
+
+// CreateOrder godoc
+// @Summary      Buyurtma berish
+// @Description  Savatdagi mahsulotlar uchun buyurtma yaratish
+// @Tags         Marketplace - Orders
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body entity.CreateOrderRequest true "Buyurtma ma'lumotlari"
+// @Success      201 {object} entity.Order
+// @Router       /marketplace/orders [post]
+func (h *MarketplaceHandler) CreateOrder(c *gin.Context) {
+	customerID := c.GetInt("customerID")
+	var req entity.CreateOrderRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	orders, err := h.uc.CreateOrder(customerID, &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, orders)
+}
+
+// GetMyOrders godoc
+// @Summary      Mening buyurtmalarim
+// @Description  Customer o'z buyurtmalari ro'yxati
+// @Tags         Marketplace - Orders
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {array} entity.Order
+// @Router       /marketplace/orders/my [get]
+func (h *MarketplaceHandler) GetMyOrders(c *gin.Context) {
+	customerID := c.GetInt("customerID")
+	orders, err := h.uc.GetOrdersByCustomer(customerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, orders)
+}
+
+// AdminGetOrders godoc
+// @Summary      Barcha buyurtmalar (Admin)
+// @Description  Barcha marketplace buyurtmalarini ko'rish
+// @Tags         Marketplace - Admin
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {array} entity.Order
+// @Router       /admin/marketplace/orders [get]
+func (h *MarketplaceHandler) AdminGetOrders(c *gin.Context) {
+	role := c.GetInt("role")
+	businessID := c.GetInt("businessID")
+
+	// Allow query param to override (standard pattern in this app)
+	if qBid := c.Query("businessId"); qBid != "" {
+		if bid, err := strconv.Atoi(qBid); err == nil && bid > 0 {
+			businessID = bid
+		}
+	}
+
+	status := c.Query("status")
+	var orders []entity.Order
+	var err error
+
+	if role == 2 {
+		// Super admin sees all
+		orders, err = h.uc.AdminGetOrders(status)
+	} else if role == 1 {
+		// Business owner sees only their orders
+		userID := c.GetInt("userID")
+		orders, err = h.uc.BusinessGetOrders(businessID, userID, status)
+	} else {
+		c.JSON(http.StatusForbidden, gin.H{"error": "ruxsat berilmadi"})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, orders)
+}
+
+// AdminUpdateOrderStatus godoc
+// @Summary      Buyurtma holatini o'zgartirish (Admin)
+// @Description  Buyurtmani tasdiqlash yoki rad etish
+// @Tags         Marketplace - Admin
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path int true "Order ID"
+// @Param        request body entity.UpdateOrderStatusRequest true "Yangi holat"
+// @Success      200 {object} map[string]string
+// @Router       /admin/marketplace/orders/{id}/status [put]
+func (h *MarketplaceHandler) AdminUpdateOrderStatus(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req entity.UpdateOrderStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.uc.UpdateOrderStatus(id, req.Status); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Status updated"})
+}

@@ -28,27 +28,27 @@ type ProductFilter struct {
 
 // GetPublicProducts — marketplace_products dan faqat isVisible=true mahsulotlarni olish
 func (r *MarketplaceRepo) GetPublicProducts(filter ProductFilter) ([]entity.MarketplaceProduct, int, error) {
-	whereClauses := []string{`"isVisible" = TRUE`, `quantity > 0`}
+	whereClauses := []string{`p."isVisible" = TRUE`, `p.quantity > 0`}
 	args := []interface{}{}
 	argIndex := 1
 
 	if filter.Search != "" {
-		whereClauses = append(whereClauses, fmt.Sprintf(`(LOWER(name) LIKE LOWER($%d) OR LOWER("shortDescription") LIKE LOWER($%d))`, argIndex, argIndex))
+		whereClauses = append(whereClauses, fmt.Sprintf(`(LOWER(p.name) LIKE LOWER($%d) OR LOWER(p."shortDescription") LIKE LOWER($%d))`, argIndex, argIndex))
 		args = append(args, "%"+filter.Search+"%")
 		argIndex++
 	}
 	if filter.CategoryID > 0 {
-		whereClauses = append(whereClauses, fmt.Sprintf(`"marketplaceCategoryId" = $%d`, argIndex))
+		whereClauses = append(whereClauses, fmt.Sprintf(`p."marketplaceCategoryId" = $%d`, argIndex))
 		args = append(args, filter.CategoryID)
 		argIndex++
 	}
 	if filter.MinPrice > 0 {
-		whereClauses = append(whereClauses, fmt.Sprintf(`price >= $%d`, argIndex))
+		whereClauses = append(whereClauses, fmt.Sprintf(`p.price >= $%d`, argIndex))
 		args = append(args, filter.MinPrice)
 		argIndex++
 	}
 	if filter.MaxPrice > 0 {
-		whereClauses = append(whereClauses, fmt.Sprintf(`price <= $%d`, argIndex))
+		whereClauses = append(whereClauses, fmt.Sprintf(`p.price <= $%d`, argIndex))
 		args = append(args, filter.MaxPrice)
 		argIndex++
 	}
@@ -57,7 +57,7 @@ func (r *MarketplaceRepo) GetPublicProducts(filter ProductFilter) ([]entity.Mark
 
 	// Count total
 	var total int
-	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM marketplace_products WHERE %s`, whereSQL)
+	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM marketplace_products p WHERE %s`, whereSQL)
 	err := r.db.QueryRow(countQuery, args...).Scan(&total)
 	if err != nil {
 		return nil, 0, err
@@ -85,9 +85,13 @@ func (r *MarketplaceRepo) GetPublicProducts(filter ProductFilter) ([]entity.Mark
 	}
 	offset := (filter.Page - 1) * filter.Limit
 
-	query := fmt.Sprintf(`SELECT id, "productId", "marketplaceCategoryId", name, "shortDescription", "fullDescription",
-		price, discount, quantity, images, "isVisible", "createdAt", "updatedAt"
-		FROM marketplace_products WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d`,
+	query := fmt.Sprintf(`SELECT p.id, p."productId", p."businessId", p."marketplaceCategoryId", p.name, p."shortDescription", p."fullDescription",
+		p.price, p.discount, p.quantity, p.images, p."isVisible", p."createdAt", p."updatedAt",
+		COALESCE(mc.name, '') as categoryName, COALESCE(b.name, '') as businessName
+		FROM marketplace_products p
+		LEFT JOIN marketplace_categories mc ON p."marketplaceCategoryId" = mc.id
+		LEFT JOIN businesses b ON p."businessId" = b.id
+		WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d`,
 		whereSQL, orderBy, argIndex, argIndex+1)
 	args = append(args, filter.Limit, offset)
 
@@ -101,8 +105,9 @@ func (r *MarketplaceRepo) GetPublicProducts(filter ProductFilter) ([]entity.Mark
 	for rows.Next() {
 		var p entity.MarketplaceProduct
 		if err := rows.Scan(
-			&p.ID, &p.ProductID, &p.MarketplaceCategoryID, &p.Name, &p.ShortDescription, &p.FullDescription,
+			&p.ID, &p.ProductID, &p.BusinessID, &p.MarketplaceCategoryID, &p.Name, &p.ShortDescription, &p.FullDescription,
 			&p.Price, &p.Discount, &p.Quantity, &p.Images, &p.IsVisible, &p.CreatedAt, &p.UpdatedAt,
+			&p.CategoryName, &p.BusinessName,
 		); err != nil {
 			return nil, 0, err
 		}
@@ -114,12 +119,17 @@ func (r *MarketplaceRepo) GetPublicProducts(filter ProductFilter) ([]entity.Mark
 
 func (r *MarketplaceRepo) GetProductByID(id int) (*entity.MarketplaceProduct, error) {
 	p := &entity.MarketplaceProduct{}
-	query := `SELECT id, "productId", "marketplaceCategoryId", name, "shortDescription", "fullDescription",
-		price, discount, quantity, images, "isVisible", "createdAt", "updatedAt"
-		FROM marketplace_products WHERE id = $1 AND "isVisible" = TRUE`
+	query := `SELECT p.id, p."productId", p."businessId", p."marketplaceCategoryId", p.name, p."shortDescription", p."fullDescription",
+		p.price, p.discount, p.quantity, p.images, p."isVisible", p."createdAt", p."updatedAt",
+		COALESCE(mc.name, '') as categoryName, COALESCE(b.name, '') as businessName
+		FROM marketplace_products p
+		LEFT JOIN marketplace_categories mc ON p."marketplaceCategoryId" = mc.id
+		LEFT JOIN businesses b ON p."businessId" = b.id
+		WHERE p.id = $1 AND p."isVisible" = TRUE`
 	err := r.db.QueryRow(query, id).Scan(
-		&p.ID, &p.ProductID, &p.MarketplaceCategoryID, &p.Name, &p.ShortDescription, &p.FullDescription,
+		&p.ID, &p.ProductID, &p.BusinessID, &p.MarketplaceCategoryID, &p.Name, &p.ShortDescription, &p.FullDescription,
 		&p.Price, &p.Discount, &p.Quantity, &p.Images, &p.IsVisible, &p.CreatedAt, &p.UpdatedAt,
+		&p.CategoryName, &p.BusinessName,
 	)
 	if err != nil {
 		return nil, err

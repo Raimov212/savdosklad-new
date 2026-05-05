@@ -181,17 +181,17 @@ function openBusinessModal(b = null) {
           </div>
         </div>
       </div>
-      <div class="form-group">
-        <label>${t("Biznes logotipi")}</label>
-        <div style="display:flex; gap:16px; align-items: flex-start;">
-           <div id="biz-image-preview" style="width:100px; height:100px; border-radius:12px; background:var(--bg-input); border:2px dashed var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-             ${isEdit && b.image ? `<img src="${b.image}" style="width:100%; height:100%; object-fit:cover;">` : `<span style="font-size:32px; opacity:0.3;">🖼️</span>`}
-           </div>
-           <div style="flex:1">
-             <input type="file" class="form-control" id="biz-image-file" accept="image/*" onchange="previewBusinessImage(this)">
-             <input type="hidden" id="biz-image-url" value="${isEdit && b.image ? escapeHtml(b.image) : ''}">
-             <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">${t("Tavsiya etilgan: 500x500px. JPG, PNG.")}</p>
-           </div>
+      <div class="form-group" style="margin-top:10px; padding:12px; background:rgba(0,0,0,0.02); border-radius:8px;">
+        <label style="font-weight:700; margin-bottom:8px; display:block;">${t("Barcode qidiruv sozlamalari")}</label>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer;">
+            <input type="checkbox" id="biz-local-lookup" ${(!isEdit || b.localBarcodeLookup) ? 'checked' : ''}>
+            <span>${t("Mahalliy bazadan qidirish")}</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-weight:400; cursor:pointer;">
+            <input type="checkbox" id="biz-global-lookup" ${isEdit && b.globalBarcodeLookup ? 'checked' : ''}>
+            <span>${t("Global bazadan qidirish (Open Food Facts)")}</span>
+          </label>
         </div>
       </div>
       <div class="modal-footer" style="padding-top:10px">
@@ -357,7 +357,9 @@ async function saveBusiness(e, id) {
     districtId: parseInt(document.getElementById('biz-district-sel')?.value) || null,
     marketId: marketId,
     address: finalAddress,
-    image: document.getElementById('biz-image-url')?.value.trim() || null
+    image: document.getElementById('biz-image-url')?.value.trim() || null,
+    localBarcodeLookup: document.getElementById('biz-local-lookup').checked,
+    globalBarcodeLookup: document.getElementById('biz-global-lookup').checked
   };
 
   try {

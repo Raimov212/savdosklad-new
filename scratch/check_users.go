@@ -1,44 +1,56 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"log"
-	"savdosklad/config"
-	"savdosklad/pkg/database"
+	"os"
+	"time"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
+	godotenv.Load(".env")
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
+		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"), os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
 
-	db, err := database.NewPostgresDB(cfg.DB)
-	if err != nil {
-		log.Fatal(err)
-	}
+	db, err := sql.Open("postgres", connStr)
+	if err != nil { log.Fatal(err) }
 	defer db.Close()
 
-	rows, err := db.Query(`SELECT id, "userName", "telegramUserId", "brandName", "brandImage" FROM users`)
+	rows, err := db.Query(`SELECT id, "firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "createdAt", "updatedAt" FROM users ORDER BY id`)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	fmt.Println("Users in DB:")
 	for rows.Next() {
-		var id int
-		var username string
-		var tgID int64
-		var brandName, brandImage *string
-		rows.Scan(&id, &username, &tgID, &brandName, &brandImage)
-		
-		bn := "nil"
-		if brandName != nil { bn = *brandName }
-		bi := "nil"
-		if brandImage != nil { bi = *brandImage }
-		
-		fmt.Printf("ID: %d, User: %s, TG_ID: %d, Brand: %s, Image: %s\n", id, username, tgID, bn, bi)
+		var (
+			id int
+			firstName, lastName, userName, password string
+			phoneNumber, inviterCode, offerCode, image, brandName, brandImage *string
+			role int
+			isVerified, isExpired bool
+			tgID sql.NullInt64
+			lang sql.NullString
+			marketId, createdBy *int
+			expDate sql.NullTime
+			createdAt, updatedAt time.Time
+		)
+
+		err := rows.Scan(
+			&id, &firstName, &lastName, &phoneNumber, &userName, &password,
+			&role, &inviterCode, &offerCode, &isVerified, &isExpired,
+			&image, &brandName, &brandImage, &tgID, &lang, &marketId, &createdBy, &expDate, &createdAt, &updatedAt,
+		)
+		if err != nil {
+			fmt.Printf("XATO Topildi! ID: %d da muammo bor. Xato: %v\n", id, err)
+			continue
+		}
+		fmt.Printf("User ID: %d Muvaffaqiyatli o'qildi!\n", id)
 	}
+	fmt.Println("Tekshiruv tugadi.")
 }
