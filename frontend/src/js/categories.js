@@ -87,9 +87,9 @@ function renderCategoriesTable(list) {
 }
 
 function filterCategories(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allCategoriesList.filter(c =>
-    c.name && c.name.toLowerCase().includes(q)
+    c.name && String(c.name).toLowerCase().includes(q)
   );
   const _inputEl = document.getElementById('category-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;

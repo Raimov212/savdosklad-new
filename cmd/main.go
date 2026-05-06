@@ -63,6 +63,7 @@ func main() {
 	calculationRepo := postgres.NewCalculationRepo(db)
 	organizationRepo := postgres.NewOrganizationRepo(db)
 	salaryRepo := postgres.NewSalaryRepo(db)
+	cashbackTierRepo := postgres.NewCashbackTierRepo(db)
 
 	// Brand management and RBAC updates
 	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "brandName" VARCHAR(255);`)
@@ -114,6 +115,32 @@ func main() {
 	_, _ = db.Exec(`ALTER TABLE total_refunds ADD COLUMN IF NOT EXISTS "createdBy" INTEGER REFERENCES users(id);`)
 	_, _ = db.Exec(`ALTER TABLE total_expenses ADD COLUMN IF NOT EXISTS "createdBy" INTEGER REFERENCES users(id);`)
 
+	// Cashback system updates
+	_, _ = db.Exec(`CREATE TABLE IF NOT EXISTS cashback_tiers (
+		id SERIAL PRIMARY KEY,
+		"businessId" INTEGER REFERENCES businesses(id) ON DELETE CASCADE,
+		name VARCHAR(255),
+		"minSpend" NUMERIC(15,2) NOT NULL DEFAULT 0,
+		percentage NUMERIC(5,2) NOT NULL DEFAULT 0,
+		"createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		"updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);`)
+	// Fix old schema if table was already created
+	_, _ = db.Exec(`ALTER TABLE cashback_tiers RENAME COLUMN business_id TO "businessId";`)
+	_, _ = db.Exec(`ALTER TABLE cashback_tiers RENAME COLUMN min_spend TO "minSpend";`)
+	_, _ = db.Exec(`ALTER TABLE cashback_tiers RENAME COLUMN created_at TO "createdAt";`)
+	_, _ = db.Exec(`ALTER TABLE cashback_tiers RENAME COLUMN updated_at TO "updatedAt";`)
+
+	_, _ = db.Exec(`ALTER TABLE clients ADD COLUMN IF NOT EXISTS "cashbackBalance" NUMERIC(15,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE clients ADD COLUMN IF NOT EXISTS "totalSpent" NUMERIC(15,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "cashbackEnabled" BOOLEAN DEFAULT FALSE;`)
+	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "cashbackType" VARCHAR(20) DEFAULT 'percentage';`)
+	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "cashbackPercentage" NUMERIC(5,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE products ADD COLUMN IF NOT EXISTS "cashbackPercentage" NUMERIC(5,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "cashbackEarned" NUMERIC(15,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "cashbackUsed" NUMERIC(15,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "cashbackAmount" NUMERIC(15,2) DEFAULT 0;`)
+
 	// Region repository
 	regionRepo := postgres.NewRegionRepo(db)
 
@@ -135,13 +162,14 @@ func main() {
 	categoryUC := usecase.NewCategoryUseCase(categoryRepo)
 	productUC := usecase.NewProductUseCase(productRepo)
 	clientUC := usecase.NewClientUseCase(clientRepo, userRepo)
-	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, productRepo, tgNotifier)
+	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, productRepo, businessRepo, cashbackTierRepo, tgNotifier)
 	refundUC := usecase.NewRefundUseCase(refundRepo, tgNotifier)
 	expenseUC := usecase.NewExpenseUseCase(expenseRepo, tgNotifier)
 	moneyUC := usecase.NewMoneyUseCase(moneyRepo)
 	calculationUC := usecase.NewCalculationUseCase(calculationRepo)
 	organizationUC := usecase.NewOrganizationUseCase(organizationRepo)
 	salaryUC := usecase.NewSalaryUseCase(salaryRepo)
+	cashbackTierUC := usecase.NewCashbackTierUseCase(cashbackTierRepo)
 
 	// Admin-related
 	regionUC := usecase.NewRegionUseCase(regionRepo)
@@ -261,6 +289,7 @@ func main() {
 	calculationH := handler.NewCalculationHandler(calculationUC)
 	organizationH := handler.NewOrganizationHandler(organizationUC)
 	salaryH := handler.NewSalaryHandler(salaryUC)
+	cashbackH := handler.NewCashbackHandler(cashbackTierUC, userUC)
 	excelH := handler.NewExcelHandler(productUC, categoryUC)
 	uploadH := handler.NewUploadHandler()
 	adminH := handler.NewAdminHandler(userUC, regionUC)
@@ -303,7 +332,7 @@ func main() {
 		protected.Use(middleware.JWTAuth(jwtManager))
 		protected.Use(middleware.SubscriptionCheck(userRepo))
 		{
-			handler.RegisterRoutes(protected, userH, businessH, categoryH, productH, clientH, transactionH, refundH, expenseH, moneyH, calculationH, organizationH, salaryH)
+			handler.RegisterRoutes(protected, userH, businessH, categoryH, productH, clientH, transactionH, refundH, expenseH, moneyH, calculationH, organizationH, salaryH, cashbackH)
 
 			// Excel
 			excel := protected.Group("/excel")

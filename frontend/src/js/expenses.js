@@ -89,10 +89,10 @@ function renderExpenseTable(list, isAppend = false) {
     if (!isAppend) window.expensePage = 1;
   }
   // Use allExpensesList filtered by search query
-  const query = document.getElementById('expense-search')?.value.toLowerCase() || '';
+  const query = (document.getElementById('expense-search')?.value || '').toLowerCase();
   let filteredRaw = allExpensesList.filter(e => 
-    !query || (e.description && e.description.toLowerCase().includes(query)) ||
-    (e.createdAt && e.createdAt.toLowerCase().includes(query))
+    !query || (e.description && String(e.description).toLowerCase().includes(query)) ||
+    (e.createdAt && String(e.createdAt).toLowerCase().includes(query))
   );
 
   if (window.expensePeriod === 'monthly') {
@@ -328,9 +328,9 @@ function renderFixedTable(list, isAppend = false) {
 }
 
 function filterExpenses(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allExpensesList.filter(e =>
-    (e.description && e.description.toLowerCase().includes(q))
+    (e.description && String(e.description).toLowerCase().includes(q))
   );
   const _inputEl = document.getElementById('expense-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;
@@ -347,10 +347,10 @@ function filterExpenses(query) {
 }
 
 function filterFixed(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allFixedList.filter(f =>
-    (f.name && f.name.toLowerCase().includes(q)) ||
-    (f.description && f.description.toLowerCase().includes(q))
+    (f.name && String(f.name).toLowerCase().includes(q)) ||
+    (f.description && String(f.description).toLowerCase().includes(q))
   );
   const _inputEl = document.getElementById('fixed-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;

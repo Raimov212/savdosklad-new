@@ -21,6 +21,9 @@ type Business struct {
 	MarketName            string    `json:"marketName,omitempty"`
 	LocalBarcodeLookup    bool      `json:"localBarcodeLookup"`
 	GlobalBarcodeLookup   bool      `json:"globalBarcodeLookup"`
+	CashbackEnabled       bool      `json:"cashbackEnabled"`
+	CashbackType          string    `json:"cashbackType"`
+	CashbackPercentage    float64   `json:"cashbackPercentage"`
 }
 
 type CreateBusinessRequest struct {
@@ -33,6 +36,9 @@ type CreateBusinessRequest struct {
 	DistrictID            *int    `json:"districtId"`
 	MarketID              *int    `json:"marketId"`
 	Address               string  `json:"address"`
+	CashbackEnabled       bool    `json:"cashbackEnabled"`
+	CashbackType          string  `json:"cashbackType"`
+	CashbackPercentage    float64 `json:"cashbackPercentage"`
 }
 
 type UpdateBusinessRequest struct {
@@ -47,4 +53,7 @@ type UpdateBusinessRequest struct {
 	Address               *string  `json:"address"`
 	LocalBarcodeLookup    *bool    `json:"localBarcodeLookup"`
 	GlobalBarcodeLookup   *bool    `json:"globalBarcodeLookup"`
+	CashbackEnabled       *bool    `json:"cashbackEnabled"`
+	CashbackType          *string  `json:"cashbackType"`
+	CashbackPercentage    *float64 `json:"cashbackPercentage"`
 }

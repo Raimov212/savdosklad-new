@@ -1303,6 +1303,7 @@ func RegisterRoutes(
 	calculationH *CalculationHandler,
 	organizationH *OrganizationHandler,
 	salaryH *SalaryHandler,
+	cashbackH *CashbackHandler,
 ) {
 	// User Handlers
 	r.GET("/users", userH.GetAll)
@@ -1396,4 +1397,10 @@ func RegisterRoutes(
 	r.GET("/organizations/:id", organizationH.GetByID)
 	r.PUT("/organizations/:id", organizationH.Update)
 	r.DELETE("/organizations/:id", organizationH.Delete)
+
+	// Cashback Handlers
+	r.POST("/cashback/tiers", cashbackH.CreateTier)
+	r.GET("/cashback/tiers", cashbackH.GetTiersByBusinessID)
+	r.PUT("/cashback/tiers/:id", cashbackH.UpdateTier)
+	r.DELETE("/cashback/tiers/:id", cashbackH.DeleteTier)
 }

@@ -20,9 +20,9 @@ func NewBusinessRepo(db *sql.DB) *BusinessRepo {
 func (r *BusinessRepo) Create(b *entity.Business) (int, error) {
 	var id int
 	err := r.db.QueryRow(
-		`INSERT INTO businesses ("userId", name, description, "businessAccountNumber", balance, image, "regionId", "districtId", "marketId", address, "localBarcodeLookup", "globalBarcodeLookup", "createdAt", "updatedAt")
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
-		b.UserID, b.Name, b.Description, b.BusinessAccountNumber, b.Balance, b.Image, b.RegionID, b.DistrictID, b.MarketID, b.Address, true, false, time.Now(), time.Now(),
+		`INSERT INTO businesses ("userId", name, description, "businessAccountNumber", balance, image, "regionId", "districtId", "marketId", address, "localBarcodeLookup", "globalBarcodeLookup", "cashbackEnabled", "cashbackType", "cashbackPercentage", "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING id`,
+		b.UserID, b.Name, b.Description, b.BusinessAccountNumber, b.Balance, b.Image, b.RegionID, b.DistrictID, b.MarketID, b.Address, true, false, b.CashbackEnabled, b.CashbackType, b.CashbackPercentage, time.Now(), time.Now(),
 	).Scan(&id)
 	return id, err
 }
@@ -33,7 +33,7 @@ func (r *BusinessRepo) GetByID(id int) (*entity.Business, error) {
 		`SELECT b.id, b."userId", b.name, b.description, b."businessAccountNumber", b.balance, b.image, 
 		        b."regionId", b."districtId", b."marketId", b.address, b."createdAt", b."updatedAt",
 		        COALESCE(r.name, '') as region_name, COALESCE(d.name, '') as district_name, COALESCE(m.name, '') as market_name,
-		        b."localBarcodeLookup", b."globalBarcodeLookup"
+		        b."localBarcodeLookup", b."globalBarcodeLookup", b."cashbackEnabled", b."cashbackType", b."cashbackPercentage"
 		FROM businesses b
 		LEFT JOIN regions r ON b."regionId" = r.id
 		LEFT JOIN districts d ON b."districtId" = d.id
@@ -41,7 +41,7 @@ func (r *BusinessRepo) GetByID(id int) (*entity.Business, error) {
 		WHERE b.id = $1`, id,
 	).Scan(&b.ID, &b.UserID, &b.Name, &b.Description, &b.BusinessAccountNumber, &b.Balance, &b.Image,
 		&b.RegionID, &b.DistrictID, &b.MarketID, &b.Address, &b.CreatedAt, &b.UpdatedAt,
-		&b.RegionName, &b.DistrictName, &b.MarketName, &b.LocalBarcodeLookup, &b.GlobalBarcodeLookup)
+		&b.RegionName, &b.DistrictName, &b.MarketName, &b.LocalBarcodeLookup, &b.GlobalBarcodeLookup, &b.CashbackEnabled, &b.CashbackType, &b.CashbackPercentage)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (r *BusinessRepo) GetByUserID(userID int) ([]entity.Business, error) {
 		`SELECT b.id, b."userId", b.name, b.description, b."businessAccountNumber", b.balance, b.image, 
 		        b."regionId", b."districtId", b."marketId", b.address, b."createdAt", b."updatedAt",
 		        COALESCE(r.name, '') as region_name, COALESCE(d.name, '') as district_name, COALESCE(m.name, '') as market_name,
-		        b."localBarcodeLookup", b."globalBarcodeLookup"
+		        b."localBarcodeLookup", b."globalBarcodeLookup", b."cashbackEnabled", b."cashbackType", b."cashbackPercentage"
 		FROM businesses b
 		LEFT JOIN regions r ON b."regionId" = r.id
 		LEFT JOIN districts d ON b."districtId" = d.id
@@ -74,7 +74,7 @@ func (r *BusinessRepo) GetByUserID(userID int) ([]entity.Business, error) {
 		var b entity.Business
 		if err := rows.Scan(&b.ID, &b.UserID, &b.Name, &b.Description, &b.BusinessAccountNumber, &b.Balance, &b.Image,
 			&b.RegionID, &b.DistrictID, &b.MarketID, &b.Address, &b.CreatedAt, &b.UpdatedAt,
-			&b.RegionName, &b.DistrictName, &b.MarketName, &b.LocalBarcodeLookup, &b.GlobalBarcodeLookup); err != nil {
+			&b.RegionName, &b.DistrictName, &b.MarketName, &b.LocalBarcodeLookup, &b.GlobalBarcodeLookup, &b.CashbackEnabled, &b.CashbackType, &b.CashbackPercentage); err != nil {
 			log.Printf("[Repo] GetByUserID scan error for %d: %v", userID, err)
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func (r *BusinessRepo) GetAll() ([]entity.Business, error) {
 		`SELECT b.id, b."userId", b.name, b.description, b."businessAccountNumber", b.balance, b.image, 
 		        b."regionId", b."districtId", b."marketId", b.address, b."createdAt", b."updatedAt",
 		        COALESCE(r.name, '') as region_name, COALESCE(d.name, '') as district_name, COALESCE(m.name, '') as market_name,
-		        b."localBarcodeLookup", b."globalBarcodeLookup"
+		        b."localBarcodeLookup", b."globalBarcodeLookup", b."cashbackEnabled", b."cashbackType", b."cashbackPercentage"
 		FROM businesses b
 		LEFT JOIN regions r ON b."regionId" = r.id
 		LEFT JOIN districts d ON b."districtId" = d.id
@@ -106,7 +106,7 @@ func (r *BusinessRepo) GetAll() ([]entity.Business, error) {
 		var b entity.Business
 		if err := rows.Scan(&b.ID, &b.UserID, &b.Name, &b.Description, &b.BusinessAccountNumber, &b.Balance, &b.Image,
 			&b.RegionID, &b.DistrictID, &b.MarketID, &b.Address, &b.CreatedAt, &b.UpdatedAt,
-			&b.RegionName, &b.DistrictName, &b.MarketName, &b.LocalBarcodeLookup, &b.GlobalBarcodeLookup); err != nil {
+			&b.RegionName, &b.DistrictName, &b.MarketName, &b.LocalBarcodeLookup, &b.GlobalBarcodeLookup, &b.CashbackEnabled, &b.CashbackType, &b.CashbackPercentage); err != nil {
 			return nil, err
 		}
 		list = append(list, b)
@@ -172,6 +172,21 @@ func (r *BusinessRepo) Update(id int, req entity.UpdateBusinessRequest) error {
 	if req.GlobalBarcodeLookup != nil {
 		query += fmt.Sprintf(`, "globalBarcodeLookup" = $%d`, argIdx)
 		args = append(args, *req.GlobalBarcodeLookup)
+		argIdx++
+	}
+	if req.CashbackEnabled != nil {
+		query += fmt.Sprintf(`, "cashbackEnabled" = $%d`, argIdx)
+		args = append(args, *req.CashbackEnabled)
+		argIdx++
+	}
+	if req.CashbackType != nil {
+		query += fmt.Sprintf(`, "cashbackType" = $%d`, argIdx)
+		args = append(args, *req.CashbackType)
+		argIdx++
+	}
+	if req.CashbackPercentage != nil {
+		query += fmt.Sprintf(`, "cashbackPercentage" = $%d`, argIdx)
+		args = append(args, *req.CashbackPercentage)
 		argIdx++
 	}
 

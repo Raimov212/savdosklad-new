@@ -18,6 +18,7 @@ type Product struct {
 	CategoryID       int       `json:"categoryId"`
 	BusinessID       int       `json:"businessId"`
 	IsDeleted        bool      `json:"isDeleted"`
+	CashbackPercentage float64   `json:"cashbackPercentage"`
 	CreatedAt        time.Time `json:"createdAt"`
 	UpdatedAt        time.Time `json:"updatedAt"`
 }
@@ -36,6 +37,7 @@ type CreateProductRequest struct {
 	Country          string   `json:"country"`
 	CategoryID       int      `json:"categoryId" binding:"required"`
 	BusinessID       int      `json:"businessId" binding:"required"`
+	CashbackPercentage float64 `json:"cashbackPercentage"`
 }
 
 type UpdateProductRequest struct {
@@ -52,6 +54,7 @@ type UpdateProductRequest struct {
 	Country          *string  `json:"country"`
 	CategoryID       *int     `json:"categoryId"`
 	IsDeleted        *bool    `json:"isDeleted"`
+	CashbackPercentage *float64 `json:"cashbackPercentage"`
 }
 
 type ProductChange struct {

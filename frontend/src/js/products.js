@@ -181,10 +181,10 @@ function renderProductsTable(list, isAppend = false) {
 }
 
 function filterProducts(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allProducts.filter(p =>
-    (p.name && p.name.toLowerCase().includes(q)) ||
-    (p.barcode && p.barcode.toLowerCase().includes(q))
+    (p.name && String(p.name).toLowerCase().includes(q)) ||
+    (p.barcode && String(p.barcode).toLowerCase().includes(q))
   );
   const _inputEl = document.getElementById('product-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;
@@ -275,13 +275,18 @@ function openProductModal(p = null) {
 
         <div class="form-row">
           <div class="form-group">
+            <label>💰 ${t("Keshbek foizi")} (%)</label>
+            <input type="number" min="0" max="100" step="0.1" class="form-control" id="prod-cashback-pct" value="${isEdit ? (p.cashbackPercentage || 0) : 0}" placeholder="0">
+          </div>
+          <div class="form-group">
             <label>${t("Lokal kod")}</label>
             <input type="text" class="form-control" id="prod-lcode" value="${isEdit && p.lokalCode ? escapeHtml(p.lokalCode) : ''}" placeholder="${t('Ixtiyoriy')}">
           </div>
-          <div class="form-group">
-            <label>${t("Mamlakat")}</label>
-            <input type="text" class="form-control" id="prod-country" value="${isEdit ? escapeHtml(p.country || '') : t('O\'zbekiston')}" placeholder="${t('O\'zbekiston')}">
-          </div>
+        </div>
+
+        <div class="form-group">
+          <label>${t("Mamlakat")}</label>
+          <input type="text" class="form-control" id="prod-country" value="${isEdit ? escapeHtml(p.country || '') : t('O\'zbekiston')}" placeholder="${t('O\'zbekiston')}">
         </div>
 
         <div class="form-group">
@@ -570,6 +575,7 @@ async function saveProduct(e, id) {
         country: document.getElementById('prod-country').value.trim() || null,
         categoryId: parseInt(document.getElementById('prod-cat').value),
         images: imageUrl || null,
+        cashbackPercentage: parseFloat(document.getElementById('prod-cashback-pct')?.value) || 0,
       });
       showToast(t('Mahsulot yangilandi'));
       closeModal();
@@ -587,6 +593,7 @@ async function saveProduct(e, id) {
         country: document.getElementById('prod-country').value.trim(),
         categoryId: parseInt(document.getElementById('prod-cat').value),
         images: imageUrl,
+        cashbackPercentage: parseFloat(document.getElementById('prod-cashback-pct')?.value) || 0,
       });
       showToast(t('Mahsulot yaratildi'));
       resetProductForm();

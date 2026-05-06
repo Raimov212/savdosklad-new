@@ -184,13 +184,13 @@ function renderAdminUsersTable(list, isAppend = false) {
 }
 
 function filterAdminUsers(query) {
-    const q = query.toLowerCase();
+    const q = (query || '').toLowerCase();
     const filtered = allAdminUsersList.filter(u => {
         const roleName = u.role === 2 ? 'super admin' : u.role === 1 ? 'admin' : u.role === 3 ? 'client' : 'employee';
-        return (u.firstName && u.firstName.toLowerCase().includes(q)) ||
-            (u.lastName && u.lastName.toLowerCase().includes(q)) ||
-            (u.userName && u.userName.toLowerCase().includes(q)) ||
-            (u.phoneNumber && u.phoneNumber.toLowerCase().includes(q)) ||
+        return (u.firstName && String(u.firstName).toLowerCase().includes(q)) ||
+            (u.lastName && String(u.lastName).toLowerCase().includes(q)) ||
+            (u.userName && String(u.userName).toLowerCase().includes(q)) ||
+            (u.phoneNumber && String(u.phoneNumber).toLowerCase().includes(q)) ||
             roleName.includes(q);
     });
     const _inputEl = document.getElementById('admin-user-search');
@@ -534,9 +534,9 @@ function renderAdminRegionsTable(list, isAppend = false) {
 }
 
 function filterAdminRegions(query) {
-    const q = query.toLowerCase();
+    const q = (query || '').toLowerCase();
     const filtered = allAdminRegionsList.filter(r =>
-        (r.name && r.name.toLowerCase().includes(q))
+        (r.name && String(r.name).toLowerCase().includes(q))
     );
     const _inputEl = document.getElementById('admin-region-search');
     const _cursor = _inputEl ? _inputEl.selectionStart : 0;
@@ -686,10 +686,10 @@ function renderAdminDistrictsTable(list, isAppend = false) {
 }
 
 function filterAdminDistricts(query) {
-    const q = query.toLowerCase();
+    const q = (query || '').toLowerCase();
     const filtered = allAdminDistrictsList.filter(d =>
-        (d.name && d.name.toLowerCase().includes(q)) ||
-        (d.regionName && d.regionName.toLowerCase().includes(q))
+        (d.name && String(d.name).toLowerCase().includes(q)) ||
+        (d.regionName && String(d.regionName).toLowerCase().includes(q))
     );
     const _inputEl = document.getElementById('admin-district-search');
     const _cursor = _inputEl ? _inputEl.selectionStart : 0;
@@ -854,11 +854,11 @@ function renderAdminMarketsTable(list, isAppend = false) {
 }
 
 function filterAdminMarkets(query) {
-    const q = query.toLowerCase();
+    const q = (query || '').toLowerCase();
     const filtered = allAdminMarketsList.filter(m =>
-        (m.name && m.name.toLowerCase().includes(q)) ||
-        (m.address && m.address.toLowerCase().includes(q)) ||
-        (m.districtName && m.districtName.toLowerCase().includes(q))
+        (m.name && String(m.name).toLowerCase().includes(q)) ||
+        (m.address && String(m.address).toLowerCase().includes(q)) ||
+        (m.districtName && String(m.districtName).toLowerCase().includes(q))
     );
     const _inputEl = document.getElementById('admin-market-search');
     const _cursor = _inputEl ? _inputEl.selectionStart : 0;

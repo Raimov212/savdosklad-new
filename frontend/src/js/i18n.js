@@ -254,7 +254,20 @@ export const translations = {
         "Mahalliy bazadan qidirish": "Mahalliy bazadan qidirish",
         "Global bazadan qidirish (Open Food Facts)": "Global bazadan qidirish (Open Food Facts)",
         "Ma'lumotlar topildi va to'ldirildi": "Ma'lumotlar topildi va to'ldirildi",
-        "Global bazadan ma'lumot olindi": "Global bazadan ma'lumot olindi"
+        "Global bazadan ma'lumot olindi": "Global bazadan ma'lumot olindi",
+        "Keshbek": "Keshbek",
+        "Keshbek tizimi": "Keshbek tizimi",
+        "Keshbek turi": "Keshbek turi",
+        "Foizli": "Foizli",
+        "Darajali (Tiered)": "Darajali (Tiered)",
+        "Mahsulotga xos": "Mahsulotga xos",
+        "Keshbek foizi": "Keshbek foizi",
+        "Keshbek darajalari": "Keshbek darajalari",
+        "Minimal harid summasi": "Minimal harid summasi",
+        "Keshbek balansi": "Keshbek balansi",
+        "Keshbek ishlatish": "Keshbek ishlatish",
+        "Keshbek hisoblandi": "Keshbek hisoblandi",
+        "Keshbek sozlamalari": "Keshbek sozlamalari"
     },
     'uz-cyrl': {
         "Biznesingizni": "Бизнесингизни",
@@ -916,7 +929,20 @@ export const translations = {
         "Telefon raqami noto'g'ri formatda (Masalan: +998901234567)": "Телефон рақами нотўғри форматда (Масалан: +998901234567)",
         "Kutilmagan xatolik yuz berdi": "Кутилмаган хатолик юз берди",
         "Iltimos, sahifani yangilang yoki qo'llab-quvvatlash xizmatiga murojaat qiling.": "Илтимос, саҳифани янгиланг ёки қўллаб-қувватлаш хизматига мурожаат қилинг.",
-        "Sahifani yangilash": "Саҳифани янгилаш"
+        "Sahifani yangilash": "Саҳифани янгилаш",
+        "Keshbek": "Кешбек",
+        "Keshbek tizimi": "Кешбек тизими",
+        "Keshbek turi": "Кешбек тури",
+        "Foizli": "Фоизли",
+        "Darajali (Tiered)": "Даражали (Tiered)",
+        "Mahsulotga xos": "Маҳсулотга хос",
+        "Keshbek foizi": "Кешбек фоизи",
+        "Keshbek darajalari": "Кешбек даражалари",
+        "Minimal harid summasi": "Минимал ҳарид суммаси",
+        "Keshbek balansi": "Кешбек баланси",
+        "Keshbek ishlatish": "Кешбек ишлатиш",
+        "Keshbek hisoblandi": "Кешбек ҳисобланди",
+        "Keshbek sozlamalari": "Кешбек созламалари"
     },
     ru: {
         "Biznesingizni": "Управляйте бизнесом",
@@ -1584,7 +1610,20 @@ export const translations = {
         "Mahalliy bazadan qidirish": "Поиск в локальной базе",
         "Global bazadan qidirish (Open Food Facts)": "Глобальный поиск (Open Food Facts)",
         "Ma'lumotlar topildi va to'ldirildi": "Данные найдены и заполнены",
-        "Global bazadan ma'lumot olindi": "Данные получены из глобальной базы"
+        "Global bazadan ma'lumot olindi": "Данные получены из глобальной базы",
+        "Keshbek": "Кешбэк",
+        "Keshbek tizimi": "Система кешбэка",
+        "Keshbek turi": "Тип кешбэка",
+        "Foizli": "Процентный",
+        "Darajali (Tiered)": "Уровневый (Tiered)",
+        "Mahsulotga xos": "По конкретным товарам",
+        "Keshbek foizi": "Процент кешбэка",
+        "Keshbek darajalari": "Уровни кешбэка",
+        "Minimal harid summasi": "Минимальная сумма покупки",
+        "Keshbek balansi": "Кешбэк баланс",
+        "Keshbek ishlatish": "Использовать кешбэк",
+        "Keshbek hisoblandi": "Кешбэк начислен",
+        "Keshbek sozlamalari": "Настройки кешбэка"
     },
     en: {
         "Biznesingizni": "Manage your business",
@@ -2236,7 +2275,20 @@ export const translations = {
         "Mahalliy bazadan qidirish": "Local database lookup",
         "Global bazadan qidirish (Open Food Facts)": "Global lookup (Open Food Facts)",
         "Ma'lumotlar topildi va to'ldirildi": "Data found and filled",
-        "Global bazadan ma'lumot olindi": "Data fetched from global database"
+        "Global bazadan ma'lumot olindi": "Data fetched from global database",
+        "Keshbek": "Cashback",
+        "Keshbek tizimi": "Cashback System",
+        "Keshbek turi": "Cashback Type",
+        "Foizli": "Percentage",
+        "Darajali (Tiered)": "Tiered",
+        "Mahsulotga xos": "Product-specific",
+        "Keshbek foizi": "Cashback Percentage",
+        "Keshbek darajalari": "Cashback Tiers",
+        "Minimal harid summasi": "Minimum purchase amount",
+        "Keshbek balansi": "Cashback balance",
+        "Keshbek ishlatish": "Use cashback",
+        "Keshbek hisoblandi": "Cashback earned",
+        "Keshbek sozlamalari": "Cashback Settings"
     }
 };
 

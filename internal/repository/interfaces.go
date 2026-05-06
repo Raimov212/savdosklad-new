@@ -143,4 +143,10 @@ type OrganizationRepository interface {
 	Delete(id int) error
 }
 
-
+type CashbackTierRepository interface {
+	Create(tier *entity.CashbackTier) (int, error)
+	GetByID(id int) (*entity.CashbackTier, error)
+	GetByBusinessID(businessID int) ([]entity.CashbackTier, error)
+	Update(id int, req entity.UpdateCashbackTierRequest) error
+	Delete(id int) error
+}

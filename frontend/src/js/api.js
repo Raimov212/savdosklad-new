@@ -99,6 +99,11 @@ export const api = {
     post(path, body) { return this.request('POST', path, body); },
     put(path, body) { return this.request('PUT', path, body); },
     delete(path) { return this.request('DELETE', path); },
+    // Cashback Tiers
+    getCashbackTiers(bid) { return this.get(`/cashback/tiers?businessId=${bid}`); },
+    createCashbackTier(data) { return this.post('/cashback/tiers', data); },
+    updateCashbackTier(id, data) { return this.put(`/cashback/tiers/${id}`, data); },
+    deleteCashbackTier(id) { return this.delete(`/cashback/tiers/${id}`); },
 };
 
 // Global error handler for Webview debugging

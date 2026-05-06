@@ -19,9 +19,9 @@ func NewClientRepo(db *sql.DB) *ClientRepo {
 func (r *ClientRepo) Create(c *entity.Client) (int, error) {
 	var id int
 	err := r.db.QueryRow(
-		`INSERT INTO clients ("businessId", "fullName", phone, address, "telegramUserId", language, "createdAt", "updatedAt") 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-		c.BusinessID, c.FullName, c.Phone, c.Address, c.TelegramUserID, c.Language, time.Now(), time.Now(),
+		`INSERT INTO clients ("businessId", "fullName", phone, address, "telegramUserId", language, "cashbackBalance", "totalSpent", "createdAt", "updatedAt") 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+		c.BusinessID, c.FullName, c.Phone, c.Address, c.TelegramUserID, c.Language, c.CashbackBalance, c.TotalSpent, time.Now(), time.Now(),
 	).Scan(&id)
 	return id, err
 }
@@ -29,9 +29,9 @@ func (r *ClientRepo) Create(c *entity.Client) (int, error) {
 func (r *ClientRepo) GetByID(id int) (*entity.Client, error) {
 	var c entity.Client
 	err := r.db.QueryRow(
-		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "createdAt", "updatedAt" 
+		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "cashbackBalance", "totalSpent", "createdAt", "updatedAt" 
 		 FROM clients WHERE id = $1`, id,
-	).Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CreatedAt, &c.UpdatedAt)
+	).Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CashbackBalance, &c.TotalSpent, &c.CreatedAt, &c.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (r *ClientRepo) GetByID(id int) (*entity.Client, error) {
 
 func (r *ClientRepo) GetByBusinessID(businessID int) ([]entity.Client, error) {
 	rows, err := r.db.Query(
-		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "createdAt", "updatedAt" 
+		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "cashbackBalance", "totalSpent", "createdAt", "updatedAt" 
 		 FROM clients WHERE "businessId" = $1 ORDER BY id`, businessID,
 	)
 	if err != nil {
@@ -51,7 +51,7 @@ func (r *ClientRepo) GetByBusinessID(businessID int) ([]entity.Client, error) {
 	var list []entity.Client
 	for rows.Next() {
 		var c entity.Client
-		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CashbackBalance, &c.TotalSpent, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		list = append(list, c)
@@ -61,7 +61,7 @@ func (r *ClientRepo) GetByBusinessID(businessID int) ([]entity.Client, error) {
 
 func (r *ClientRepo) GetByTelegramID(tgID int64) ([]entity.Client, error) {
 	rows, err := r.db.Query(
-		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "createdAt", "updatedAt" 
+		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "cashbackBalance", "totalSpent", "createdAt", "updatedAt" 
 		 FROM clients WHERE "telegramUserId" = $1`, tgID,
 	)
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *ClientRepo) GetByTelegramID(tgID int64) ([]entity.Client, error) {
 	var list []entity.Client
 	for rows.Next() {
 		var c entity.Client
-		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CashbackBalance, &c.TotalSpent, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		list = append(list, c)
@@ -82,7 +82,7 @@ func (r *ClientRepo) GetByTelegramID(tgID int64) ([]entity.Client, error) {
 
 func (r *ClientRepo) GetByPhoneNumber(phone string) ([]entity.Client, error) {
 	rows, err := r.db.Query(
-		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "createdAt", "updatedAt" 
+		`SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "cashbackBalance", "totalSpent", "createdAt", "updatedAt" 
 		 FROM clients WHERE regexp_replace(phone, '[^0-9]', '', 'g') = regexp_replace($1, '[^0-9]', '', 'g')`, phone,
 	)
 	if err != nil {
@@ -93,7 +93,7 @@ func (r *ClientRepo) GetByPhoneNumber(phone string) ([]entity.Client, error) {
 	var list []entity.Client
 	for rows.Next() {
 		var c entity.Client
-		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CashbackBalance, &c.TotalSpent, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		list = append(list, c)
@@ -109,7 +109,7 @@ func (r *ClientRepo) Search(bid int, query string) ([]entity.Client, error) {
 		}
 	}
 
-	sqlQuery := `SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "createdAt", "updatedAt" 
+	sqlQuery := `SELECT id, "businessId", "fullName", phone, address, "telegramUserId", language, "cashbackBalance", "totalSpent", "createdAt", "updatedAt" 
 		 FROM clients 
 		 WHERE "businessId" = $1 AND ("fullName" ILIKE $2`
 
@@ -130,7 +130,7 @@ func (r *ClientRepo) Search(bid int, query string) ([]entity.Client, error) {
 	var results []entity.Client
 	for rows.Next() {
 		var c entity.Client
-		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.BusinessID, &c.FullName, &c.Phone, &c.Address, &c.TelegramUserID, &c.Language, &c.CashbackBalance, &c.TotalSpent, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		results = append(results, c)

@@ -91,11 +91,11 @@ function renderRefundsTable(list, isAppend = false) {
       </div>
       <div class="page-bottom-bar">
         <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <span class="search-icon">🔍</span>
           <input type="text" placeholder="${t("Qidirish...")}" id="refund-search"
             value="${escapeHtml(document.getElementById('refund-search')?.value || '')}"
             oninput="filterRefunds(this.value)"
-            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;" class="form-control">
         </div>
         <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
         ${window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openRefundModal()">${t("Qo'shish")}</button>` : ''}
@@ -261,9 +261,9 @@ async function downloadRefundPdf(id) {
 }
 
 function filterRefunds(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allRefundsList.filter(r =>
-    (r.clientName && r.clientName.toLowerCase().includes(q)) ||
+    (r.clientName && String(r.clientName).toLowerCase().includes(q)) ||
     (r.id.toString().includes(q))
   );
   renderRefundsTable(filtered);

@@ -114,11 +114,11 @@ function renderClientsTable(list, isAppend = false) {
       </div>
       <div class="page-bottom-bar">
         <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <span class="search-icon">🔍</span>
           <input type="text" placeholder="${t("Qidirish...")}" id="client-search"
             value="${escapeHtml(document.getElementById('client-search')?.value || '')}"
             oninput="filterClients(this.value)"
-            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;" class="form-control">
         </div>
         ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>` : ''}
       </div>
@@ -138,10 +138,10 @@ function renderClientsTable(list, isAppend = false) {
 }
 
 function filterClients(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allClientsList.filter(c =>
-    (c.fullName && c.fullName.toLowerCase().includes(q)) ||
-    (c.phone && c.phone.toLowerCase().includes(q))
+    (c.fullName && String(c.fullName).toLowerCase().includes(q)) ||
+    (c.phone && String(c.phone).toLowerCase().includes(q))
   );
   const _inputEl = document.getElementById('client-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;
@@ -359,7 +359,7 @@ window.renderClientHistoryRows = function (transactions) {
 };
 
 window.searchClientHistory = function (query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = window.currentClientTransactions.filter(t =>
     t.ids.join(', ').includes(q) || formatDateTime(t.createdAt).includes(q)
   );

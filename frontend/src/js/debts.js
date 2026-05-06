@@ -71,10 +71,10 @@ function renderDebtsTabs() {
     <div id="debts-table-container"></div>
     <div class="page-bottom-bar">
       <div class="search-box" style="flex:1; max-width:none;">
-        <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+        <span class="search-icon">🔍</span>
         <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="debt-search"
           oninput="filterDebts(this.value)"
-          style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+          style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;" class="form-control">
       </div>
       <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
       <div style="width: 100px;"></div> <!-- Spacer because there is no 'Add' debt button directly -->

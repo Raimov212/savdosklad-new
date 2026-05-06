@@ -87,10 +87,10 @@ function renderBusinessesTable(list) {
 }
 
 function filterBusinesses(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allBusinessesList.filter(b =>
-    (b.name && b.name.toLowerCase().includes(q)) ||
-    (b.description && b.description.toLowerCase().includes(q))
+    (b.name && String(b.name).toLowerCase().includes(q)) ||
+    (b.description && String(b.description).toLowerCase().includes(q))
   );
   const _inputEl = document.getElementById('business-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;
@@ -192,6 +192,31 @@ function openBusinessModal(b = null) {
             <input type="checkbox" id="biz-global-lookup" ${isEdit && b.globalBarcodeLookup ? 'checked' : ''}>
             <span>${t("Global bazadan qidirish (Open Food Facts)")}</span>
           </label>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px; padding:12px; background:rgba(var(--primary-rgb), 0.05); border-radius:8px; border:1px solid rgba(var(--primary-rgb), 0.1);">
+        <label style="font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="biz-cashback-enabled" ${isEdit && b.cashbackEnabled ? 'checked' : ''} onchange="toggleCashbackSettings(this.checked)">
+          <span>${t("Keshbek tizimi")}</span>
+        </label>
+        <div id="cashback-settings-group" style="display: ${isEdit && b.cashbackEnabled ? 'flex' : 'none'}; flex-direction:column; gap:10px; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(0,0,0,0.1);">
+          <div class="form-row">
+            <div class="form-group">
+              <label>${t("Keshbek turi")}</label>
+              <select class="form-control" id="biz-cashback-type" onchange="toggleCashbackTypeFields(this.value)">
+                <option value="percentage" ${isEdit && b.cashbackType === 'percentage' ? 'selected' : ''}>${t("Foizli")}</option>
+                <option value="tiered" ${isEdit && b.cashbackType === 'tiered' ? 'selected' : ''}>${t("Darajali (Tiered)")}</option>
+                <option value="product_specific" ${isEdit && b.cashbackType === 'product_specific' ? 'selected' : ''}>${t("Mahsulotga xos")}</option>
+              </select>
+            </div>
+            <div class="form-group" id="cashback-pct-group" style="display: ${!isEdit || b.cashbackType === 'percentage' ? 'block' : 'none'}">
+              <label>${t("Keshbek foizi")} (%)</label>
+              <input type="number" step="0.1" class="form-control" id="biz-cashback-pct" value="${isEdit ? b.cashbackPercentage : 0}">
+            </div>
+          </div>
+          <div id="tiered-cashback-btn-group" style="display: ${isEdit && b.cashbackType === 'tiered' ? 'block' : 'none'}">
+            <button type="button" class="btn btn-sm btn-outline" onclick="openCashbackTiersModal(${isEdit ? b.id : 0})">⚙️ ${t("Keshbek darajalari")}</button>
+          </div>
         </div>
       </div>
       <div class="modal-footer" style="padding-top:10px">
@@ -359,7 +384,10 @@ async function saveBusiness(e, id) {
     address: finalAddress,
     image: document.getElementById('biz-image-url')?.value.trim() || null,
     localBarcodeLookup: document.getElementById('biz-local-lookup').checked,
-    globalBarcodeLookup: document.getElementById('biz-global-lookup').checked
+    globalBarcodeLookup: document.getElementById('biz-global-lookup').checked,
+    cashbackEnabled: document.getElementById('biz-cashback-enabled').checked,
+    cashbackType: document.getElementById('biz-cashback-type').value,
+    cashbackPercentage: parseFloat(document.getElementById('biz-cashback-pct').value) || 0
   };
 
   try {
@@ -411,3 +439,102 @@ window.previewBusinessImage = previewBusinessImage;
 window.businessPage = businessPage;
 window.allBusinessesList = allBusinessesList;
 window.currentBusinesses = currentBusinesses;
+window.toggleCashbackSettings = function(enabled) {
+  const group = document.getElementById('cashback-settings-group');
+  if (group) group.style.display = enabled ? 'flex' : 'none';
+};
+window.toggleCashbackTypeFields = function(type) {
+  const pctGroup = document.getElementById('cashback-pct-group');
+  const tieredGroup = document.getElementById('tiered-cashback-btn-group');
+  if (pctGroup) pctGroup.style.display = type === 'percentage' ? 'block' : 'none';
+  if (tieredGroup) tieredGroup.style.display = type === 'tiered' ? 'block' : 'none';
+};
+
+window.openCashbackTiersModal = async function(businessId) {
+  if (!businessId) {
+    showToast(t("Avval biznesni saqlang"), 'warning');
+    return;
+  }
+  
+  openModal(`
+    <div class="modal-header">
+      <h3>${t("Keshbek darajalari")}</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="cashback-tiers-list" style="min-width:500px; max-height:400px; overflow-y:auto; padding:10px;">
+      <div style="text-align:center; padding:20px;">${t("Yuklanmoqda...")}</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="addCashbackTierUI(${businessId})">+ ${t("Qo'shish")}</button>
+      <button class="btn btn-ghost" onclick="closeModal()">${t("Yopish")}</button>
+    </div>
+  `, true); // Use secondary modal if supported, or just overwrite (SavdoSklad usually uses one modal)
+  
+  await renderCashbackTiers(businessId);
+};
+
+async function renderCashbackTiers(businessId) {
+  const container = document.getElementById('cashback-tiers-list');
+  try {
+    const tiers = await api.getCashbackTiers(businessId);
+    if (!tiers || tiers.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:30px; color:var(--text-muted);">
+          <div style="font-size:32px; margin-bottom:8px;">🎯</div>
+          <div>${t("Hali darajalar qo'shilmagan")}</div>
+        </div>`;
+      return;
+    }
+    
+    container.innerHTML = `
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr style="background:var(--bg-secondary); border-bottom:2px solid var(--border);">
+            <th style="padding:10px 12px; text-align:left; font-weight:700; color:var(--text-primary);">${t("Minimal harid summasi")}</th>
+            <th style="padding:10px 12px; text-align:center; font-weight:700; color:var(--text-primary);">${t("Keshbek foizi")} (%)</th>
+            <th style="padding:10px 12px; text-align:center; width:60px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tiers.map(tier => `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:10px 12px; font-weight:600; color:var(--text-primary);">${formatPrice(tier.minSpend || tier.minAmount || 0)} ${t("so'm")}</td>
+              <td style="padding:10px 12px; text-align:center;">
+                <span style="background:rgba(var(--primary-rgb),0.1); color:var(--primary); font-weight:700; padding:3px 10px; border-radius:10px;">${tier.percentage}%</span>
+              </td>
+              <td style="padding:10px 12px; text-align:center;">
+                <button style="background:rgba(239,68,68,0.1); color:#ef4444; border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:14px;" onclick="deleteCashbackTier(${businessId}, ${tier.id})">🗑️</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:#ef4444; padding:16px;">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+window.addCashbackTierUI = function(businessId) {
+  const minAmount = prompt(t("Minimal harid summasi"));
+  if (minAmount === null) return;
+  const percentage = prompt(t("Keshbek foizi") + " (%)");
+  if (percentage === null) return;
+  
+  api.createCashbackTier({
+    businessId: businessId,
+    minAmount: parseFloat(minAmount),
+    percentage: parseFloat(percentage)
+  }).then(() => {
+    showToast(t("Saqlandi"));
+    renderCashbackTiers(businessId);
+  }).catch(err => showToast(err.message, 'error'));
+};
+
+window.deleteCashbackTier = function(businessId, tierId) {
+  if (!confirm(t("O'chirishni xohlaysizmi?"))) return;
+  api.deleteCashbackTier(tierId).then(() => {
+    showToast(t("O'chirildi"));
+    renderCashbackTiers(businessId);
+  }).catch(err => showToast(err.message, 'error'));
+};

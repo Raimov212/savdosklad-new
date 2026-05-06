@@ -170,20 +170,74 @@ func (uc *ClientUseCase) UpdateLanguage(id int, lang string) error {
 func (uc *ClientUseCase) Delete(id int) error { return uc.repo.Delete(id) }
 
 type TransactionUseCase struct {
-	repo        repository.TransactionRepository
-	clientRepo  repository.ClientRepository
-	productRepo repository.ProductRepository
-	notifier    *notifier.TelegramNotifier
+	repo             repository.TransactionRepository
+	clientRepo       repository.ClientRepository
+	productRepo      repository.ProductRepository
+	businessRepo     repository.BusinessRepository
+	cashbackTierRepo repository.CashbackTierRepository
+	notifier         *notifier.TelegramNotifier
 }
 
-func NewTransactionUseCase(r repository.TransactionRepository, cr repository.ClientRepository, pr repository.ProductRepository, n *notifier.TelegramNotifier) *TransactionUseCase {
-	return &TransactionUseCase{repo: r, clientRepo: cr, productRepo: pr, notifier: n}
+func NewTransactionUseCase(r repository.TransactionRepository, cr repository.ClientRepository, pr repository.ProductRepository, br repository.BusinessRepository, ctr repository.CashbackTierRepository, n *notifier.TelegramNotifier) *TransactionUseCase {
+	return &TransactionUseCase{repo: r, clientRepo: cr, productRepo: pr, businessRepo: br, cashbackTierRepo: ctr, notifier: n}
 }
 func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTransactionRequest) (int, error) {
+	// 1. Fetch business settings
+	business, err := uc.businessRepo.GetByID(req.BusinessID)
+	if err != nil {
+		return 0, err
+	}
+
+	// 2. Calculate cashback earned
+	var cashbackEarned float64
+	if business.CashbackEnabled {
+		switch business.CashbackType {
+		case "percentage":
+			cashbackEarned = req.Total * business.CashbackPercentage / 100
+		case "tiered":
+			if req.ClientID != nil {
+				client, _ := uc.clientRepo.GetByID(*req.ClientID)
+				if client != nil {
+					tiers, _ := uc.cashbackTierRepo.GetByBusinessID(req.BusinessID)
+					var applicableTier *entity.CashbackTier
+					for _, tier := range tiers {
+						if client.TotalSpent >= tier.MinSpend {
+							applicableTier = &tier
+						} else {
+							break // Tiers are sorted by minSpend
+						}
+					}
+					if applicableTier != nil {
+						cashbackEarned = req.Total * applicableTier.Percentage / 100
+					}
+				}
+			}
+		case "product_specific":
+			for _, item := range req.Items {
+				product, _ := uc.productRepo.GetByID(item.ProductID)
+				if product != nil && product.CashbackPercentage > 0 {
+					cashbackEarned += (item.ProductPrice * float64(item.ProductQuantity)) * product.CashbackPercentage / 100
+				}
+			}
+		}
+	}
+
+	// 3. Handle using cashback
+	if req.UseCashbackAmount > 0 && req.ClientID != nil {
+		client, err := uc.clientRepo.GetByID(*req.ClientID)
+		if err == nil && client.CashbackBalance >= req.UseCashbackAmount {
+			// Actually use it - deduct from balance later
+		} else {
+			req.UseCashbackAmount = 0 // Reset if not enough balance
+		}
+	}
+
 	tt := &entity.TotalTransaction{
 		BusinessID: req.BusinessID, ClientID: req.ClientID,
 		Total: req.Total, Cash: req.Cash, Card: req.Card, Click: req.Click, Debt: req.Debt,
 		Discount: req.Discount, CreatedBy: &userID,
+		CashbackEarned: cashbackEarned,
+		CashbackUsed:   req.UseCashbackAmount,
 	}
 	if req.ClientNumber != "" {
 		cn := req.ClientNumber
@@ -205,9 +259,19 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 		if itemBid == 0 {
 			itemBid = req.BusinessID
 		}
+		// Individual item cashback for product_specific
+		var itemCashback float64
+		if business.CashbackEnabled && business.CashbackType == "product_specific" {
+			product, _ := uc.productRepo.GetByID(item.ProductID)
+			if product != nil {
+				itemCashback = (item.ProductPrice * float64(item.ProductQuantity)) * product.CashbackPercentage / 100
+			}
+		}
+
 		t := &entity.Transaction{
 			ProductID: item.ProductID, ProductQuantity: item.ProductQuantity,
 			ProductPrice: item.ProductPrice, BusinessID: itemBid, TotalTransactionID: totalID,
+			CashbackAmount: itemCashback,
 		}
 		if item.Description != "" {
 			d := item.Description
@@ -217,10 +281,23 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 			return 0, err
 		}
 	}
+
+	// 4. Update client balance and total spent
+	if req.ClientID != nil {
+		client, err := uc.clientRepo.GetByID(*req.ClientID)
+		if err == nil {
+			newBalance := client.CashbackBalance + cashbackEarned - req.UseCashbackAmount
+			newTotalSpent := client.TotalSpent + (req.Total - req.Discount) // Net total
+			
+			updateReq := entity.UpdateClientRequest{
+				CashbackBalance: &newBalance,
+				TotalSpent:      &newTotalSpent,
+			}
+			_ = uc.clientRepo.Update(client.ID, updateReq)
+		}
+	}
+
 	if totalID != 0 && uc.notifier != nil {
-		// Go tili imkoniyati - "Goroutine (go)": Telegramga xabar yuborish internet tezligiga qarab 
-		// sekin bo'lishi mumkin. Mijoz sotuvni saqlashda kutib qolmasligi uchun bu funksiya "go" orqali 
-		// zudlik bilan orqa fonda asinxron tarzda ishga tushiriladi va dastur darhol mijozga javob qaytaradi.
 		go uc.notifier.NotifySale(req.BusinessID, req.Total, len(req.Items))
 	}
 	return totalID, nil
@@ -585,4 +662,43 @@ func (uc *CalculationUseCase) GetExpenseBreakdown(bid, month, year int) ([]entit
 }
 func (uc *CalculationUseCase) GetFixedBreakdown(bid int) ([]entity.FixedCost, error) {
 	return uc.repo.GetFixedBreakdown(bid)
+}
+
+type CashbackTierUseCase struct {
+	repo repository.CashbackTierRepository
+}
+
+func NewCashbackTierUseCase(r repository.CashbackTierRepository) *CashbackTierUseCase {
+	return &CashbackTierUseCase{repo: r}
+}
+
+func (uc *CashbackTierUseCase) Create(req entity.CreateCashbackTierRequest) (int, error) {
+	// Frontend sends minAmount as alias for minSpend
+	minSpend := req.MinSpend
+	if minSpend == 0 && req.MinAmount > 0 {
+		minSpend = req.MinAmount
+	}
+	tier := &entity.CashbackTier{
+		BusinessID: req.BusinessID,
+		Name:       req.Name,
+		MinSpend:   minSpend,
+		Percentage: req.Percentage,
+	}
+	return uc.repo.Create(tier)
+}
+
+func (uc *CashbackTierUseCase) GetByID(id int) (*entity.CashbackTier, error) {
+	return uc.repo.GetByID(id)
+}
+
+func (uc *CashbackTierUseCase) GetByBusinessID(bid int) ([]entity.CashbackTier, error) {
+	return uc.repo.GetByBusinessID(bid)
+}
+
+func (uc *CashbackTierUseCase) Update(id int, req entity.UpdateCashbackTierRequest) error {
+	return uc.repo.Update(id, req)
+}
+
+func (uc *CashbackTierUseCase) Delete(id int) error {
+	return uc.repo.Delete(id)
 }

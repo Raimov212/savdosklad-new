@@ -28,6 +28,7 @@ type Transaction struct {
 	ProductBarcode     string    `json:"productBarcode"` // Join field
 	RefundedQuantity   int       `json:"refundedQuantity"` // Join field
 	RefundedSum        float64   `json:"refundedSum"`      // Join field
+	CashbackAmount     float64   `json:"cashbackAmount"`
 	CreatedAt          time.Time `json:"createdAt"`
 	UpdatedAt          time.Time `json:"updatedAt"`
 }
@@ -47,6 +48,8 @@ type TotalTransaction struct {
 	ClientID      *int       `json:"clientId"`
 	ClientName    string     `json:"clientName"`   // Join field
 	BusinessName  string     `json:"businessName"` // Join field
+	CashbackEarned float64    `json:"cashbackEarned"`
+	CashbackUsed   float64    `json:"cashbackUsed"`
 	CreatedBy     *int       `json:"createdBy"`
 	CreatedByName string     `json:"createdByName"` // Join field
 	CreatedAt     time.Time  `json:"createdAt"`
@@ -62,10 +65,11 @@ type CreateTotalTransactionRequest struct {
 	Click         float64                        `json:"click"`
 	Debt          float64                        `json:"debt"`
 	Discount      float64                        `json:"discount"`
-	ClientNumber  string                         `json:"clientNumber"`
-	Description   string                         `json:"description"`
-	DebtLimitDate *time.Time                     `json:"debtLimitDate"`
-	Items         []CreateTransactionItemRequest `json:"items" binding:"required"`
+	ClientNumber      string                         `json:"clientNumber"`
+	Description       string                         `json:"description"`
+	DebtLimitDate     *time.Time                     `json:"debtLimitDate"`
+	UseCashbackAmount float64                        `json:"useCashbackAmount"`
+	Items             []CreateTransactionItemRequest `json:"items" binding:"required"`
 }
 
 type CreateTransactionItemRequest struct {

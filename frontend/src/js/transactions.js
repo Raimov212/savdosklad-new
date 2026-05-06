@@ -149,11 +149,11 @@ function renderTransactionsTable(list, isAppend = false) {
       </div>
       <div class="page-bottom-bar">
         <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <span class="search-icon">🔍</span>
           <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
             value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
             oninput="filterTransactions(this.value)"
-            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;" class="form-control">
         </div>
         <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
         <button class="btn btn-primary" onclick="openSaleModal()">${t("Qo'shish")}</button>
@@ -174,10 +174,10 @@ function renderTransactionsTable(list, isAppend = false) {
 }
 
 function filterTransactions(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const filtered = allTransactionsList.filter(trans =>
-    (trans.clientNumber && trans.clientNumber.toLowerCase().includes(q)) ||
-    (trans.clientName && trans.clientName.toLowerCase().includes(q))
+    (trans.clientNumber && String(trans.clientNumber).toLowerCase().includes(q)) ||
+    (trans.clientName && String(trans.clientName).toLowerCase().includes(q))
   );
   const _inputEl = document.getElementById('transaction-search');
   const _cursor = _inputEl ? _inputEl.selectionStart : 0;
@@ -251,10 +251,38 @@ async function openSaleModal() {
       </div>
 
       <div id="sale-step-2" class="sale-segment" style="display:none;">
-        <div style="background: var(--bg-glass); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 25px; display: flex; flex-direction: column; align-items: center;">
-          <span style="font-size: 13px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">${t("Jami summa")}</span>
-          <span id="sale-total-value" style="font-size: 36px; font-weight: 800; color: var(--success); margin: 5px 0;">0 ${t("so'm")}</span>
-          <div id="cumulative-total" style="font-size: 11px; opacity: 0.6;"></div>
+        <div style="background: var(--bg-glass); padding: 15px 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 25px;">
+          <h4 style="margin:0 0 15px 0; font-size:14px; color:var(--text-primary); text-align:center; text-transform:uppercase; letter-spacing:1px;">${t("To'lov yoyilmasi")}</h4>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:14px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">${t("Mahsulotlar jami")}:</span>
+              <span id="breakdown-subtotal" style="font-weight:600;">0 ${t("so'm")}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">${t("Chegirma")}:</span>
+              <span id="breakdown-discount" style="font-weight:600; color:var(--danger);">- 0 ${t("so'm")}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; display:none;" id="breakdown-cashback-row">
+              <span style="color:var(--text-muted);">${t("Keshbek ishlatildi")}:</span>
+              <span id="breakdown-cashback" style="font-weight:600; color:var(--success);">- 0 ${t("so'm")}</span>
+            </div>
+            <div style="height:1px; background:var(--border); margin:4px 0;"></div>
+            <div style="display:flex; justify-content:space-between; font-size:18px;">
+              <span style="font-weight:700;">${t("To'lanishi kerak")}:</span>
+              <span id="breakdown-payable" style="font-weight:800; color:var(--primary);">0 ${t("so'm")}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:8px;">
+              <span style="color:var(--text-muted);">${t("To'lanayotgan summa")}:</span>
+              <span id="breakdown-paid" style="font-weight:600; color:var(--success);">0 ${t("so'm")}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">${t("Qoldiq qarz")}:</span>
+              <span id="breakdown-debt" style="font-weight:600; color:var(--warning);">0 ${t("so'm")}</span>
+            </div>
+          </div>
+          <!-- Hidden old element for backward compatibility with scripts if missed -->
+          <span id="sale-total-value" style="display:none;"></span>
+          <div id="cumulative-total" style="display:none;"></div>
         </div>
 
         <div class="payment-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
@@ -278,6 +306,13 @@ async function openSaleModal() {
             <label>🏷️ ${t("Chegirma")}</label>
             <input type="number" step="0.01" class="form-control form-control-lg" id="sale-discount" value="0" oninput="updateSalePayment()">
           </div>
+          <div class="form-group" id="cashback-use-group" style="display:none">
+            <label>💰 ${t("Keshbek ishlatish")}</label>
+            <div style="position:relative">
+              <input type="number" step="0.01" class="form-control form-control-lg" id="sale-cashback-used" value="0" oninput="updateSalePayment()">
+              <div id="client-cashback-hint" style="position:absolute; right:0; bottom:-18px; font-size:10px; color:var(--success); font-weight:600;"></div>
+            </div>
+          </div>
         </div>
 
         <div id="payment-error-msg" style="color: #EF4444; font-size: 13px; font-weight: 700; margin: 15px 0; display: none; text-align: center; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px;">
@@ -287,7 +322,7 @@ async function openSaleModal() {
         <div class="form-row" style="margin-top:10px">
           <div class="form-group" style="flex: 1.5;">
             <label>${t("Mijoz (ixtiyoriy)")}</label>
-            <select class="form-control" id="sale-client">
+            <select class="form-control" id="sale-client" onchange="onSaleClientChange(this.value)">
               <option value="">${t("Tanlang...")}</option>
               ${globalClients.map(c => `<option value="${c.id}">${escapeHtml(c.fullName)} — ${escapeHtml(c.phone)}</option>`).join('')}
             </select>
@@ -395,13 +430,13 @@ function searchSaleProduct(query) {
     return;
   }
 
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   
   // Check for exact barcode match (Scanner support)
-  const exactBarcodeMatch = saleProducts.find(p => p.barcode === query.trim());
+  const exactBarcodeMatch = saleProducts.find(p => p.barcode === (query || '').trim());
   
   const filtered = saleProducts.filter(p =>
-    p.name.toLowerCase().includes(q) || (p.barcode && p.barcode.includes(q))
+    (p.name && String(p.name).toLowerCase().includes(q)) || (p.barcode && String(p.barcode).toLowerCase().includes(q))
   ).slice(0, 10);
 
   if (filtered.length === 0) {
@@ -499,32 +534,35 @@ function renderSaleItems() {
   container.innerHTML = `
     <div class="sale-items" style="border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 0;">
       <table style="width: 100%; border-collapse: collapse;">
-        <thead style="background: var(--bg-glass);">
+        <thead style="background: var(--bg-secondary); border-bottom: 2px solid var(--border);">
           <tr>
-            <th style="padding: 10px; text-align: left; font-size: 11px;">${t("Mahsulot")}</th>
-            <th style="padding: 10px; text-align: center; font-size: 11px; width: 80px;">${t("Soni")}</th>
-            <th style="padding: 10px; text-align: right; font-size: 11px; width: 140px;">${t("Narxi")}</th>
-            <th style="padding: 10px; text-align: right; font-size: 11px; width: 140px;">${t("Jami")}</th>
-            <th style="padding: 10px; width: 50px;"></th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">${t("Mahsulot")}</th>
+            <th style="padding: 10px 12px; text-align: center; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; width: 90px;">${t("Soni")}</th>
+            <th style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; width: 140px;">${t("Narxi")}</th>
+            <th style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; width: 130px;">${t("Jami")}</th>
+            <th style="padding: 10px; width: 44px;"></th>
           </tr>
         </thead>
         <tbody>
           ${saleItems.map((item, idx) => `
-            <tr class="sale-item-row">
+            <tr class="sale-item-row" style="border-bottom: 1px solid var(--border);">
               <td class="td-product" data-label="${t("Mahsulot")}">
                 <div class="product-info">
-                  <div class="product-name">${escapeHtml(item.name || 'Unknown')}</div>
-                  <div class="product-business">🏢 ${escapeHtml(item.businessName)}</div>
+                  <div class="product-name" style="font-weight:600; color:var(--text-primary);">${escapeHtml(item.name || 'Unknown')}</div>
+                  <div class="product-business" style="font-size:11px; color:var(--text-muted);">🏢 ${escapeHtml(item.businessName)}</div>
                 </div>
               </td>
               <td class="td-qty" data-label="${t("Soni")}">
-                <input type="number" class="form-control sale-item-input" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)">
+                <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                  <input type="number" class="form-control sale-item-input" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)" style="width:60px; text-align:center; font-weight:700;">
+                  <span style="font-size:10px; color:var(--text-muted);">${t("ta")}</span>
+                </div>
               </td>
               <td class="td-price" data-label="${t("Narxi")}">
                 <input type="number" step="0.01" class="form-control sale-item-input" value="${item.price}" oninput="onSalePriceChange(${idx}, this.value)">
               </td>
               <td class="td-total" data-label="${t("Jami")}">
-                <div id="item-total-${idx}" class="item-total-val">${formatPrice(item.price * item.quantity)}</div>
+                <div id="item-total-${idx}" class="item-total-val" style="font-weight:700; color:var(--success); text-align:right;">${formatPrice(item.price * item.quantity)}</div>
               </td>
               <td class="td-action">
                 <button type="button" class="btn-remove" onclick="removeSaleItem(${idx})" title="${t("O'chirish")}">🗑️</button>
@@ -602,31 +640,61 @@ function updateSalePayment() {
   const cash = parseFloat(cashInp.value) || 0;
   const card = parseFloat(cardInp.value) || 0;
   const click = parseFloat(clickInp.value) || 0;
+  const cashbackUsed = parseFloat(document.getElementById('sale-cashback-used')?.value || 0) || 0;
   const discount = parseFloat(document.getElementById('sale-discount')?.value || 0) || 0;
 
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
-  const currentPayments = cash + card + click;
+  const currentPayments = cash + card + click + cashbackUsed;
   const totalPaid = overallPaidSoFar + currentPayments;
 
   const debtEl = document.getElementById('sale-debt');
-  const totalValEl = document.getElementById('sale-total-value');
   const errorEl = document.getElementById('payment-error-msg');
 
   const payableTotal = overallTotal - discount;
 
+  // Update Breakdown UI
+  const bdSubtotal = document.getElementById('breakdown-subtotal');
+  const bdDiscount = document.getElementById('breakdown-discount');
+  const bdCashbackRow = document.getElementById('breakdown-cashback-row');
+  const bdCashback = document.getElementById('breakdown-cashback');
+  const bdPayable = document.getElementById('breakdown-payable');
+  const bdPaid = document.getElementById('breakdown-paid');
+  const bdDebt = document.getElementById('breakdown-debt');
+
+  if (bdSubtotal) bdSubtotal.textContent = `${formatPrice(overallTotal)} ${t("so'm")}`;
+  if (bdDiscount) bdDiscount.textContent = `- ${formatPrice(discount)} ${t("so'm")}`;
+  
+  if (cashbackUsed > 0) {
+    if (bdCashbackRow) bdCashbackRow.style.display = 'flex';
+    if (bdCashback) bdCashback.textContent = `- ${formatPrice(cashbackUsed)} ${t("so'm")}`;
+  } else {
+    if (bdCashbackRow) bdCashbackRow.style.display = 'none';
+  }
+
+  // To'lanishi kerak bo'lgan jami (chegirma va keshbek ayirilgandan keyin)
+  const finalPayable = payableTotal - cashbackUsed;
+  if (bdPayable) bdPayable.textContent = `${formatPrice(Math.max(0, finalPayable))} ${t("so'm")}`;
+
+  // Mijoz real to'layotgan puli
+  const customerPayingNow = cash + card + click;
+  if (bdPaid) bdPaid.textContent = `${formatPrice(customerPayingNow + overallPaidSoFar)} ${t("so'm")}`;
+
   if (totalPaid > payableTotal + 0.01) {
-    totalValEl.style.color = '#EF4444';
+    if (bdPayable) bdPayable.style.color = '#EF4444';
     debtEl.style.color = '#EF4444';
     if (errorEl) errorEl.style.display = 'block';
   } else {
-    totalValEl.style.color = '';
+    if (bdPayable) bdPayable.style.color = 'var(--primary)';
     debtEl.style.color = 'var(--warning)';
     if (errorEl) errorEl.style.display = 'none';
   }
 
   // Debt is calculated for the whole transaction
   const remainingDebt = payableTotal - totalPaid;
-  debtEl.value = Math.max(0, remainingDebt).toFixed(2);
+  const debtValue = Math.max(0, remainingDebt);
+  debtEl.value = debtValue.toFixed(2);
+  
+  if (bdDebt) bdDebt.textContent = `${formatPrice(debtValue)} ${t("so'm")}`;
 }
 
 async function addToSaleBatch() {
@@ -797,7 +865,8 @@ async function finalizeSale(e) {
 
     const clientId = document.getElementById('sale-client').value;
     const desc = document.getElementById('sale-desc').value.trim();
-    const debt = Math.max(0, payableTotal - (overallPaidSoFar + cash + card + click));
+    const cashbackUsed = parseFloat(document.getElementById('sale-cashback-used')?.value || 0) || 0;
+    const debt = Math.max(0, payableTotal - (overallPaidSoFar + cash + card + click + cashbackUsed));
 
     // Calculate first batch total or just use it
     if (!currentTotalTransactionID) {
@@ -810,6 +879,7 @@ async function finalizeSale(e) {
         click: click,
         debt: debt,
         discount: discount,
+        useCashbackAmount: cashbackUsed,
         clientId: clientId ? parseInt(clientId) : null,
         description: desc,
         items: saleItems.map(i => ({
@@ -1220,3 +1290,32 @@ window.allTransactionsList = allTransactionsList;
 window.currentTransactions = currentTransactions;
 window.saleProducts = saleProducts;
 window.saleItems = saleItems;
+window.onSaleClientChange = function(clientId) {
+  const group = document.getElementById('cashback-use-group');
+  const hint = document.getElementById('client-cashback-hint');
+  const input = document.getElementById('sale-cashback-used');
+  
+  if (!clientId) {
+    if (group) group.style.display = 'none';
+    if (input) input.value = 0;
+    updateSalePayment();
+    return;
+  }
+  
+  const client = globalClients.find(c => c.id == clientId);
+  if (client && group) {
+    group.style.display = 'block';
+    hint.textContent = `${t("Keshbek balansi")}: ${formatPrice(client.cashbackBalance)} ${t("so'm")}`;
+    // Limit input to balance
+    input.oninput = (e) => {
+      let val = parseFloat(e.target.value) || 0;
+      if (val > client.cashbackBalance) {
+        val = client.cashbackBalance;
+        e.target.value = val;
+      }
+      updateSalePayment();
+    };
+  } else if (group) {
+    group.style.display = 'none';
+  }
+};

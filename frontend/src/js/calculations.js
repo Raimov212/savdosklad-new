@@ -116,10 +116,10 @@ function renderCalculationsTable(list, isAppend = false) {
       </div>
       <div class="page-bottom-bar">
         <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon" style="color:rgba(255,255,255,0.6);">🔍</span>
+          <span class="search-icon">🔍</span>
           <input type="text" placeholder="${t("Oy/Yil bo'yicha")}" id="calculation-search-bottom" 
             oninput="filterCalculations(this.value)"
-            style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.25); color:white;">
+            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;" class="form-control">
         </div>
         <button class="btn btn-primary" onclick="openCalculationModal()">${t("Qo'shish")}</button>
       </div >
@@ -139,7 +139,7 @@ function renderCalculationsTable(list, isAppend = false) {
 }
 
 function filterCalculations(query) {
-  const q = query.toLowerCase();
+  const q = (query || '').toLowerCase();
   const months = ['', 'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
   
   const filtered = allCalculationsList.filter(c => {
