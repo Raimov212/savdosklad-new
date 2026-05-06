@@ -114,10 +114,19 @@ func (b *Bot) SendDailyReports() {
 	for _, u := range users {
 		if u.TelegramUserID != 0 {
 			lang := b.getLang(u.TelegramUserID)
-			// Yesterday/Today stats
-			now := time.Now()
-			start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-			end := now
+			
+			// Set timezone to Uzbekistan
+			loc, err := time.LoadLocation("Asia/Tashkent")
+			if err != nil {
+				loc = time.FixedZone("UZT", 5*3600)
+			}
+			nowUZT := time.Now().In(loc)
+			
+			// Since the bot sends reports in the morning UZT (e.g., 07:00),
+			// we generate the report for the entire previous day.
+			targetDate := nowUZT.AddDate(0, 0, -1)
+			start := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 0, 0, 0, 0, loc)
+			end := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 23, 59, 59, 999999999, loc)
 
 			businesses, err := b.businessUC.GetByUserID(u.ID)
 			if err != nil {
@@ -138,7 +147,7 @@ func (b *Bot) SendDailyReports() {
 			}
 			log.Printf("[Bot] Daily report for user %d: total=%f", u.ID, total)
 
-			text := fmt.Sprintf(i18n.T(lang, i18n.MsgBotDailyStatHeader), time.Now().Format("02.01.2006"))
+			text := fmt.Sprintf(i18n.T(lang, i18n.MsgBotDailyStatHeader), targetDate.Format("02.01.2006"))
 			text += fmt.Sprintf("\n💰 %s", i18n.FormatMoney(total, lang))
 			b.sendMessage(u.TelegramUserID, text)
 		}

@@ -143,20 +143,22 @@ function renderTransactionsTable(list, isAppend = false) {
 
   if (!isAppend) {
     content.innerHTML = `
-      <div class="acc-list" id="transaction-acc-list">${items}</div>
+      <div class="card-header" style="padding: 15px 20px; background: var(--bg-glass); border-bottom: 1px solid var(--border); border-radius: 20px 20px 0 0;">
+        <div class="toolbar" style="width: 100%; display: flex; gap: 10px; align-items: center;">
+          <div class="search-box" style="flex: 1; max-width: none; margin: 0;">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
+              value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
+              oninput="filterTransactions(this.value)"
+              style="color: var(--text-primary) !important; background: var(--bg-input) !important; height: 44px;" class="form-control" autocomplete="off">
+          </div>
+          <button class="btn btn-ghost" onclick="openDateFilterModal()" style="height: 44px; padding: 0 12px;" title="${t("Sana bo'yicha filter")}">📅</button>
+          <button class="btn btn-primary" onclick="openSaleModal()" style="height: 44px; padding: 0 20px;">${t("Qo'shish")}</button>
+        </div>
+      </div>
+      <div class="acc-list" id="transaction-acc-list" style="margin-top: 10px;">${items}</div>
       <div id="transaction-pagination-area">
         ${renderPageControls('transactionPage', totalPages, 'renderTransactionsTable')}
-      </div>
-      <div class="page-bottom-bar">
-        <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
-            value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
-            oninput="filterTransactions(this.value)"
-            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;" class="form-control">
-        </div>
-        <button class="btn btn-ghost" onclick="openDateFilterModal()" style="padding: 10px 15px;" title="${t("Sana bo'yicha filter")}">📅</button>
-        <button class="btn btn-primary" onclick="openSaleModal()">${t("Qo'shish")}</button>
       </div>
     `;
     attachInfiniteScroll('transactionPage', totalPages, 'renderTransactionsTable');
@@ -320,12 +322,14 @@ async function openSaleModal() {
         </div>
 
         <div class="form-row" style="margin-top:10px">
-          <div class="form-group" style="flex: 1.5;">
+          <div class="form-group" style="flex: 1.5; position: relative;">
             <label>${t("Mijoz (ixtiyoriy)")}</label>
-            <select class="form-control" id="sale-client" onchange="onSaleClientChange(this.value)">
-              <option value="">${t("Tanlang...")}</option>
-              ${globalClients.map(c => `<option value="${c.id}">${escapeHtml(c.fullName)} — ${escapeHtml(c.phone)}</option>`).join('')}
-            </select>
+            <div class="search-box" style="max-width: 100%;">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="form-control" id="sale-client-search" placeholder="${t("Mijoz nomi yoki tel...")}" oninput="searchSaleClient(this.value)" autocomplete="off">
+              <input type="hidden" id="sale-client-id" value="">
+            </div>
+            <div id="sale-client-results" class="search-results-dropdown"></div>
           </div>
           <div class="form-group" style="flex: 1;">
             <label>${t("Izoh")}</label>
@@ -393,7 +397,7 @@ async function openSaleModal() {
         }
         .btn-remove:hover { background: #EF4444; color: white; }
       </style>
-    `);
+    `, null, 'modal-wide');
 
     renderSaleItems();
     setTimeout(() => document.getElementById('sale-product-search').focus(), 150);
@@ -478,6 +482,54 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
+
+window.searchSaleClient = function(query) {
+  const dropdown = document.getElementById('sale-client-results');
+  if (!dropdown) return;
+  if (!query.trim()) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  const q = (query || '').toLowerCase();
+  const filtered = globalClients.filter(c =>
+    (c.fullName && String(c.fullName).toLowerCase().includes(q)) ||
+    (c.phone && String(c.phone).toLowerCase().includes(q))
+  ).slice(0, 10);
+
+  if (filtered.length === 0) {
+    dropdown.innerHTML = `<div style="padding: 15px; text-align: center; color: var(--text-muted); font-size: 13px;">${t("Mijoz topilmadi")}</div>`;
+  } else {
+    dropdown.innerHTML = filtered.map(c => `
+      <div class="search-result-item" onclick="selectSaleClient(${c.id})">
+        <div>
+          <div style="font-weight:700; color:var(--text-primary);">${escapeHtml(c.fullName)}</div>
+          <div style="font-size:12px; color:var(--text-muted);">${escapeHtml(c.phone)}</div>
+        </div>
+        <div style="text-align: right;">
+           <span class="badge" style="background:var(--primary-glass); color:var(--primary); font-size:10px;">${formatPrice(c.cashbackBalance)} ${t("keshbek")}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+  dropdown.style.display = 'block';
+};
+
+window.selectSaleClient = function(id) {
+  const client = globalClients.find(c => c.id == id);
+  if (!client) return;
+
+  const input = document.getElementById('sale-client-search');
+  if (input) input.value = client.fullName;
+  
+  const hiddenInput = document.getElementById('sale-client-id');
+  if (hiddenInput) hiddenInput.value = id;
+
+  const dropdown = document.getElementById('sale-client-results');
+  if (dropdown) dropdown.style.display = 'none';
+  
+  window.onSaleClientChange(id);
+};
 
 
 function addSaleProductById(id) {
@@ -718,7 +770,7 @@ async function addToSaleBatch() {
     }
 
     const total = validItems.reduce((s, i) => s + (i.price * i.quantity), 0);
-    const clientId = document.getElementById('sale-client').value;
+    const clientId = document.getElementById('sale-client-id').value;
     const cash = parseFloat(document.getElementById('sale-cash').value) || 0;
     const card = parseFloat(document.getElementById('sale-card').value) || 0;
     const click = parseFloat(document.getElementById('sale-click').value) || 0;
@@ -863,7 +915,7 @@ async function finalizeSale(e) {
       return;
     }
 
-    const clientId = document.getElementById('sale-client').value;
+    const clientId = document.getElementById('sale-client-id').value;
     const desc = document.getElementById('sale-desc').value.trim();
     const cashbackUsed = parseFloat(document.getElementById('sale-cashback-used')?.value || 0) || 0;
     const debt = Math.max(0, payableTotal - (overallPaidSoFar + cash + card + click + cashbackUsed));
@@ -939,8 +991,10 @@ async function finalizeSale(e) {
       const discountInp = document.getElementById('sale-discount');
       if (discountInp) discountInp.value = 0;
       
-      const clientSel = document.getElementById('sale-client');
-      if (clientSel) clientSel.value = '';
+      const clientInp = document.getElementById('sale-client-search');
+      if (clientInp) clientInp.value = '';
+      const clientIdInp = document.getElementById('sale-client-id');
+      if (clientIdInp) clientIdInp.value = '';
       
       const descInp = document.getElementById('sale-desc');
       if (descInp) descInp.value = '';

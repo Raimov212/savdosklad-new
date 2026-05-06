@@ -149,21 +149,23 @@ function renderProductsTable(list, isAppend = false) {
 
   if (!isAppend) {
     content.innerHTML = `
-      <div class="acc-list" id="product-acc-list">${items}</div>
+      <div class="card-header" style="padding: 15px 20px; background: var(--bg-glass); border-bottom: 1px solid var(--border); border-radius: 20px 20px 0 0;">
+        <div class="toolbar" style="width: 100%; display: flex; gap: 10px; align-items: center;">
+          <div class="search-box" style="flex: 1; max-width: none; margin: 0;">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="${t("Qidirish...")}" id="product-search" class="form-control"
+              value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
+              oninput="filterProducts(this.value)"
+              style="color: var(--text-primary) !important; background: var(--bg-input) !important; height: 44px;"
+              autocomplete="off">
+          </div>
+          <button class="btn btn-ghost" id="out-of-stock-btn" onclick="toggleOutOfStockFilter()" style="height: 44px; padding: 0 12px; white-space:nowrap;" title="${t("Qolmagan mahsulotlar")}">📦</button>
+          ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openProductModal()" style="height: 44px; padding: 0 20px;">${t("Qo'shish")}</button>` : ''}
+        </div>
+      </div>
+      <div class="acc-list" id="product-acc-list" style="margin-top: 10px;">${items}</div>
       <div id="product-pagination-area">
         ${renderPageControls('productPage', totalPages, 'renderProductsTable')}
-      </div>
-      <div class="page-bottom-bar">
-        <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="${t("Qidirish...")}" id="product-search" class="form-control"
-            value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
-            oninput="filterProducts(this.value)"
-            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;"
-            autocomplete="off">
-        </div>
-        <button class="btn btn-ghost" id="out-of-stock-btn" onclick="toggleOutOfStockFilter()" style="padding: 10px 15px; white-space:nowrap;" title="${t("Qolmagan mahsulotlar")}">📦 ${t("Qolmagan")}</button>
-        ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openProductModal()">${t("Qo'shish")}</button>` : ''}
       </div>
     `;
     attachInfiniteScroll('productPage', totalPages, 'renderProductsTable');

@@ -108,19 +108,21 @@ function renderClientsTable(list, isAppend = false) {
 
   if (!isAppend) {
     content.innerHTML = `
-      <div class="acc-list" id="client-acc-list">${items}</div>
+      <div class="card-header" style="padding: 15px 20px; background: var(--bg-glass); border-bottom: 1px solid var(--border); border-radius: 20px 20px 0 0;">
+        <div class="toolbar" style="width: 100%; display: flex; gap: 10px; align-items: center;">
+          <div class="search-box" style="flex: 1; max-width: none; margin: 0;">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="${t("Qidirish...")}" id="client-search"
+              value="${escapeHtml(document.getElementById('client-search')?.value || '')}"
+              oninput="filterClients(this.value)"
+              style="color: var(--text-primary) !important; background: var(--bg-input) !important; height: 44px;" class="form-control" autocomplete="off">
+          </div>
+          ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openClientModal()" style="height: 44px; padding: 0 20px;">${t("Qo'shish")}</button>` : ''}
+        </div>
+      </div>
+      <div class="acc-list" id="client-acc-list" style="margin-top: 10px;">${items}</div>
       <div id="client-pagination-area">
         ${renderPageControls('clientPage', totalPages, 'renderClientsTable')}
-      </div>
-      <div class="page-bottom-bar">
-        <div class="search-box" style="flex:1; max-width:none;">
-          <span class="search-icon">🔍</span>
-          <input type="text" placeholder="${t("Qidirish...")}" id="client-search"
-            value="${escapeHtml(document.getElementById('client-search')?.value || '')}"
-            oninput="filterClients(this.value)"
-            style="color: var(--text-primary) !important; background: var(--bg-secondary) !important;" class="form-control">
-        </div>
-        ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openClientModal()">${t("Qo'shish")}</button>` : ''}
       </div>
     `;
     attachInfiniteScroll('clientPage', totalPages, 'renderClientsTable');
