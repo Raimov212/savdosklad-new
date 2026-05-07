@@ -1,5 +1,11 @@
 export const translations = {
     uz: {
+        "Mijoz nomi yoki tel...": "Mijoz nomi yoki tel...",
+        "To'lov yoyilmasi": "To'lov yoyilmasi",
+        "Mahsulotlar jami": "Mahsulotlar jami",
+        "To'lanishi kerak": "To'lanishi kerak",
+        "To'lanayotgan summa": "To'lanayotgan summa",
+        "Keshbek ishlatildi": "Keshbek ishlatildi",
         "Xarajatlar yoyilmasini ko'rish": "Xarajatlar yoyilmasini ko'rish",
         "Doimiy xarajatlar yoyilmasini ko'rish": "Doimiy xarajatlar yoyilmasini ko'rish",
         "Daromad yoyilmasini ko'rish": "Daromad yoyilmasini ko'rish",
@@ -267,9 +273,20 @@ export const translations = {
         "Keshbek balansi": "Keshbek balansi",
         "Keshbek ishlatish": "Keshbek ishlatish",
         "Keshbek hisoblandi": "Keshbek hisoblandi",
-        "Keshbek sozlamalari": "Keshbek sozlamalari"
+        "Keshbek sozlamalari": "Keshbek sozlamalari",
+        "To'lov yoyilmasi": "To'lov yoyilmasi",
+        "Mahsulotlar jami": "Mahsulotlar jami",
+        "To'lanishi kerak": "To'lanishi kerak",
+        "To'lanayotgan summa": "To'lanayotgan summa",
+        "Keshbek ishlatildi": "Keshbek ishlatildi"
     },
     'uz-cyrl': {
+        "Mijoz nomi yoki tel...": "Мижоз номи ёки тел...",
+        "To'lov yoyilmasi": "Тўлов ёйилмаси",
+        "Mahsulotlar jami": "Маҳсулотлар жами",
+        "To'lanishi kerak": "Тўланиши керак",
+        "To'lanayotgan summa": "Тўланаётган сумма",
+        "Keshbek ishlatildi": "Кешбек ишлатилди",
         "Biznesingizni": "Бизнесингизни",
         "aqlli": "ақлли",
         "boshqaring": "бошқаринг",
@@ -945,6 +962,12 @@ export const translations = {
         "Keshbek sozlamalari": "Кешбек созламалари"
     },
     ru: {
+        "Mijoz nomi yoki tel...": "Имя клиента или тел...",
+        "To'lov yoyilmasi": "ДЕТАЛИЗАЦИЯ ОПЛАТЫ",
+        "Mahsulotlar jami": "Итого товаров",
+        "To'lanishi kerak": "К оплате",
+        "To'lanayotgan summa": "Оплачиваемая сумма",
+        "Keshbek ishlatildi": "Использованный кешбэк",
         "Biznesingizni": "Управляйте бизнесом",
         "aqlli": "умно",
         "boshqaring": "",
@@ -1626,6 +1649,12 @@ export const translations = {
         "Keshbek sozlamalari": "Настройки кешбэка"
     },
     en: {
+        "Mijoz nomi yoki tel...": "Client name or phone...",
+        "To'lov yoyilmasi": "PAYMENT BREAKDOWN",
+        "Mahsulotlar jami": "TOTAL PRODUCTS",
+        "To'lanishi kerak": "TOTAL DUE",
+        "To'lanayotgan summa": "TOTAL PAID",
+        "Keshbek ishlatildi": "TOTAL CASHBACK",
         "Biznesingizni": "Manage your business",
         "aqlli": "smartly",
         "boshqaring": "",
@@ -2236,6 +2265,7 @@ export const translations = {
         "Qarzni to'lash": "Pay Debt",
         "Qolgan qarz": "Remaining Debt",
         "Jami qarz": "Total Debt",
+        "Qoldiq qarz": "Remaining Debt",
         "To'lov summasini kiriting": "Enter payment amount",
         "To'langan summasi": "Paid amount",
         "To'lov summasi qarzdan ko'p bo'lishi mumkin emas!": "Payment amount cannot exceed the debt!",

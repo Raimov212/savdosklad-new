@@ -205,7 +205,10 @@ async function openSaleModal() {
       Promise.all((businesses || []).filter(b => b).map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
     ]);
 
-    const clients = clientsResults.flat().filter(c => c);
+    const rawClients = clientsResults.flat().filter(c => c);
+    const uniqueClientsMap = new Map();
+    rawClients.forEach(c => uniqueClientsMap.set(c.id, c));
+    const clients = Array.from(uniqueClientsMap.values());
 
     saleProducts = (products || []).filter(p => p && !p.isDeleted && p.quantity > 0).map(p => {
       const b = (businesses || []).find(bus => bus && bus.id === p.businessId);
@@ -588,11 +591,11 @@ function renderSaleItems() {
       <table style="width: 100%; border-collapse: collapse;">
         <thead style="background: var(--bg-secondary); border-bottom: 2px solid var(--border);">
           <tr>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px;">${t("Mahsulot")}</th>
-            <th style="padding: 10px 12px; text-align: center; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; width: 90px;">${t("Soni")}</th>
-            <th style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; width: 140px;">${t("Narxi")}</th>
-            <th style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; width: 130px;">${t("Jami")}</th>
-            <th style="padding: 10px; width: 44px;"></th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-primary) !important; background: transparent !important; text-transform: uppercase; letter-spacing: 0.5px;">${t("Mahsulot")}</th>
+            <th style="padding: 10px 12px; text-align: center; font-size: 11px; font-weight: 700; color: var(--text-primary) !important; background: transparent !important; text-transform: uppercase; letter-spacing: 0.5px; width: 90px;">${t("Soni")}</th>
+            <th style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 700; color: var(--text-primary) !important; background: transparent !important; text-transform: uppercase; letter-spacing: 0.5px; width: 140px;">${t("Narxi")}</th>
+            <th style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 700; color: var(--text-primary) !important; background: transparent !important; text-transform: uppercase; letter-spacing: 0.5px; width: 130px;">${t("Jami")}</th>
+            <th style="padding: 10px; width: 44px; background: transparent !important;"></th>
           </tr>
         </thead>
         <tbody>
@@ -606,7 +609,7 @@ function renderSaleItems() {
               </td>
               <td class="td-qty" data-label="${t("Soni")}">
                 <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
-                  <input type="number" class="form-control sale-item-input" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)" style="width:60px; text-align:center; font-weight:700;">
+                  <input type="number" class="form-control sale-item-input" value="${item.quantity}" min="1" oninput="onSaleQtyChange(${idx}, this.value)" style="width:60px; text-align:center; font-weight:700; color: var(--text-primary) !important; background: var(--bg-input) !important; border: 1px solid var(--border) !important;">
                   <span style="font-size:10px; color:var(--text-muted);">${t("ta")}</span>
                 </div>
               </td>
