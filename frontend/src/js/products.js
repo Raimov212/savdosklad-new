@@ -235,18 +235,21 @@ function openProductModal(p = null) {
         
         <div class="form-row">
           <div class="form-group">
+            <label>${t("Barcode")}</label>
+            <div class="barcode-input-group">
+              <input type="text" class="form-control" id="prod-barcode" value="${isEdit && p.barcode ? escapeHtml(p.barcode) : ''}" placeholder="${t('Kodni skanerlang yoki qo‘lda kiriting')}">
+              <div class="barcode-actions">
+                <button type="button" class="btn-camera-scan" title="${t('Kamera orqali skanerlash')}" onclick="window.openCameraScanner(function(code){ const el=document.getElementById('prod-barcode'); if(el){el.value=code; setTimeout(() => el.dispatchEvent(new Event('input', { bubbles: true })), 100);} })">📷</button>
+                <button type="button" class="btn-barcode-search" title="${t('Qidirish')}" onclick="const el=document.getElementById('prod-barcode'); if(el) el.dispatchEvent(new Event('input', { bubbles: true }));">🔍</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
             <label>${t("Kategoriya")}</label>
             <select class="form-control" id="prod-cat" required>
               <option value="">${t("Tanlang...")}</option>
               ${catOptions}
             </select>
-          </div>
-          <div class="form-group">
-            <label>${t("Barcode")}</label>
-            <div class="barcode-input-group">
-              <input type="text" class="form-control" id="prod-barcode" value="${isEdit && p.barcode ? escapeHtml(p.barcode) : ''}" placeholder="${t('Kodni skanerlang yoki qo‘lda kiriting')}">
-              <button type="button" class="btn-camera-scan" title="${t('Kamera orqali skanerlash')}" onclick="window.openCameraScanner(function(code){ const el=document.getElementById('prod-barcode'); if(el){el.value=code; setTimeout(() => el.dispatchEvent(new Event('input', { bubbles: true })), 100);} })">📷</button>
-            </div>
           </div>
         </div>
 
@@ -357,52 +360,44 @@ async function attachBarcodeLookup() {
   const bid = getSelectedBusinessId();
   if (!bid) return;
 
-  // We need business settings. 
-  let business = (window.allBusinessesList || []).find(b => b.id == bid);
-
-  // If not found (e.g. user didn't visit Businesses page yet), fetch it
-  if (!business) {
-    try {
-      const businesses = await api.get('/businesses/my');
-      window.allBusinessesList = businesses || [];
-      business = (businesses || []).find(b => b.id == bid);
-    } catch (e) {
-      console.error("Failed to fetch business for lookup settings", e);
-    }
-  }
-
-  if (!business) return;
-
   let lookupTimeout = null;
 
-  barcodeInput.addEventListener('input', (e) => {
+  // Attach listener immediately to avoid race conditions
+  const runLookup = (e) => {
     const barcode = e.target.value.trim();
     if (barcode.length < 8) return;
 
     if (lookupTimeout) clearTimeout(lookupTimeout);
 
     lookupTimeout = setTimeout(async () => {
-      // 1. Local Lookup
-      if (business.localBarcodeLookup) {
-        const existing = allProducts.find(p => p.barcode === barcode);
-        if (existing) {
-          fillProductForm(existing);
-          showToast(t("Ma'lumotlar topildi va to'ldirildi"), 'success');
-          return;
-        }
+      // Get settings inside the timeout to ensure they might have loaded by now
+      let business = (window.allBusinessesList || []).find(b => b.id == bid);
+      if (!business) {
+        try {
+          const businesses = await api.get('/businesses/my');
+          window.allBusinessesList = businesses || [];
+          business = (businesses || []).find(b => b.id == bid);
+        } catch (e) { console.error(e); }
+      }
+
+      // 1. Local Lookup (Always try local if available, regardless of setting, but respect setting if explicitly false)
+      const existing = allProducts.find(p => p.barcode === barcode);
+      if (existing) {
+        fillProductForm(existing);
+        showToast(t("Ma'lumotlar topildi va to'ldirildi"), 'success');
+        return;
       }
 
       // 2. Global Lookup
-      if (business.globalBarcodeLookup) {
+      if (!business || business.globalBarcodeLookup !== false) { // Default to true if not specified
         try {
           const resp = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
           const data = await resp.json();
           if (data.status === 1 && data.product) {
             const p = data.product;
             const nameEl = document.getElementById('prod-name');
-            // Only fill name if it's empty to avoid overwriting user input
             if (!nameEl.value) {
-              nameEl.value = p.product_name || p.product_name_uz || p.product_name_ru || p.product_name_en || '';
+              nameEl.value = p.product_name || p.product_name_uz || p.product_name_ru || p.product_name_en || p.generic_name || '';
             }
             
             const countryEl = document.getElementById('prod-country');
@@ -410,9 +405,15 @@ async function attachBarcodeLookup() {
               countryEl.value = p.countries_tags[0].split(':').pop().charAt(0).toUpperCase() + p.countries_tags[0].split(':').pop().slice(1);
             }
 
-            if (!document.getElementById('prod-image-url').value && p.image_url) {
-              document.getElementById('prod-image-url').value = p.image_url;
-              document.getElementById('prod-image-preview').innerHTML = `<img src="${p.image_url}" style="width:100%; height:100%; object-fit:cover;">`;
+            const shortEl = document.getElementById('prod-short');
+            if (shortEl && !shortEl.value) {
+              shortEl.value = p.generic_name || p.ingredients_text || '';
+            }
+
+            if (!document.getElementById('prod-image-url').value && (p.image_url || p.image_front_url)) {
+              const url = p.image_url || p.image_front_url;
+              document.getElementById('prod-image-url').value = url;
+              document.getElementById('prod-image-preview').innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:cover;">`;
             }
             showToast(t("Global bazadan ma'lumot olindi"), 'success');
           }
@@ -420,8 +421,11 @@ async function attachBarcodeLookup() {
           console.error("Global lookup failed", err);
         }
       }
-    }, 500); // 500ms debounce
-  });
+    }, 400);
+  };
+
+  barcodeInput.addEventListener('input', runLookup);
+  barcodeInput.addEventListener('change', runLookup);
 }
 
 async function handleProductExport() {
