@@ -245,7 +245,7 @@ function openProductModal(p = null) {
             <label>${t("Barcode")}</label>
             <div class="barcode-input-group">
               <input type="text" class="form-control" id="prod-barcode" value="${isEdit && p.barcode ? escapeHtml(p.barcode) : ''}" placeholder="${t('Kodni skanerlang yoki qo‘lda kiriting')}">
-              <button type="button" class="btn-camera-scan" title="${t('Kamera orqali skanerlash')}" onclick="window.openCameraScanner(function(code){ const el=document.getElementById('prod-barcode'); if(el){el.value=code; el.dispatchEvent(new Event('input'));} })">📷</button>
+              <button type="button" class="btn-camera-scan" title="${t('Kamera orqali skanerlash')}" onclick="window.openCameraScanner(function(code){ const el=document.getElementById('prod-barcode'); if(el){el.value=code; setTimeout(() => el.dispatchEvent(new Event('input', { bubbles: true })), 100);} })">📷</button>
             </div>
           </div>
         </div>

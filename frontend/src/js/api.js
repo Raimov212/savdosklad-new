@@ -383,12 +383,24 @@ export function openCameraScanner(onScanCallback) {
 
   const closeScannerUI = () => {
     if (activeCameraScanner) {
-      activeCameraScanner.stop().then(() => {
-        activeCameraScanner.clear();
+      try {
+        const state = activeCameraScanner.getState();
+        if (state === 2 || state === 3) { // SCANNING (2) or PAUSED (3)
+          activeCameraScanner.stop().then(() => {
+            activeCameraScanner.clear();
+            activeCameraScanner = null;
+          }).catch(err => {
+            console.warn("Scanner stop failed:", err);
+            activeCameraScanner = null;
+          });
+        } else {
+          activeCameraScanner.clear();
+          activeCameraScanner = null;
+        }
+      } catch (e) {
+        console.warn("Error getting scanner state:", e);
         activeCameraScanner = null;
-      }).catch(() => {
-        activeCameraScanner = null;
-      });
+      }
     }
     overlay.classList.remove('active');
     setTimeout(() => overlay.remove(), 300);
