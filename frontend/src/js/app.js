@@ -318,7 +318,9 @@ async function renderDashboard() {
         return;
       }
       // Barcha bizneslar bo'yicha parallel so'rovlar
-      const query = getDateQuery();
+      const now = new Date();
+      const startPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const query = `&startDate=${startPrevMonth.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`;
       const allProducts = await Promise.all(businesses.map(b => api.get(`/products?businessId=${b.id}`).catch(() => [])));
       const allTransactions = await Promise.all(businesses.map(b => api.get(`/transactions?businessId=${b.id}${query}`).catch(() => [])));
       const allClients = await Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])));
@@ -326,7 +328,9 @@ async function renderDashboard() {
       transactions = allTransactions.flat();
       clients = allClients.flat();
     } else {
-      const query = getDateQuery();
+      const now = new Date();
+      const startPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const query = `&startDate=${startPrevMonth.toISOString().split('T')[0]}&endDate=${now.toISOString().split('T')[0]}`;
       [products, transactions, clients] = await Promise.all([
         api.get(`/products?businessId=${bid}`).catch(() => []),
         api.get(`/transactions?businessId=${bid}${query}`).catch(() => []),
@@ -354,6 +358,13 @@ async function renderDashboard() {
       return d.getMonth() === lastMonth && d.getFullYear() === lastYear;
     }).reduce((s, t) => s + (t.total || 0), 0);
 
+    // O'tgan oyning aynan bugungi kungacha bo'lgan davri (Like-for-like)
+    const todayDay = now.getDate();
+    const totalLastMonthSamePeriodSales = transactionList.filter(t => {
+      const d = new Date(t.createdAt);
+      return d.getMonth() === lastMonth && d.getFullYear() === lastYear && d.getDate() <= todayDay;
+    }).reduce((s, t) => s + (t.total || 0), 0);
+
     let growthPercent = 0;
     let growthType = 'none';
     if (totalLastMonthSales > 0) {
@@ -362,6 +373,16 @@ async function renderDashboard() {
     } else if (totalMonthSales > 0) {
       growthType = 'up';
       growthPercent = 100;
+    }
+
+    let growthSamePeriodPercent = 0;
+    let growthSamePeriodType = 'none';
+    if (totalLastMonthSamePeriodSales > 0) {
+      growthSamePeriodPercent = ((totalMonthSales - totalLastMonthSamePeriodSales) / totalLastMonthSamePeriodSales) * 100;
+      growthSamePeriodType = growthSamePeriodPercent >= 0 ? 'up' : 'down';
+    } else if (totalMonthSales > 0) {
+      growthSamePeriodType = 'up';
+      growthSamePeriodPercent = 100;
     }
 
     const newClientsThisMonth = clientList.filter(c => {
@@ -429,14 +450,24 @@ async function renderDashboard() {
             <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800;">${formatPrice(totalMonthSales)}</div>
             <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:8px;">
               <div class="stat-trend" style="color:var(--text-muted); font-size:12px; font-weight:400;">${currentMonthLabel}</div>
-              ${growthType !== 'none' ? `
-                <div style="text-align:right;">
-                  <div style="font-size:16px; font-weight:800; color:${growthType === 'up' ? 'var(--success)' : 'var(--danger)'}; display:flex; align-items:center; justify-content:flex-end; gap:2px;">
-                    ${growthType === 'up' ? '↑' : '↓'} ${Math.abs(Math.round(growthPercent))}%
+              <div style="text-align:right; display:flex; flex-direction:column; gap:4px;">
+                ${growthType !== 'none' ? `
+                  <div>
+                    <div style="font-size:16px; font-weight:800; color:${growthType === 'up' ? 'var(--success)' : 'var(--danger)'}; display:flex; align-items:center; justify-content:flex-end; gap:2px;">
+                      ${growthType === 'up' ? '↑' : '↓'} ${Math.abs(Math.round(growthPercent))}%
+                    </div>
+                    <div style="font-size:9px; color:var(--text-muted); font-weight:400; text-transform:uppercase; letter-spacing:0.3px;">${t("o'tgan oyga nisbatan")}</div>
                   </div>
-                  <div style="font-size:10px; color:var(--text-muted); font-weight:400;">${t("o'tgan oyga nisbatan")}</div>
-                </div>
-              ` : ''}
+                ` : ''}
+                ${growthSamePeriodType !== 'none' ? `
+                  <div style="border-top: 1px solid var(--border); padding-top:4px; margin-top:2px;">
+                    <div style="font-size:13px; font-weight:700; color:${growthSamePeriodType === 'up' ? 'var(--success)' : 'var(--danger)'}; display:flex; align-items:center; justify-content:flex-end; gap:2px;">
+                      ${growthSamePeriodType === 'up' ? '↑' : '↓'} ${Math.abs(Math.round(growthSamePeriodPercent))}%
+                    </div>
+                    <div style="font-size:9px; color:var(--text-muted); font-weight:400; text-transform:uppercase; letter-spacing:0.3px;">${t("O'tgan oy (shu davr)")}</div>
+                  </div>
+                ` : ''}
+              </div>
             </div>
           </div>
 
