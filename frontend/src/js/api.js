@@ -185,7 +185,10 @@ export function showToast(message, type = 'success') {
     toast.textContent = message;
     container.appendChild(toast);
 
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // ==================== HELPER FUNCTIONS ====================

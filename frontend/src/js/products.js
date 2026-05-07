@@ -34,14 +34,18 @@ async function renderProducts() {
         )
       );
 
-      allProducts = results.flatMap(r => r.prods).filter(p => p && !p.isDeleted);
+      allProducts = results.flatMap(r => r.prods)
+        .filter(p => p && !p.isDeleted)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
       allCategories = results.flatMap(r => r.cats).filter(c => c);
     } else {
       const [products, categories] = await Promise.all([
         api.get(`/products?businessId=${bid}`),
         api.get(`/categories?businessId=${bid}`)
       ]);
-      allProducts = (products || []).filter(p => !p.isDeleted);
+      allProducts = (products || [])
+        .filter(p => !p.isDeleted)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
       allCategories = categories || [];
     }
 
@@ -239,8 +243,8 @@ function openProductModal(p = null) {
             <div class="barcode-input-group">
               <input type="text" class="form-control" id="prod-barcode" value="${isEdit && p.barcode ? escapeHtml(p.barcode) : ''}" placeholder="${t('Kodni skanerlang yoki qo‘lda kiriting')}">
               <div class="barcode-actions">
-                <button type="button" class="btn-camera-scan" title="${t('Kamera orqali skanerlash')}" onclick="window.openCameraScanner(function(code){ const el=document.getElementById('prod-barcode'); if(el){el.value=code; setTimeout(() => el.dispatchEvent(new Event('input', { bubbles: true })), 100);} })">📷</button>
-                <button type="button" class="btn-barcode-search" title="${t('Qidirish')}" onclick="const el=document.getElementById('prod-barcode'); if(el) el.dispatchEvent(new Event('input', { bubbles: true }));">🔍</button>
+                <button type="button" class="btn-camera-scan" title="${t('Kamera orqali skanerlash')}" onclick="window.openCameraScanner(function(code){ const el=document.getElementById('prod-barcode'); if(el){el.value=code; window.executeBarcodeLookup(code);} })">📷</button>
+                <button type="button" class="btn-barcode-search" title="${t('Qidirish')}" onclick="window.executeBarcodeLookup(document.getElementById('prod-barcode').value)">🔍</button>
               </div>
             </div>
           </div>
@@ -325,7 +329,7 @@ function openProductModal(p = null) {
   `);
 
   // Attach barcode lookup logic
-  setTimeout(attachBarcodeLookup, 100);
+  setTimeout(attachBarcodeLookup, 300);
 }
 
 function fillProductForm(p) {
@@ -349,79 +353,117 @@ function fillProductForm(p) {
   if (p.images || p.image_url) {
     const url = p.images || p.image_url;
     document.getElementById('prod-image-url').value = url;
-    document.getElementById('prod-image-preview').innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:cover;">`;
+    document.getElementById('prod-image-preview').innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
   }
 }
+
+// Global function to be called from buttons or events
+window.executeBarcodeLookup = async function(barcodeValue) {
+  const barcode = (barcodeValue || "").trim().replace(/\D/g, '');
+  if (barcode.length < 8) {
+    showToast(t("Shtrix-kod juda qisqa"), 'warning');
+    return;
+  }
+
+  const nameEl = document.getElementById('prod-name');
+  const countryEl = document.getElementById('prod-country');
+  const shortEl = document.getElementById('prod-short');
+  const imgUrlEl = document.getElementById('prod-image-url');
+
+  // 1. Local Lookup
+  const existing = allProducts.find(p => p.barcode === barcode);
+  if (existing) {
+    fillProductForm(existing);
+    showToast(t("Ma'lumotlar topildi va to'ldirildi"), 'success');
+    return;
+  }
+
+  showToast(t("Global bazadan qidirilmoqda..."), 'info');
+  
+  try {
+    let found = false;
+    let product = null;
+    let domain = '';
+
+    const databases = [
+      'world.openfoodfacts.org',
+      'world.openproductsfacts.org',
+      'world.openbeautyfacts.org'
+    ];
+
+    for (const db of databases) {
+      if (found) break;
+      try {
+        const resp = await fetch(`https://${db}/api/v0/product/${barcode}.json`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          cache: 'no-store'
+        });
+        
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.status === 1 && data.product) {
+            product = data.product;
+            found = true;
+            domain = db;
+          } else if (data.status_verbose && data.status_verbose.includes("different product type")) {
+            continue; 
+          }
+        }
+      } catch (e) { 
+        console.warn(`${db} fetch error:`, e);
+      }
+    }
+
+    if (found && product) {
+      const p = product;
+      const name = p.product_name_uz || p.product_name_ru || p.product_name || p.product_name_en || p.generic_name || "";
+      if (nameEl && !nameEl.value && name) {
+        nameEl.value = name;
+      }
+      
+      if (countryEl && !countryEl.value) {
+        const country = p.countries_uz || p.countries_ru || p.countries || "";
+        if (country) countryEl.value = country;
+      }
+
+      if (shortEl && !shortEl.value) {
+        shortEl.value = p.generic_name || p.ingredients_text || p.categories || "";
+      }
+
+      if (imgUrlEl && !imgUrlEl.value) {
+        let url = p.image_url || p.image_front_url || p.image_small_url;
+        if (url) {
+          if (!url.startsWith('http')) {
+            url = `https://images.${domain.split('.').slice(1).join('.')}${url}`;
+          }
+          imgUrlEl.value = url;
+          const preview = document.getElementById('prod-image-preview');
+          if (preview) {
+            preview.innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">`;
+          }
+        }
+      }
+      showToast(t("Ma'lumotlar olindi"), 'success');
+    } else {
+      showToast(t("Mahsulot topilmadi"), 'warning');
+    }
+  } catch (err) {
+    console.error("Global lookup failed", err);
+    showToast(t("Global bazaga ulanishda xatolik"), 'danger');
+  }
+};
 
 async function attachBarcodeLookup() {
   const barcodeInput = document.getElementById('prod-barcode');
   if (!barcodeInput) return;
 
-  const bid = getSelectedBusinessId();
-  if (!bid) return;
-
   let lookupTimeout = null;
 
-  // Attach listener immediately to avoid race conditions
   const runLookup = (e) => {
-    const barcode = e.target.value.trim();
-    if (barcode.length < 8) return;
-
+    const val = e.target.value;
     if (lookupTimeout) clearTimeout(lookupTimeout);
-
-    lookupTimeout = setTimeout(async () => {
-      // Get settings inside the timeout to ensure they might have loaded by now
-      let business = (window.allBusinessesList || []).find(b => b.id == bid);
-      if (!business) {
-        try {
-          const businesses = await api.get('/businesses/my');
-          window.allBusinessesList = businesses || [];
-          business = (businesses || []).find(b => b.id == bid);
-        } catch (e) { console.error(e); }
-      }
-
-      // 1. Local Lookup (Always try local if available, regardless of setting, but respect setting if explicitly false)
-      const existing = allProducts.find(p => p.barcode === barcode);
-      if (existing) {
-        fillProductForm(existing);
-        showToast(t("Ma'lumotlar topildi va to'ldirildi"), 'success');
-        return;
-      }
-
-      // 2. Global Lookup
-      if (!business || business.globalBarcodeLookup !== false) { // Default to true if not specified
-        try {
-          const resp = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-          const data = await resp.json();
-          if (data.status === 1 && data.product) {
-            const p = data.product;
-            const nameEl = document.getElementById('prod-name');
-            if (!nameEl.value) {
-              nameEl.value = p.product_name || p.product_name_uz || p.product_name_ru || p.product_name_en || p.generic_name || '';
-            }
-            
-            const countryEl = document.getElementById('prod-country');
-            if (!countryEl.value && p.countries_tags && p.countries_tags.length > 0) {
-              countryEl.value = p.countries_tags[0].split(':').pop().charAt(0).toUpperCase() + p.countries_tags[0].split(':').pop().slice(1);
-            }
-
-            const shortEl = document.getElementById('prod-short');
-            if (shortEl && !shortEl.value) {
-              shortEl.value = p.generic_name || p.ingredients_text || '';
-            }
-
-            if (!document.getElementById('prod-image-url').value && (p.image_url || p.image_front_url)) {
-              const url = p.image_url || p.image_front_url;
-              document.getElementById('prod-image-url').value = url;
-              document.getElementById('prod-image-preview').innerHTML = `<img src="${url}" style="width:100%; height:100%; object-fit:cover;">`;
-            }
-            showToast(t("Global bazadan ma'lumot olindi"), 'success');
-          }
-        } catch (err) {
-          console.error("Global lookup failed", err);
-        }
-      }
-    }, 400);
+    lookupTimeout = setTimeout(() => window.executeBarcodeLookup(val), 600);
   };
 
   barcodeInput.addEventListener('input', runLookup);

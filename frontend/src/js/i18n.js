@@ -198,6 +198,11 @@ export const translations = {
         "To'lash": "To'lash",
         "Qarzni to'lash": "Qarzni to'lash",
         "Jami qarz": "Jami qarz",
+        "Global bazadan qidirilmoqda...": "Global bazadan qidirilmoqda...",
+        "Ma'lumotlar olindi": "Ma'lumotlar olindi",
+        "Mahsulot topilmadi": "Mahsulot topilmadi",
+        "Global bazaga ulanishda xatolik": "Global bazaga ulanishda xatolik",
+        "Shtrix-kod juda qisqa": "Shtrix-kod juda qisqa",
         "Qoldiq qarz": "Qoldiq qarz",
         "Qarz summasi": "Qarz summasi",
         "Qarz summasi qarzdan ko'p bo'lishi mumkin emas!": "Qarz summasi qarzdan ko'p bo'lishi mumkin emas!",
@@ -919,6 +924,11 @@ export const translations = {
         "To'lash": "Тўлаш",
         "Qarzni to'lash": "Қарзни тўлаш",
         "Jami qarz": "Жами қарз",
+        "Global bazadan qidirilmoqda...": "Глобал базадан қидирилмоқда...",
+        "Ma'lumotlar olindi": "Маълумотлар олинди",
+        "Mahsulot topilmadi": "Маҳсулот топилмади",
+        "Global bazaga ulanishda xatolik": "Глобал базага уланишда хатолик",
+        "Shtrix-kod juda qisqa": "Штрих-код жуда қисқа",
         "Qoldiq qarz": "Қолдиқ қарз",
         "To'lov summasini kiriting": "Тўлов суммасини киритинг",
         "To'lov summasi qarzdan ko'p bo'lishi mumkin эмас!": "Тўлов суммаси қарздан кўп бўлиши мумкин эмас!",
@@ -1672,7 +1682,12 @@ export const translations = {
         "Keshbek balansi": "Кешбэк баланс",
         "Keshbek ishlatish": "Использовать кешбэк",
         "Keshbek hisoblandi": "Кешбэк начислен",
-        "Keshbek sozlamalari": "Настройки кешбэка"
+        "Keshbek sozlamalari": "Настройки кешбэка",
+        "Global bazadan qidirilmoqda...": "Поиск в глобальной базе...",
+        "Ma'lumotlar olindi": "Данные получены",
+        "Mahsulot topilmadi": "Товар не найден",
+        "Global bazaga ulanishda xatolik": "Ошибка подключения к глобальной базе",
+        "Shtrix-kod juda qisqa": "Штрих-код слишком короткий"
     },
     en: {
         "Mijoz nomi yoki tel...": "Client name or phone...",
@@ -2355,7 +2370,12 @@ export const translations = {
         "Kameraga ruxsat berilmadi": "Camera permission denied",
         "Brauzer sozlamalaridan kameraga ruxsat bering": "Allow camera access from browser settings",
         "Kamera skanerlash kutubxonasi yuklanmadi": "Camera scanning library not loaded",
-        "Kamera orqali skanerlash": "Scan via camera"
+        "Kamera orqali skanerlash": "Scan via camera",
+        "Global bazadan qidirilmoqda...": "Searching global database...",
+        "Ma'lumotlar olindi": "Data received",
+        "Mahsulot topilmadi": "Product not found",
+        "Global bazaga ulanishda xatolik": "Global database connection error",
+        "Shtrix-kod juda qisqa": "Barcode too short"
     }
 };
 
