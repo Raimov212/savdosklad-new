@@ -385,6 +385,10 @@ async function renderDashboard() {
       growthSamePeriodPercent = 100;
     }
 
+    const salesIconType = growthSamePeriodType === 'down' ? 'trending-down' : 'trending-up';
+    const salesIconColor = growthSamePeriodType === 'down' ? 'var(--danger)' : 'var(--success)';
+    const salesIconBg = growthSamePeriodType === 'down' ? 'var(--danger-bg)' : 'var(--success-bg)';
+
     const newClientsThisMonth = clientList.filter(c => {
       const d = new Date(c.createdAt);
       return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
@@ -445,7 +449,7 @@ async function renderDashboard() {
           <div class="stat-card">
             <div class="card-header">
               <span class="stat-label">${t("Jami savdo")}</span>
-              <div class="btn-icon" style="background:var(--success-bg); color:var(--success);"><i data-lucide="trending-up"></i></div>
+              <div class="btn-icon" style="background:${salesIconBg}; color:${salesIconColor};"><i data-lucide="${salesIconType}"></i></div>
             </div>
             <div class="stat-value" style="font-size:28px; font-family:'Outfit'; font-weight:800;">${formatPrice(totalMonthSales)}</div>
             <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:8px;">
