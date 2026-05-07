@@ -236,9 +236,12 @@ async function openSaleModal() {
       
       <div id="sale-step-1" class="sale-segment">
         <div class="form-group" style="position:relative; margin-bottom: 20px;">
-          <div class="search-box" style="max-width: 100%;">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="form-control" id="sale-product-search" placeholder="${t("Qidirish (Nomi, Barcode)...")}" oninput="searchSaleProduct(this.value)" autocomplete="off">
+          <div class="barcode-input-group">
+            <div class="search-box" style="flex: 1; max-width: none; margin: 0;">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="form-control" id="sale-product-search" placeholder="${t("Qidirish (Nomi, Barcode)...")}" oninput="searchSaleProduct(this.value)" autocomplete="off">
+            </div>
+            <button type="button" class="btn-camera-scan" title="${t('Kamera orqali skanerlash')}" onclick="window.openCameraScanner(function(code){ addSaleProductByBarcode(code); })">📷</button>
           </div>
           <div id="sale-search-results" class="search-results-dropdown"></div>
         </div>
@@ -1322,6 +1325,16 @@ function resetSaleForm() {
   showToast(t("Forma tozalandi"));
 }
 
+function addSaleProductByBarcode(barcode) {
+  if (!barcode) return;
+  const product = saleProducts.find(p => p.barcode === barcode);
+  if (product) {
+    addSaleProductById(product.id);
+  } else {
+    showToast(t("Mahsulot topilmadi"), 'warning');
+  }
+}
+
 // Global exports
 window.addToSaleBatch = addToSaleBatch;
 window.renderSavedBatches = renderSavedBatches;
@@ -1330,6 +1343,7 @@ window.renderTransactions = renderTransactions;
 window.renderTransactionsTable = renderTransactionsTable;
 window.filterTransactions = filterTransactions;
 window.openSaleModal = openSaleModal;
+window.addSaleProductByBarcode = addSaleProductByBarcode;
 window.searchSaleProduct = searchSaleProduct;
 window.addSaleProductById = addSaleProductById;
 window.renderSaleItems = renderSaleItems;

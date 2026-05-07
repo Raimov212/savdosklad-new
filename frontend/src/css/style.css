@@ -2216,4 +2216,168 @@ body.is-admin .nav-section-title {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* ==================== CAMERA BARCODE SCANNER ==================== */
+.camera-scanner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.camera-scanner-overlay.active {
+  opacity: 1;
+}
+
+.camera-scanner-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  width: 92%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg), 0 0 60px rgba(16, 185, 129, 0.1);
+  overflow: hidden;
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.camera-scanner-overlay.active .camera-scanner-modal {
+  transform: translateY(0) scale(1);
+}
+
+.camera-scanner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-glass);
+}
+
+.camera-scanner-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-primary);
+}
+
+.camera-scanner-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Override html5-qrcode default styles */
+#camera-scanner-reader {
+  width: 100% !important;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid var(--accent) !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+#camera-scanner-reader video {
+  border-radius: 14px;
+}
+
+#camera-scanner-reader img[alt="Info icon"] {
+  display: none !important;
+}
+
+/* Hide the default html5-qrcode UI clutter */
+#camera-scanner-reader__scan_region {
+  background: transparent !important;
+}
+
+#camera-scanner-reader__dashboard {
+  display: none !important;
+}
+
+.camera-scanner-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.camera-scanner-hint::before {
+  content: "📡";
+  animation: pulse-icon 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.camera-scanner-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+
+/* Camera scan button next to barcode input */
+.barcode-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.barcode-input-group .form-control {
+  flex: 1;
+}
+
+.btn-camera-scan {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-camera-scan:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.btn-camera-scan:active {
+  transform: scale(0.95);
+}
+
+.btn-camera-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.btn-camera-scan:hover::after {
+  opacity: 1;
 }

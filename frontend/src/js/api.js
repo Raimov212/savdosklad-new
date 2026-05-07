@@ -351,4 +351,112 @@ window.updateThemeIcon = updateThemeIcon;
 window.toggleAcc = toggleAcc;
 window.showErrorBoundary = showErrorBoundary;
 
+// ==================== CAMERA BARCODE SCANNER ====================
+let activeCameraScanner = null;
+export function openCameraScanner(onScanCallback) {
+  // Prevent multiple scanners
+  if (document.getElementById('camera-scanner-overlay')) return;
+
+  const translate = window.t || (s => s);
+  const overlay = document.createElement('div');
+  overlay.id = 'camera-scanner-overlay';
+  overlay.className = 'camera-scanner-overlay';
+  overlay.innerHTML = `
+    <div class="camera-scanner-modal">
+      <div class="camera-scanner-header">
+        <h3>📷 ${translate("Kamerani skanerlash")}</h3>
+        <button class="modal-close" id="camera-scanner-close">✕</button>
+      </div>
+      <div class="camera-scanner-body">
+        <div id="camera-scanner-reader"></div>
+        <p class="camera-scanner-hint">${translate("Shtrix-kodni kamera oldiga olib keling")}</p>
+      </div>
+      <div class="camera-scanner-footer">
+        <button class="btn btn-ghost" id="camera-scanner-cancel">${translate("Bekor qilish")}</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Animate in
+  requestAnimationFrame(() => overlay.classList.add('active'));
+
+  const closeScannerUI = () => {
+    if (activeCameraScanner) {
+      activeCameraScanner.stop().then(() => {
+        activeCameraScanner.clear();
+        activeCameraScanner = null;
+      }).catch(() => {
+        activeCameraScanner = null;
+      });
+    }
+    overlay.classList.remove('active');
+    setTimeout(() => overlay.remove(), 300);
+  };
+
+  document.getElementById('camera-scanner-close').onclick = closeScannerUI;
+  document.getElementById('camera-scanner-cancel').onclick = closeScannerUI;
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeScannerUI();
+  });
+
+  // Initialize html5-qrcode
+  try {
+    if (typeof Html5Qrcode === 'undefined') {
+        throw new Error("Html5Qrcode library not loaded");
+    }
+    const scanner = new Html5Qrcode("camera-scanner-reader");
+    activeCameraScanner = scanner;
+
+    const config = {
+      fps: 10,
+      qrbox: { width: 280, height: 120 },
+      aspectRatio: 1.0,
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.CODE_93,
+        Html5QrcodeSupportedFormats.ITF,
+        Html5QrcodeSupportedFormats.QR_CODE
+      ]
+    };
+
+    scanner.start(
+      { facingMode: "environment" },
+      config,
+      (decodedText) => {
+        // Success — vibrate if available
+        if (navigator.vibrate) navigator.vibrate(200);
+        showToast(`✅ ${translate("Kod aniqlandi")}: ${decodedText}`, 'success');
+        closeScannerUI();
+        if (typeof onScanCallback === 'function') {
+          onScanCallback(decodedText);
+        }
+      },
+      () => { /* ignore scan errors */ }
+    ).catch(err => {
+      console.error("Camera scanner error:", err);
+      const readerEl = document.getElementById('camera-scanner-reader');
+      if (readerEl) {
+        readerEl.innerHTML = `
+          <div style="padding:30px; text-align:center; color:var(--danger);">
+            <div style="font-size:48px; margin-bottom:16px;">📵</div>
+            <p style="font-weight:700; margin-bottom:8px;">${translate("Kameraga ruxsat berilmadi")}</p>
+            <p style="font-size:12px; color:var(--text-muted);">${translate("Brauzer sozlamalaridan kameraga ruxsat bering")}</p>
+          </div>
+        `;
+      }
+    });
+  } catch (err) {
+    console.error("Html5Qrcode error:", err);
+    showToast(translate("Kamera skanerlash kutubxonasi yuklanmadi"), 'error');
+    closeScannerUI();
+  }
+}
+window.openCameraScanner = openCameraScanner;
+
 console.log("%cSavdoSklad Frontend v1.0.6 (Defensive) Loaded", "color: #10b981; font-weight: bold; font-size: 12px;");

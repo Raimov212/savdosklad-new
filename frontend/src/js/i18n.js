@@ -278,7 +278,14 @@ export const translations = {
         "Mahsulotlar jami": "Mahsulotlar jami",
         "To'lanishi kerak": "To'lanishi kerak",
         "To'lanayotgan summa": "To'lanayotgan summa",
-        "Keshbek ishlatildi": "Keshbek ishlatildi"
+        "Keshbek ishlatildi": "Keshbek ishlatildi",
+        "Kamerani skanerlash": "Kamerani skanerlash",
+        "Shtrix-kodni kamera oldiga olib keling": "Shtrix-kodni kamera oldiga olib keling",
+        "Kod aniqlandi": "Kod aniqlandi",
+        "Kameraga ruxsat berilmadi": "Kameraga ruxsat berilmadi",
+        "Brauzer sozlamalaridan kameraga ruxsat bering": "Brauzer sozlamalaridan kameraga ruxsat bering",
+        "Kamera skanerlash kutubxonasi yuklanmadi": "Kamera skanerlash kutubxonasi yuklanmadi",
+        "Kamera orqali skanerlash": "Kamera orqali skanerlash"
     },
     'uz-cyrl': {
         "Mijoz nomi yoki tel...": "Мижоз номи ёки тел...",
@@ -884,6 +891,13 @@ export const translations = {
         "Ushbu xodimni o'chirishga ishonchingiz komilmi?": "Ушбу ходимни ўчиришга ишончингиз комилми?",
         "Biriktirilgan biznes": "Бириктирилган бизнес",
         "Biriktirilgan bizneslar": "Бириктирилган бизнеслaр",
+        "Kamerani skanerlash": "Камерани сканерлаш",
+        "Shtrix-kodni kamera oldiga olib keling": "Штрих-кодни камера олдига олиб келинг",
+        "Kod aniqlandi": "Код аниқланди",
+        "Kameraga ruxsat berilmadi": "Камерага рухсат берилмади",
+        "Brauzer sozlamalaridan kameraga ruxsat bering": "Браузер созламаларидан камерага рухсат беринг",
+        "Kamera skanerlash kutubxonasi yuklanmadi": "Камера сканерлаш кутубхонаси юкланмади",
+        "Kamera orqali skanerlash": "Камера орқали сканерлаш",
         "Biriktirilmagan": "Бириктирилмаган",
         "Biznes": "Бизнес",
         "Obuna muddati": "Обуна муддати",
@@ -1591,6 +1605,13 @@ export const translations = {
         "Ushbu xodimni o'chirishga ishonchingiz komilmi?": "Вы уверены, что хотите удалить этого сотрудника?",
         "Biriktirilgan biznes": "Прикрепленный бизнес",
         "Biriktirilgan bizneslar": "Прикрепленные бизнесы",
+        "Kamerani skanerlash": "Сканирование камерой",
+        "Shtrix-kodni kamera oldiga olib keling": "Поднесите штрих-код к камере",
+        "Kod aniqlandi": "Код обнаружен",
+        "Kameraga ruxsat berilmadi": "Доступ к камере запрещен",
+        "Brauzer sozlamalaridan kameraga ruxsat bering": "Разрешите доступ к камере в настройках браузера",
+        "Kamera skanerlash kutubxonasi yuklanmadi": "Библиотека сканирования камерой не загружена",
+        "Kamera orqali skanerlash": "Сканировать через камеру",
         "Biriktirilmagan": "Не прикреплен",
         "Biznes": "Бизнес",
         "Obuna muddati": "Срок подписки",
@@ -2327,7 +2348,14 @@ export const translations = {
         "Keshbek balansi": "Cashback balance",
         "Keshbek ishlatish": "Use cashback",
         "Keshbek hisoblandi": "Cashback earned",
-        "Keshbek sozlamalari": "Cashback Settings"
+        "Keshbek sozlamalari": "Cashback Settings",
+        "Kamerani skanerlash": "Camera scanning",
+        "Shtrix-kodni kamera oldiga olib keling": "Bring the barcode to the camera",
+        "Kod aniqlandi": "Code detected",
+        "Kameraga ruxsat berilmadi": "Camera permission denied",
+        "Brauzer sozlamalaridan kameraga ruxsat bering": "Allow camera access from browser settings",
+        "Kamera skanerlash kutubxonasi yuklanmadi": "Camera scanning library not loaded",
+        "Kamera orqali skanerlash": "Scan via camera"
     }
 };
 
