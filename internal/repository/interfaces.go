@@ -78,7 +78,7 @@ type TransactionRepository interface {
 	GetTotalTransactionByID(id int) (*entity.TotalTransaction, error)
 	GetTotalTransactionsByBusinessID(bid int) ([]entity.TotalTransaction, error)
 	GetTotalTransactionsByPeriod(bid int, start, end time.Time) ([]entity.TotalTransaction, error)
-	GetTransactionsByTotalID(totalID int) ([]entity.Transaction, error)
+	GetTransactionsByTotalID(totalID int, bid int) ([]entity.Transaction, error)
 	GetRecentTransactionsByBusinessID(bid int, limit int) ([]entity.TotalTransaction, error)
 	GetRecentTransactionsByClientID(clientID int, limit int) ([]entity.TotalTransaction, error)
 	GetStats(bid int, start, end *time.Time) (entity.TransactionStats, error)

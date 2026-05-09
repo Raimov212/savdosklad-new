@@ -759,7 +759,11 @@ func (h *TransactionHandler) GetByID(c *gin.Context) {
 // @Router /transactions/{id}/items [get]
 func (h *TransactionHandler) GetItems(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	list, err := h.uc.GetItems(id)
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	if bid != 0 && !h.checkPerm(c, bid, "view") {
+		return
+	}
+	list, err := h.uc.GetItems(id, bid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

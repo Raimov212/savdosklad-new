@@ -300,11 +300,12 @@ async function checkTransactionForRefund() {
 
   try {
     showToast(t("Tafsilotlar yuklanmoqda..."), 'info');
-    const items = await api.get(`/transactions/${tid}/items`);
+    const bid = getSelectedBusinessId();
+    const items = await api.get(`/transactions/${tid}/items?businessId=${bid}`);
     currentTransactionItems = items || [];
 
     if (currentTransactionItems.length === 0) {
-      document.getElementById('refund-items-area').innerHTML = `<p style="color:var(--danger); text-align:center; padding:20px;">${t("Sotuv topilmadi")} yoki unda mahsulotlar yo'q.</p>`;
+      document.getElementById('refund-items-area').innerHTML = `<p style="color:var(--danger); text-align:center; padding:20px;">${t("Sotuv topilmadi yoki unda mahsulotlar yo'q")}</p>`;
       return;
     }
 
@@ -464,7 +465,7 @@ async function submitRefund() {
     });
 
     showToast(t("Qaytarish muvaffaqiyatli amalga oshirildi!"));
-    
+
     // Clear form
     const tidInput = document.getElementById('refund-trans-id');
     if (tidInput) {

@@ -78,7 +78,7 @@ func (r *RefundRepo) GetTotalRefundsByBusinessID(businessID int) ([]entity.Total
 	return list, nil
 }
 
-func (r *RefundRepo) GetTransactionsByTotalID(totalID int) ([]entity.Transaction, error) {
+func (r *RefundRepo) GetTransactionsByTotalID(totalID int, bid int) ([]entity.Transaction, error) {
 	return nil, nil
 }
 

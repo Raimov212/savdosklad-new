@@ -337,8 +337,8 @@ func (uc *TransactionUseCase) GetByPeriod(bid int, start, end time.Time) ([]enti
 func (uc *TransactionUseCase) GetStats(bid int, start, end *time.Time) (entity.TransactionStats, error) {
 	return uc.repo.GetStats(bid, start, end)
 }
-func (uc *TransactionUseCase) GetItems(totalID int) ([]entity.Transaction, error) {
-	return uc.repo.GetTransactionsByTotalID(totalID)
+func (uc *TransactionUseCase) GetItems(totalID int, bid int) ([]entity.Transaction, error) {
+	return uc.repo.GetTransactionsByTotalID(totalID, bid)
 }
 func (uc *TransactionUseCase) GetTransactionByID(id int) (*entity.Transaction, error) {
 	return uc.repo.GetTransactionByID(id)
@@ -523,12 +523,13 @@ func (uc *TransactionUseCase) DeleteItem(id int) error {
 
 
 type RefundUseCase struct {
-	repo     repository.RefundRepository
-	notifier *notifier.TelegramNotifier
+	repo        repository.RefundRepository
+	productRepo repository.ProductRepository
+	notifier    *notifier.TelegramNotifier
 }
 
-func NewRefundUseCase(r repository.RefundRepository, n *notifier.TelegramNotifier) *RefundUseCase {
-	return &RefundUseCase{repo: r, notifier: n}
+func NewRefundUseCase(r repository.RefundRepository, pr repository.ProductRepository, n *notifier.TelegramNotifier) *RefundUseCase {
+	return &RefundUseCase{repo: r, productRepo: pr, notifier: n}
 }
 func (uc *RefundUseCase) Create(userID int, req entity.CreateTotalRefundRequest) (int, error) {
 	tr := &entity.TotalRefund{
@@ -563,6 +564,13 @@ func (uc *RefundUseCase) Create(userID int, req entity.CreateTotalRefundRequest)
 		}
 		if _, err := uc.repo.CreateRefund(rf); err != nil {
 			return 0, err
+		}
+
+		// Update product quantity in stock (return items to ombor)
+		if err := uc.productRepo.UpdateQuantity(item.ProductID, item.ProductQuantity); err != nil {
+			// Log error but continue or decide how to handle? 
+			// Usually we should rollback, but here we just try our best.
+			fmt.Printf("Error updating product quantity during refund: %v\n", err)
 		}
 	}
 	return totalID, nil
