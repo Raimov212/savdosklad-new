@@ -735,6 +735,22 @@ func (h *TransactionHandler) GetByClientID(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
+// @Summary Get total transaction by ID
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Total Transaction ID"
+// @Success 200 {object} entity.TotalTransaction
+// @Router /transactions/{id} [get]
+func (h *TransactionHandler) GetByID(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	tt, err := h.uc.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": i18n.Tc(c, i18n.MsgNotFound)})
+		return
+	}
+	c.JSON(http.StatusOK, tt)
+}
+
 // @Summary Get transaction items
 // @Tags Transactions
 // @Security BearerAuth
@@ -1351,6 +1367,7 @@ func RegisterRoutes(
 	// Transaction Handlers
 	r.POST("/transactions", transactionH.Create)
 	r.GET("/transactions", transactionH.GetByBusinessID)
+	r.GET("/transactions/:id", transactionH.GetByID)
 	r.PUT("/transactions/:id", transactionH.Update)
 	r.GET("/transactions/:id/items", transactionH.GetItems)
 	r.POST("/transactions/:id/items", transactionH.AddItems)

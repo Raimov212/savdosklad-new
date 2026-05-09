@@ -58,6 +58,10 @@ function renderTransactionsTable(list, isAppend = false) {
         group.card += trans.card;
         group.click += (trans.click || 0);
         group.debt += trans.debt;
+        group.pointsEarned = (group.pointsEarned || 0) + (trans.pointsEarned || 0);
+        group.pointsUsed = (group.pointsUsed || 0) + (trans.pointsUsed || 0);
+        group.cashbackEarned = (group.cashbackEarned || 0) + (trans.cashbackEarned || 0);
+        group.cashbackUsed = (group.cashbackUsed || 0) + (trans.cashbackUsed || 0);
         // Keep the latest timestamp for the row title
         if (new Date(trans.createdAt) > new Date(group.createdAt)) {
           group.createdAt = trans.createdAt;
@@ -71,7 +75,7 @@ function renderTransactionsTable(list, isAppend = false) {
       }
     });
 
-    currentTransactions = Array.from(groupedMap.values());
+    currentTransactions = Array.from(groupedMap.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     if (!isAppend) window.transactionPage = 1;
   }
 
@@ -124,6 +128,22 @@ function renderTransactionsTable(list, isAppend = false) {
                 <span class="acc-detail-icon">⚠️</span>
                 <div><div class="acc-detail-label" style="color:#EF4444;">${t("Qarz")}</div><div class="acc-detail-value" style="color:#EF4444;">${formatPrice(trans.debt)} ${t("so'm")}</div></div>
               </div>` : ''}
+              ${(trans.pointsEarned || 0) > 0 ? `<div class="acc-detail-item" style="border-left: 2px solid var(--success-glass);">
+                <span class="acc-detail-icon">⭐</span>
+                <div><div class="acc-detail-label" style="color:var(--success);">${t("To'plangan ballar")}</div><div class="acc-detail-value" style="color:var(--success); font-weight:800;">+${trans.pointsEarned}</div></div>
+              </div>` : ''}
+              ${(trans.pointsUsed || 0) > 0 ? `<div class="acc-detail-item" style="border-left: 2px solid var(--accent);">
+                <span class="acc-detail-icon">💫</span>
+                <div><div class="acc-detail-label" style="color:var(--accent);">${t("Ishlatilgan ballar")}</div><div class="acc-detail-value" style="color:var(--accent); font-weight:800;">-${trans.pointsUsed}</div></div>
+              </div>` : ''}
+              ${(trans.cashbackEarned || 0) > 0 ? `<div class="acc-detail-item" style="border-left: 2px solid var(--success);">
+                <span class="acc-detail-icon">💰</span>
+                <div><div class="acc-detail-label" style="color:var(--success);">${t("To'plangan keshbek")}</div><div class="acc-detail-value" style="color:var(--success); font-weight:800;">+${formatPrice(trans.cashbackEarned)}</div></div>
+              </div>` : ''}
+              ${(trans.cashbackUsed || 0) > 0 ? `<div class="acc-detail-item" style="border-left: 2px solid var(--danger);">
+                <span class="acc-detail-icon">💸</span>
+                <div><div class="acc-detail-label" style="color:var(--danger);">${t("Ishlatilgan keshbek")}</div><div class="acc-detail-value" style="color:var(--danger); font-weight:800;">-${formatPrice(trans.cashbackUsed)}</div></div>
+              </div>` : ''}
               <div class="acc-detail-item">
                 <span class="acc-detail-icon">👤</span>
                 <div><div class="acc-detail-label">${t("Mijoz")}</div><div class="acc-detail-value">${trans.clientName ? escapeHtml(trans.clientName) : (trans.clientNumber ? escapeHtml(trans.clientNumber) : t('Begona xaridor'))}</div></div>
@@ -145,15 +165,17 @@ function renderTransactionsTable(list, isAppend = false) {
     content.innerHTML = `
       <div class="card-header" style="padding: 15px 20px; background: var(--bg-glass); border-bottom: 1px solid var(--border); border-radius: 20px 20px 0 0;">
         <div class="toolbar" style="width: 100%; display: flex; gap: 10px; align-items: center;">
-          <div class="search-box" style="flex: 1; max-width: none; margin: 0;">
-            <span class="search-icon">🔍</span>
+          <div class="toolbar-actions" style="display: flex; gap: 10px; width: 100%;">
+            <button class="btn btn-ghost" onclick="openDateFilterModal()" style="height: 42px; flex: 1; justify-content: center; font-size: 13px;" title="${t("Sana bo'yicha filter")}">📅 ${t("Sana")}</button>
+            <button class="btn btn-primary" onclick="openSaleModal()" style="height: 42px; flex: 1.5; justify-content: center; font-size: 13px;">${t("Qo'shish")}</button>
+          </div>
+          <div class="search-box" style="width: 100%; margin: 0;">
+            <span class="search-icon" style="left: 12px;">🔍</span>
             <input type="text" placeholder="${t("Mijoz bo'yicha qidirish...")}" id="transaction-search"
               value="${escapeHtml(document.getElementById('transaction-search')?.value || '')}"
               oninput="filterTransactions(this.value)"
-              style="color: var(--text-primary) !important; background: var(--bg-input) !important; height: 44px;" class="form-control" autocomplete="off">
+              style="padding-left: 38px !important; height: 42px; font-size: 13px;" class="form-control" autocomplete="off">
           </div>
-          <button class="btn btn-ghost" onclick="openDateFilterModal()" style="height: 44px; padding: 0 12px;" title="${t("Sana bo'yicha filter")}">📅</button>
-          <button class="btn btn-primary" onclick="openSaleModal()" style="height: 44px; padding: 0 20px;">${t("Qo'shish")}</button>
         </div>
       </div>
       <div class="acc-list" id="transaction-acc-list" style="margin-top: 10px;">${items}</div>
@@ -287,9 +309,9 @@ async function openSaleModal() {
               <span style="color:var(--text-muted);">${t("To'lanayotgan summa")}:</span>
               <span id="breakdown-paid" style="font-weight:600; color:var(--success);">0 ${t("so'm")}</span>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">${t("Qoldiq qarz")}:</span>
-              <span id="breakdown-debt" style="font-weight:600; color:var(--warning);">0 ${t("so'm")}</span>
+            <div style="display:flex; justify-content:space-between;" id="breakdown-remaining-row">
+              <span style="color:var(--text-muted);">${t("Qoldiq")}:</span>
+              <span id="breakdown-remaining" style="font-weight:700; color:var(--primary);">0 ${t("so'm")}</span>
             </div>
           </div>
           <!-- Hidden old element for backward compatibility with scripts if missed -->
@@ -318,20 +340,20 @@ async function openSaleModal() {
             <label>🏷️ ${t("Chegirma")}</label>
             <input type="number" step="0.01" class="form-control form-control-lg" id="sale-discount" value="0" oninput="updateSalePayment()">
           </div>
-          <div class="form-group" id="cashback-use-group" style="display:none">
-            <label>💰 ${t("Keshbek ishlatish")}</label>
-            <div style="position:relative">
-              <input type="number" step="0.01" class="form-control form-control-lg" id="sale-cashback-used" value="0" oninput="updateSalePayment()">
-              <div id="client-cashback-hint" style="position:absolute; right:0; bottom:-18px; font-size:10px; color:var(--success); font-weight:600;"></div>
-            </div>
+        </div>
+
+        <!-- Improved Bonus Section -->
+        <div id="bonus-section" style="display:none; margin-top:15px; padding:15px; background:var(--bg-secondary); border-radius:16px; border:1px solid var(--primary-glass);">
+          <h5 style="margin:0 0 12px 0; font-size:12px; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+            <i data-lucide="sparkles" style="width:14px;"></i> ${t("Bonuslar va Takliflar")}
+          </h5>
+          <div id="bonus-cards-container" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <!-- Dynamic Bonus Cards -->
           </div>
-          <div class="form-group" id="points-use-group" style="display:none">
-            <label>⭐ ${t("Ballar orqali to'lash")}</label>
-            <div style="position:relative">
-              <input type="number" step="0.01" class="form-control form-control-lg" id="sale-points-used" value="0" oninput="updateSalePayment()">
-              <div id="client-points-hint" style="position:absolute; right:0; bottom:-18px; font-size:10px; color:var(--accent); font-weight:600;"></div>
-            </div>
-          </div>
+          
+          <!-- Hidden inputs for backward compatibility with updateSalePayment logic -->
+          <input type="hidden" id="sale-cashback-used" value="0">
+          <input type="hidden" id="sale-points-used" value="0">
         </div>
 
         <div id="payment-error-msg" style="color: #EF4444; font-size: 13px; font-weight: 700; margin: 15px 0; display: none; text-align: center; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px;">
@@ -710,7 +732,7 @@ function updateSalePayment() {
   const card = parseFloat(cardInp.value) || 0;
   const click = parseFloat(clickInp.value) || 0;
   const cashbackUsed = parseFloat(document.getElementById('sale-cashback-used')?.value || 0) || 0;
-  const pointsUsedValue = parseFloat(document.getElementById('sale-points-used')?.value || 0) || 0; // This is the monetary value of points
+  const pointsUsedValue = parseFloat(document.getElementById('sale-points-used')?.value || 0) || 0;
   const discount = parseFloat(document.getElementById('sale-discount')?.value || 0) || 0;
 
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
@@ -719,8 +741,6 @@ function updateSalePayment() {
 
   const debtEl = document.getElementById('sale-debt');
   const errorEl = document.getElementById('payment-error-msg');
-
-  const payableTotal = overallTotal - discount;
 
   // Update Breakdown UI
   const bdSubtotal = document.getElementById('breakdown-subtotal');
@@ -731,7 +751,8 @@ function updateSalePayment() {
   const bdPoints = document.getElementById('breakdown-points');
   const bdPayable = document.getElementById('breakdown-payable');
   const bdPaid = document.getElementById('breakdown-paid');
-  const bdDebt = document.getElementById('breakdown-debt');
+  const bdRemaining = document.getElementById('breakdown-remaining');
+  const bdRemainingRow = document.getElementById('breakdown-remaining-row');
 
   if (bdSubtotal) bdSubtotal.textContent = `${formatPrice(overallTotal)} ${t("so'm")}`;
   if (bdDiscount) bdDiscount.textContent = `- ${formatPrice(discount)} ${t("so'm")}`;
@@ -750,13 +771,24 @@ function updateSalePayment() {
     if (bdPointsRow) bdPointsRow.style.display = 'none';
   }
 
-  // To'lanishi kerak bo'lgan jami (chegirma, keshbek va ballar ayirilgandan keyin)
+  const payableTotal = overallTotal - discount;
   const finalPayable = payableTotal - cashbackUsed - pointsUsedValue;
   if (bdPayable) bdPayable.textContent = `${formatPrice(Math.max(0, finalPayable))} ${t("so'm")}`;
 
   // Mijoz real to'layotgan puli
   const customerPayingNow = cash + card + click;
-  if (bdPaid) bdPaid.textContent = `${formatPrice(customerPayingNow + overallPaidSoFar)} ${t("so'm")}`;
+  const totalPaidNow = customerPayingNow + overallPaidSoFar;
+  if (bdPaid) bdPaid.textContent = `${formatPrice(totalPaidNow)} ${t("so'm")}`;
+
+  const remainingToPay = finalPayable - totalPaidNow;
+  if (bdRemaining) {
+    bdRemaining.textContent = `${formatPrice(Math.max(0, remainingToPay))} ${t("so'm")}`;
+    if (remainingToPay <= 0) {
+        bdRemaining.style.color = 'var(--success)';
+    } else {
+        bdRemaining.style.color = 'var(--primary)';
+    }
+  }
 
   if (totalPaid > payableTotal + 0.01) {
     if (bdPayable) bdPayable.style.color = '#EF4444';
@@ -770,10 +802,10 @@ function updateSalePayment() {
 
   // Debt is calculated for the whole transaction
   const remainingDebt = payableTotal - totalPaid;
-  const debtValue = Math.max(0, remainingDebt);
-  debtEl.value = debtValue.toFixed(2);
-  
-  if (bdDebt) bdDebt.textContent = `${formatPrice(debtValue)} ${t("so'm")}`;
+  const currentDebt = Math.max(0, remainingToPay);
+  if (debtEl) debtEl.value = currentDebt;
+
+  if (window.updatePointsEarnedPreview) window.updatePointsEarnedPreview();
 }
 
 async function addToSaleBatch() {
@@ -1051,8 +1083,18 @@ async function viewTransactionItems(ids) {
   try {
     showToast(t('Tafsilotlar yuklanmoqda...'), 'info');
 
+    const allTrans = await Promise.all(ids.map(id => api.get(`/transactions/${id}`)));
     const allItems = await Promise.all(ids.map(id => api.get(`/transactions/${id}/items`)));
+    
     const list = allItems.filter(items => items !== null).flat();
+    
+    // Sum up totals from all transactions in the set
+    const totalCashback = allTrans.reduce((s, t) => s + (t.cashbackUsed || 0), 0);
+    const totalPointsMoney = allTrans.reduce((s, t) => s + (t.pointsUsed || 0), 0);
+    const totalPointsEarned = allTrans.reduce((s, t) => s + (t.pointsEarned || 0), 0);
+    const totalCashbackEarned = allTrans.reduce((s, t) => s + (t.cashbackEarned || 0), 0);
+    const totalDiscount = allTrans.reduce((s, t) => s + (t.discount || 0), 0);
+    const overallSubtotal = list.reduce((s, item) => s + ((item.productPrice || 0) * (item.productQuantity || 0)), 0);
 
     openModal(`
       <div class="modal-header">
@@ -1094,10 +1136,45 @@ async function viewTransactionItems(ids) {
           </tbody>
           ${list.length > 0 ? `
           <tfoot>
+            <tr style="background: rgba(0, 0, 0, 0.02);">
+              <td colspan="3" style="text-align:right; font-size: 13px; color: var(--text-muted);">${t("Mahsulotlar jami")}:</td>
+              <td style="text-align:center; font-size: 13px; color: var(--text-muted);">${list.reduce((sum, item) => sum + (item.productQuantity || 0), 0)}</td>
+              <td style="text-align:right; font-size: 13px; color: var(--text);">${formatPrice(overallSubtotal)} ${t("so'm")}</td>
+              <td></td>
+            </tr>
+            ${totalDiscount > 0 ? `
+            <tr style="background: rgba(0, 0, 0, 0.02);">
+              <td colspan="4" style="text-align:right; font-size: 13px; color: var(--text-muted);">${t("Chegirma")}:</td>
+              <td style="text-align:right; font-size: 13px; color: var(--danger);">- ${formatPrice(totalDiscount)} ${t("so'm")}</td>
+              <td></td>
+            </tr>` : ''}
+            ${totalCashback > 0 ? `
+            <tr style="background: rgba(0, 0, 0, 0.02);">
+              <td colspan="4" style="text-align:right; font-size: 13px; color: var(--text-muted);">${t("Keshbek ishlatildi")}:</td>
+              <td style="text-align:right; font-size: 13px; color: var(--success);">- ${formatPrice(totalCashback)} ${t("so'm")}</td>
+              <td></td>
+            </tr>` : ''}
+            ${totalPointsMoney > 0 ? `
+            <tr style="background: rgba(0, 0, 0, 0.02);">
+              <td colspan="4" style="text-align:right; font-size: 13px; color: var(--text-muted);">${t("Ball ishlatildi")}:</td>
+              <td style="text-align:right; font-size: 13px; color: var(--accent);">- ${formatPrice(totalPointsMoney)} ${t("so'm")}</td>
+              <td></td>
+            </tr>` : ''}
+            ${totalCashbackEarned > 0 ? `
+            <tr style="background: rgba(0, 0, 0, 0.02);">
+              <td colspan="4" style="text-align:right; font-size: 13px; color: var(--text-muted);">${t("To'plangan keshbek")}:</td>
+              <td style="text-align:right; font-size: 13px; color: var(--success);">+ ${formatPrice(totalCashbackEarned)}</td>
+              <td></td>
+            </tr>` : ''}
+            ${totalPointsEarned > 0 ? `
+            <tr style="background: rgba(0, 0, 0, 0.02);">
+              <td colspan="4" style="text-align:right; font-size: 13px; color: var(--text-muted);">${t("To'plangan ballar")}:</td>
+              <td style="text-align:right; font-size: 13px; color: var(--accent);">+ ${totalPointsEarned}</td>
+              <td></td>
+            </tr>` : ''}
             <tr style="background: rgba(0, 0, 0, 0.05); font-weight: bold;">
-              <td colspan="3" style="text-align:right; font-size: 14px; color: var(--text);">${t("Jami")}:</td>
-              <td style="text-align:center; font-size: 14px; color: var(--text);">${list.reduce((sum, item) => sum + (item.productQuantity || 0), 0)}</td>
-              <td class="price" style="text-align:right; font-size: 14px; color: var(--success);">${formatPrice(list.reduce((sum, item) => sum + ((item.productPrice || 0) * (item.productQuantity || 0)), 0))}</td>
+              <td colspan="4" style="text-align:right; font-size: 14px; color: var(--text);">${t("Jami to'lov")}:</td>
+              <td class="price" style="text-align:right; font-size: 15px; color: var(--primary);">${formatPrice(overallSubtotal - totalDiscount - totalCashback - totalPointsMoney)} ${t("so'm")}</td>
               <td></td>
             </tr>
           </tfoot>` : ''}
@@ -1387,19 +1464,18 @@ window.saleProducts = saleProducts;
 window.saleItems = saleItems;
 window.onSaleClientChange = function(clientId) {
   const bid = getSelectedBusinessId();
-  const cbGroup = document.getElementById('cashback-use-group');
-  const cbHint = document.getElementById('client-cashback-hint');
+  const bonusSection = document.getElementById('bonus-section');
+  const bonusCards = document.getElementById('bonus-cards-container');
   const cbInput = document.getElementById('sale-cashback-used');
-  
-  const ptGroup = document.getElementById('points-use-group');
-  const ptHint = document.getElementById('client-points-hint');
   const ptInput = document.getElementById('sale-points-used');
 
+  // Reset
+  cbInput.value = 0;
+  ptInput.value = 0;
+  if (bonusSection) bonusSection.style.display = 'none';
+  if (bonusCards) bonusCards.innerHTML = '';
+
   if (!clientId) {
-    if (cbGroup) cbGroup.style.display = 'none';
-    if (cbInput) cbInput.value = 0;
-    if (ptGroup) ptGroup.style.display = 'none';
-    if (ptInput) ptInput.value = 0;
     updateSalePayment();
     return;
   }
@@ -1407,40 +1483,99 @@ window.onSaleClientChange = function(clientId) {
   const client = globalClients.find(c => c.id == clientId);
   if (!client) return;
 
-  // 1. Cashback logic
-  if (cbGroup) {
-    cbGroup.style.display = 'block';
-    cbHint.textContent = `${t("Keshbek balansi")}: ${formatPrice(client.cashbackBalance)} ${t("so'm")}`;
-    cbInput.oninput = (e) => {
-      let val = parseFloat(e.target.value) || 0;
-      if (val > client.cashbackBalance) {
-        val = client.cashbackBalance;
-        e.target.value = val;
-      }
-      updateSalePayment();
-    };
-  }
+  if (bonusSection) bonusSection.style.display = 'block';
 
-  // 2. Points logic
-  api.get(`/businesses/${bid}`).then(business => {
-    if (business && business.pointsEnabled && ptGroup) {
-      ptGroup.style.display = 'block';
-      const pointValueInMoney = (client.pointsBalance || 0) * (business.pointValue || 1);
-      ptHint.textContent = `${t("Mijoz ballari")}: ${client.pointsBalance || 0} (${formatPrice(pointValueInMoney)} ${t("so'm")})`;
-      
-      ptInput.oninput = (e) => {
-        let val = parseFloat(e.target.value) || 0;
-        if (val > pointValueInMoney) {
-          val = pointValueInMoney;
-          e.target.value = val;
+  // 1. Cashback Card
+  const cbBalance = client.cashbackBalance || 0;
+  const cbCard = document.createElement('div');
+  cbCard.className = 'bonus-card';
+  cbCard.style = `background:var(--bg-glass); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px;`;
+  cbCard.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:11px; opacity:0.7;">💰 ${t("Keshbek")}</span>
+      <span style="font-size:12px; font-weight:800; color:var(--success);">${formatPrice(cbBalance)} ${t("so'm")}</span>
+    </div>
+    <div style="position:relative;">
+      <input type="number" id="cb-manual-input" class="form-control" style="width:100%; height:36px; font-size:13px; font-weight:700; padding-right:85px; color:var(--success) !important; background:var(--bg-input) !important;" value="0" step="0.01">
+      <button type="button" id="btn-cb-all" class="btn btn-primary" style="position:absolute; right:4px; top:4px; height:28px; font-size:10px; padding:0 10px;">${t("Hammasi")}</button>
+    </div>
+  `;
+  if (bonusCards) bonusCards.appendChild(cbCard);
+
+  const cbManual = cbCard.querySelector('#cb-manual-input');
+  const btnCbAll = cbCard.querySelector('#btn-cb-all');
+  cbManual.oninput = (e) => { cbInput.value = Math.min(parseFloat(e.target.value) || 0, cbBalance); updateSalePayment(); };
+  btnCbAll.onclick = () => { cbManual.value = cbBalance; cbInput.value = cbBalance; updateSalePayment(); };
+
+  // 2. Points Card (Redesigned with Checkboxes)
+  const ptCard = document.createElement('div');
+  ptCard.className = 'bonus-card';
+  ptCard.style = `background:var(--bg-glass); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;`;
+  
+  const pointsBalance = client.pointsBalance || 0;
+  let pointValue = 100; 
+  let earnRate = 10000; 
+
+  ptCard.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px;">
+      <span style="font-size:11px; font-weight:700; color:var(--accent);">⭐ ${t("Ballar")}</span>
+      <span style="font-size:12px; font-weight:800;">${pointsBalance}</span>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px;">
+        <input type="checkbox" id="pt-use-check" style="width:16px; height:16px;">
+        <span>${t("Ballarni ishlatish")}</span>
+      </label>
+      <div id="pt-spend-area" style="display:none; position:relative; margin-left:24px;">
+        <input type="number" id="pt-spend-input" class="form-control" style="width:100%; height:32px; font-size:12px; padding-right:70px; color:var(--accent) !important;" value="0">
+        <button type="button" id="btn-pt-spend-all" class="btn btn-primary" style="position:absolute; right:3px; top:3px; height:26px; font-size:9px; padding:0 8px; background:var(--accent); border:none;">${t("Hammasi")}</button>
+      </div>
+
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px;">
+        <input type="checkbox" id="pt-earn-check" checked style="width:16px; height:16px;">
+        <span>${t("Ballar to'plash")}</span>
+      </label>
+      <div id="pt-earn-area" style="margin-left:24px; font-size:11px; color:var(--success);">
+        ${t("To'planadigan ballar")}: <strong id="pt-earn-preview">0</strong>
+      </div>
+    </div>
+  `;
+  if (bonusCards) bonusCards.appendChild(ptCard);
+
+  const ptUseCheck = ptCard.querySelector('#pt-use-check');
+  const ptSpendArea = ptCard.querySelector('#pt-spend-area');
+  const ptSpendInput = ptCard.querySelector('#pt-spend-input');
+  const btnPtSpendAll = ptCard.querySelector('#btn-pt-spend-all');
+  const ptEarnCheck = ptCard.querySelector('#pt-earn-check');
+  const ptEarnPreview = ptCard.querySelector('#pt-earn-preview');
+
+  ptUseCheck.onchange = () => {
+    ptSpendArea.style.display = ptUseCheck.checked ? 'block' : 'none';
+    if (!ptUseCheck.checked) { ptSpendInput.value = 0; ptInput.value = 0; updateSalePayment(); }
+  };
+  ptSpendInput.oninput = (e) => { ptInput.value = Math.min(parseFloat(e.target.value) || 0, pointsBalance * pointValue); updateSalePayment(); };
+  btnPtSpendAll.onclick = () => { ptSpendInput.value = pointsBalance * pointValue; ptInput.value = pointsBalance * pointValue; updateSalePayment(); };
+
+  window.updatePointsEarnedPreview = () => {
+    if (!ptEarnCheck.checked) { ptEarnPreview.textContent = '0'; return; }
+    const cash = parseFloat(document.getElementById('sale-cash').value) || 0;
+    const card = parseFloat(document.getElementById('sale-card').value) || 0;
+    const click = parseFloat(document.getElementById('sale-click').value) || 0;
+    ptEarnPreview.textContent = Math.floor((cash + card + click) / earnRate);
+  };
+  ptEarnCheck.onchange = window.updatePointsEarnedPreview;
+
+  let targetBid = bid;
+  if (!targetBid && saleItems.length > 0) targetBid = saleItems[0].businessId;
+  if (targetBid) {
+      api.get(`/businesses/${targetBid}`).then(business => {
+        if (business) {
+          pointValue = business.pointValue || 100;
+          earnRate = business.pointsRate || 10000;
+          if (window.updatePointsEarnedPreview) window.updatePointsEarnedPreview();
         }
-        updateSalePayment();
-      };
-    } else if (ptGroup) {
-      ptGroup.style.display = 'none';
-    }
-  }).catch(err => {
-    console.error("Error fetching business for points:", err);
-    if (ptGroup) ptGroup.style.display = 'none';
-  });
+      });
+  }
+  updateSalePayment();
 };

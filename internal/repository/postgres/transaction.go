@@ -125,7 +125,7 @@ func (r *TransactionRepo) GetTransactionsByTotalID(totalID int) ([]entity.Transa
 
 func (r *TransactionRepo) GetTotalTransactionsByPeriod(bid int, start, end time.Time) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."cashbackEarned", t."cashbackUsed", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."cashbackEarned", t."cashbackUsed", t."pointsEarned", t."pointsUsed", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
@@ -141,7 +141,7 @@ func (r *TransactionRepo) GetTotalTransactionsByPeriod(bid int, start, end time.
 	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
-		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CashbackEarned, &tt.CashbackUsed, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CashbackEarned, &tt.CashbackUsed, &tt.PointsEarned, &tt.PointsUsed, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
 		list = append(list, tt)
@@ -177,7 +177,7 @@ func (r *TransactionRepo) GetStats(bid int, start, end *time.Time) (entity.Trans
 
 func (r *TransactionRepo) GetRecentTransactionsByBusinessID(bid int, limit int) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."cashbackEarned", t."cashbackUsed", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."cashbackEarned", t."cashbackUsed", t."pointsEarned", t."pointsUsed", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(b.name, ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
@@ -194,7 +194,7 @@ func (r *TransactionRepo) GetRecentTransactionsByBusinessID(bid int, limit int) 
 	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
-		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CashbackEarned, &tt.CashbackUsed, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CashbackEarned, &tt.CashbackUsed, &tt.PointsEarned, &tt.PointsUsed, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
 		list = append(list, tt)
@@ -204,7 +204,7 @@ func (r *TransactionRepo) GetRecentTransactionsByBusinessID(bid int, limit int) 
 
 func (r *TransactionRepo) GetRecentTransactionsByClientID(clientID int, limit int) ([]entity.TotalTransaction, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."cashbackEarned", t."cashbackUsed", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t."total", t."cash", t."card", t."click", t."debt", t."discount", t."clientNumber", t."description", t."debtLimitDate", t."businessId", t."clientId", t."cashbackEarned", t."cashbackUsed", t."pointsEarned", t."pointsUsed", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(c."fullName", ''), COALESCE(b.name, ''), COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_transactions t
 		 LEFT JOIN clients c ON t."clientId" = c.id
@@ -221,7 +221,7 @@ func (r *TransactionRepo) GetRecentTransactionsByClientID(clientID int, limit in
 	list := []entity.TotalTransaction{}
 	for rows.Next() {
 		var tt entity.TotalTransaction
-		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CashbackEarned, &tt.CashbackUsed, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
+		if err := rows.Scan(&tt.ID, &tt.Total, &tt.Cash, &tt.Card, &tt.Click, &tt.Debt, &tt.Discount, &tt.ClientNumber, &tt.Description, &tt.DebtLimitDate, &tt.BusinessID, &tt.ClientID, &tt.CashbackEarned, &tt.CashbackUsed, &tt.PointsEarned, &tt.PointsUsed, &tt.CreatedBy, &tt.CreatedAt, &tt.UpdatedAt, &tt.ClientName, &tt.BusinessName, &tt.CreatedByName); err != nil {
 			return nil, err
 		}
 		list = append(list, tt)

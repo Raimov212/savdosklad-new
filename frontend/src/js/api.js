@@ -27,7 +27,11 @@ export const api = {
     },
 
     logout(reason = '') {
-        localStorage.clear();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('customer_token');
+        localStorage.removeItem('customer_user');
+        // Do NOT clear selectedBusinessId or currentPage as requested
         let url = 'index.html';
         if (reason) url += `?reason=${encodeURIComponent(reason)}`;
         window.location.href = url;
@@ -216,24 +220,20 @@ export function formatDateTime(dateStr) {
 }
 
 export function getSelectedBusinessId() {
-    // First, try the global selected business ID to maintain consistency across pages
-    const globalVal = localStorage.getItem('selectedBusinessId');
-    if (globalVal !== null && globalVal !== "0" && globalVal !== "") {
-        return parseInt(globalVal);
-    }
-
-    const page = window.currentPage || 'dashboard';
-    const key = `selectedBusinessId_${page}`;
-    const val = localStorage.getItem(key);
+    const val = localStorage.getItem('selectedBusinessId');
     return parseInt(val) || 0;
 }
 
 export function setSelectedBusinessId(id) {
-    const page = window.currentPage || 'dashboard';
-    const key = `selectedBusinessId_${page}`;
-    localStorage.setItem(key, id);
-    // Also update global as a "last used" fallback
     localStorage.setItem('selectedBusinessId', id);
+}
+
+export function getSelectedPage() {
+    return localStorage.getItem('currentPage') || 'dashboard';
+}
+
+export function setSelectedPage(page) {
+    localStorage.setItem('currentPage', page);
 }
 
 // ==================== DATE PERIOD HELPERS ====================
@@ -344,6 +344,8 @@ window.formatDate = formatDate;
 window.formatDateTime = formatDateTime;
 window.getSelectedBusinessId = getSelectedBusinessId;
 window.setSelectedBusinessId = setSelectedBusinessId;
+window.getSelectedPage = getSelectedPage;
+window.setSelectedPage = setSelectedPage;
 window.getDatePeriod = getDatePeriod;
 window.setDatePeriod = setDatePeriod;
 window.getDateQuery = getDateQuery;

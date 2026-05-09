@@ -235,8 +235,13 @@ window.handleAddEmployee = async function (e) {
     });
 
     const phoneNumber = document.getElementById('emp-phone').value.trim();
-    if (phoneNumber && !/^\+998[0-9]{9}$/.test(phoneNumber)) {
-        showToast(t("Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"), 'error');
+    if (phoneNumber.startsWith('+998')) {
+        if (!/^\+998[0-9]{9}$/.test(phoneNumber)) {
+            showToast(t("Telefon raqami noto'g'ri formatda (Masalan: +998901234567)"), 'error');
+            return;
+        }
+    } else if (phoneNumber && !phoneNumber.startsWith('+')) {
+        showToast(t("Telefon raqami '+' bilan boshlanishi kerak"), 'error');
         return;
     }
 

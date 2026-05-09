@@ -155,16 +155,19 @@ function renderProductsTable(list, isAppend = false) {
     content.innerHTML = `
       <div class="card-header" style="padding: 15px 20px; background: var(--bg-glass); border-bottom: 1px solid var(--border); border-radius: 20px 20px 0 0;">
         <div class="toolbar" style="width: 100%; display: flex; gap: 10px; align-items: center;">
+          <div class="toolbar-actions" style="display: none; gap: 10px;">
+            <button class="btn btn-ghost" id="out-of-stock-btn" onclick="toggleOutOfStockFilter()" style="height: 42px; flex: 1; justify-content: center; font-size: 13px;" title="${t("Qolmagan mahsulotlar")}">📦 ${t("Qolmagan")}</button>
+            ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openProductModal()" style="height: 42px; flex: 1.5; justify-content: center; font-size: 13px;">${t("Qo'shish")}</button>` : ''}
+          </div>
           <div class="search-box" style="flex: 1; max-width: none; margin: 0;">
             <span class="search-icon">🔍</span>
             <input type="text" placeholder="${t("Qidirish...")}" id="product-search" class="form-control"
               value="${escapeHtml(document.getElementById('product-search')?.value || '')}"
               oninput="filterProducts(this.value)"
-              style="color: var(--text-primary) !important; background: var(--bg-input) !important; height: 44px;"
+              style="padding-left: 38px !important; height: 42px; font-size: 13px;"
               autocomplete="off">
           </div>
-          <button class="btn btn-ghost" id="out-of-stock-btn" onclick="toggleOutOfStockFilter()" style="height: 44px; padding: 0 12px; white-space:nowrap;" title="${t("Qolmagan mahsulotlar")}">📦</button>
-          ${getSelectedBusinessId() && window.hasPermission('add') ? `<button class="btn btn-primary" onclick="openProductModal()" style="height: 44px; padding: 0 20px;">${t("Qo'shish")}</button>` : ''}
+         
         </div>
       </div>
       <div class="acc-list" id="product-acc-list" style="margin-top: 10px;">${items}</div>
@@ -358,7 +361,7 @@ function fillProductForm(p) {
 }
 
 // Global function to be called from buttons or events
-window.executeBarcodeLookup = async function(barcodeValue) {
+window.executeBarcodeLookup = async function (barcodeValue) {
   const barcode = (barcodeValue || "").trim().replace(/\D/g, '');
   if (barcode.length < 8) {
     showToast(t("Shtrix-kod juda qisqa"), 'warning');
@@ -379,7 +382,7 @@ window.executeBarcodeLookup = async function(barcodeValue) {
   }
 
   showToast(t("Global bazadan qidirilmoqda..."), 'info');
-  
+
   try {
     let found = false;
     let product = null;
@@ -399,7 +402,7 @@ window.executeBarcodeLookup = async function(barcodeValue) {
           headers: { 'Accept': 'application/json' },
           cache: 'no-store'
         });
-        
+
         if (resp.ok) {
           const data = await resp.json();
           if (data.status === 1 && data.product) {
@@ -407,10 +410,10 @@ window.executeBarcodeLookup = async function(barcodeValue) {
             found = true;
             domain = db;
           } else if (data.status_verbose && data.status_verbose.includes("different product type")) {
-            continue; 
+            continue;
           }
         }
-      } catch (e) { 
+      } catch (e) {
         console.warn(`${db} fetch error:`, e);
       }
     }
@@ -421,7 +424,7 @@ window.executeBarcodeLookup = async function(barcodeValue) {
       if (nameEl && !nameEl.value && name) {
         nameEl.value = name;
       }
-      
+
       if (countryEl && !countryEl.value) {
         const country = p.countries_uz || p.countries_ru || p.countries || "";
         if (country) countryEl.value = country;

@@ -229,7 +229,7 @@ function openBusinessModal(b = null) {
             <div class="form-group">
               <label>${t("Ballar kursi (1 ball uchun UZS)")}</label>
               <div style="position:relative">
-                <input type="number" step="100" class="form-control" id="biz-points-rate" value="${isEdit ? b.pointsRate : 1000}">
+                <input type="number" step="100" class="form-control" id="biz-points-rate" value="${isEdit ? b.pointsRate : 10000}">
                 <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); opacity:0.5; font-size:12px;">UZS</span>
               </div>
               <p style="font-size:10px; color:var(--text-muted); margin-top:4px;">${t("Masalan: 1000 so'm uchun 1 ball")}</p>

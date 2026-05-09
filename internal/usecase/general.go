@@ -242,11 +242,14 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 		}
 	}
 
-	// 3b. Calculate points earned
+	// 3b. Calculate points earned based on non-debt payment
 	var pointsEarned float64
-	if business.PointsEnabled && business.PointsRate > 0 {
-		pointsEarned = req.Total / business.PointsRate
+	rate := business.PointsRate
+	if rate <= 0 {
+		rate = 10000 // Default fallback
 	}
+	actualPaid := req.Cash + req.Card + req.Click
+	pointsEarned = actualPaid / rate
 
 	tt := &entity.TotalTransaction{
 		BusinessID: req.BusinessID, ClientID: req.ClientID,

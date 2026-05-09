@@ -131,6 +131,17 @@
                 </button>
             </nav>
             <div class="sidebar-footer">
+                <div class="sidebar-footer-tools mobile-only-flex" style="display:none; gap:10px; margin-bottom:12px; padding:0 12px;">
+                    <select class="business-selector" id="lang-selector-sidebar" onchange="setAppLang(this.value)" 
+                        style="flex:1; height:36px; font-size:12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border);">
+                        <option value="uz">O'zb</option>
+                        <option value="uz-cyrl">Ўзб</option>
+                        <option value="ru">Рус</option>
+                        <option value="en">Eng</option>
+                    </select>
+                    <button class="btn btn-ghost theme-toggle" onclick="toggleTheme()" 
+                        style="width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; font-size:16px; border: 1px solid var(--border);">☀️</button>
+                </div>
                 <button class="nav-item" onclick="api.logout()" style="color:var(--danger) !important; opacity:0.8;"
                     title="Chiqish" data-i18n-title="Chiqish">
                     <span class="icon">🚪</span> <span data-i18n="Chiqish">Chiqish</span>

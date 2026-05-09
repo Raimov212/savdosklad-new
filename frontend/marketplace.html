@@ -159,52 +159,80 @@
         }
         .mp-drawer.open { right: 0; }
 
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        .status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .status-confirmed { background: rgba(16, 185, 129, 0.15); color: #10b981; }
         .status-rejected { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+        /* Auth Modal Enhancements */
+        [data-theme="light"] .auth-content {
+            background: #ffffff;
+            color: #0f172a;
+        }
+        [data-theme="dark"] .auth-content {
+            background: #0f172a;
+            color: #f8fafc;
+        }
 
         aside { transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         aside.hidden { width: 0 !important; opacity: 0; margin-right: 0 !important; overflow: hidden; pointer-events: none; }
 
+        /* Hero Section */
+        .mp-hero {
+            padding: 100px 5% 60px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(16, 185, 129, 0.05), transparent);
+        }
+        .mp-hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
         @media (max-width: 600px) {
             .mp-drawer { width: 100%; right: -100%; }
+            .mp-hero h1 { font-size: 36px; }
         }
     </style>
 </head>
 <body>
-    <div id="main-content">
-        <nav class="mp-navbar">
-            <div style="display:flex; align-items:center; gap:20px;">
-                <button class="btn btn-ghost" onclick="toggleSidebar()" title="Kategoriyalarni ko'rsatish/yashirish" style="padding:8px;">
-                    <i data-lucide="menu"></i>
-                </button>
-                <div class="mp-logo" onclick="location.reload()">SavdoSklad MP</div>
-            </div>
-            <div style="display:flex; gap:20px; align-items:center;">
-                <button class="btn btn-ghost" onclick="showOrdersLayout()">
-                    <i data-lucide="package"></i> <span data-i18n="Buyurtmalarim">Buyurtmalarim</span>
-                </button>
-                <div style="position:relative; cursor:pointer;" onclick="toggleCart()">
-                    <i data-lucide="shopping-cart"></i>
-                    <span id="cart-count" style="position:absolute; top:-8px; right:-10px; background:#ef4444; color:white; font-size:10px; padding:3px 7px; border-radius:12px; font-weight:900;">0</span>
-                </div>
-                <div id="mp-auth-section">
-                    <button class="btn btn-primary" onclick="openAuthModal('login')" data-i18n="Kirish">Kirish</button>
-                </div>
-                <div style="display:flex; align-items:center; gap:10px; border-left:1px solid var(--mp-border); padding-left:20px; margin-left:10px;">
-                    <button class="btn btn-ghost theme-toggle" onclick="toggleTheme()" title="Mavzuni o'zgartirish">
-                        <i data-lucide="sun" style="width:20px;"></i>
+        <div id="main-content">
+            <nav class="mp-navbar">
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <button class="btn btn-ghost" onclick="toggleSidebar()" title="Kategoriyalarni ko'rsatish/yashirish" style="padding:8px;">
+                        <i data-lucide="menu"></i>
                     </button>
-                    <select id="mp-lang-selector" class="form-control" style="width:auto; padding:5px 12px; height:auto; background:var(--mp-card); border-color:var(--mp-border); color:var(--mp-text);" onchange="setAppLang(this.value)">
-                        <option value="uz">O'zbek</option>
-                        <option value="uz-cyrl">Ўзбекча</option>
-                        <option value="ru">Русский</option>
-                        <option value="en">English</option>
-                    </select>
+                    <div class="mp-logo" onclick="location.reload()">SavdoSklad MP</div>
                 </div>
-            </div>
-        </nav>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn btn-ghost theme-toggle" onclick="toggleTheme()" title="Mavzuni o'zgartirish" style="padding:8px;">
+                        <i id="theme-icon" data-lucide="moon" style="width:18px;"></i>
+                    </button>
+                    <select id="mp-lang-selector" class="form-control" style="width:auto; padding:5px 8px; height:32px; font-size:12px; background:var(--mp-card); border-color:var(--mp-border); color:var(--mp-text);" onchange="setAppLang(this.value)">
+                        <option value="uz">UZ</option>
+                        <option value="uz-cyrl">ЎЗ</option>
+                        <option value="ru">RU</option>
+                        <option value="en">EN</option>
+                    </select>
+                    <button class="btn btn-ghost" onclick="showOrdersLayout()" style="padding:8px 12px;">
+                        <i data-lucide="package" style="width:18px;"></i> <span data-i18n="Buyurtmalarim" class="hide-mobile">Buyurtmalarim</span>
+                    </button>
+                    <div style="position:relative; cursor:pointer; padding:8px 12px;" onclick="toggleCart()">
+                        <i data-lucide="shopping-cart" style="width:18px;"></i>
+                        <span id="cart-count" style="position:absolute; top:2px; right:4px; background:#ef4444; color:white; font-size:9px; padding:1px 5px; border-radius:10px; font-weight:900;">0</span>
+                    </div>
+                    <div id="mp-auth-section">
+                        <button class="btn btn-primary btn-sm" onclick="openAuthModal('login')" data-i18n="Kirish" style="padding:6px 16px; font-size:13px;">Kirish</button>
+                    </div>
+                </div>
+            </nav>
+
+            <header class="mp-hero">
+                <h1 data-i18n="Eng zo'r mahsulotlar — bir joyda">Eng zo'r mahsulotlar — bir joyda</h1>
+                <p style="opacity:0.6; font-size:18px; max-width:600px; margin:0 auto 30px;" data-i18n="Minglab tovarlar, ishonchli sotuvchilar va tezkor yetkazib berish.">Minglab tovarlar, ishonchli sotuvchilar va tezkor yetkazib berish.</p>
+                <div style="display:flex; justify-content:center; gap:20px;">
+                    <button class="btn btn-primary" onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})" data-i18n="Xarid qilish">Xarid qilish</button>
+                    <button class="btn btn-ghost" onclick="toggleCart()" data-i18n="Savat">Savat</button>
+                </div>
+            </header>
 
         <div class="mp-container">
             <aside id="mp-sidebar" style="width:240px; flex-shrink:0; margin-right:30px;">
@@ -325,7 +353,7 @@
                 // Initialize theme
                 const savedTheme = localStorage.getItem('appTheme') || 'dark';
                 document.documentElement.setAttribute('data-theme', savedTheme);
-                if (typeof updateThemeIcon === 'function') updateThemeIcon(savedTheme);
+                updateThemeIcon(savedTheme);
 
                 // Initialize language
                 const savedLang = localStorage.getItem('appLang') || 'uz';
@@ -342,6 +370,21 @@
             
             document.getElementById('mp-login-form').onsubmit = handleLogin;
             document.getElementById('mp-register-form').onsubmit = handleRegister;
+        }
+
+        window.toggleTheme = () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('appTheme', next);
+            updateThemeIcon(next);
+        };
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (!icon) return;
+            icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         // --- AUTH ---

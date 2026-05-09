@@ -96,6 +96,14 @@ function renderClientsTable(list, isAppend = false) {
                 <span class="acc-detail-icon">📅</span>
                 <div><div class="acc-detail-label">${t("Qo'shilgan")}</div><div class="acc-detail-value">${formatDate(c.createdAt)}</div></div>
               </div>
+              <div class="acc-detail-item" style="border: 1px solid var(--success-glass); background: var(--success-glass); border-radius: 12px; padding: 10px;">
+                <span class="acc-detail-icon" style="background: var(--success); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">💰</span>
+                <div><div class="acc-detail-label" style="color:var(--success); font-weight: 600;">${t("Keshbek")}</div><div class="acc-detail-value" style="color:var(--success); font-weight:800; font-size: 15px;">${formatPrice(c.cashbackBalance || 0)} ${t("so'm")}</div></div>
+              </div>
+              <div class="acc-detail-item" style="border: 1px solid var(--accent-glass); background: var(--accent-glass); border-radius: 12px; padding: 10px;">
+                <span class="acc-detail-icon" style="background: var(--accent); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">⭐</span>
+                <div><div class="acc-detail-label" style="color:var(--accent); font-weight: 600;">${t("Ballar")}</div><div class="acc-detail-value" style="color:var(--accent); font-weight:800; font-size: 15px;">${c.pointsBalance || 0}</div></div>
+              </div>
             </div>
             <div class="acc-actions">
               <button class="btn btn-ghost btn-sm" onclick="showClientTransactions(${c.id}, '${escapeHtml(c.fullName)}')">🛍️ ${t("Sotuvlar")}</button>
@@ -197,10 +205,15 @@ async function saveClient(e, id) {
   const phone = document.getElementById('client-phone').value.trim();
   const address = document.getElementById('client-address').value.trim() || null;
 
-  // Phone verification (+998XXXXXXXXX)
-  const phoneRegex = /^\+998\d{9}$/;
-  if (!phoneRegex.test(phone)) {
-    showToast(t("Telefon raqami noto'g'ri (+998XXXXXXXXX ko'rinishida bo'lsin)"), 'error');
+  // Phone verification
+  if (phone.startsWith('+998')) {
+    const phoneRegex = /^\+998\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      showToast(t("Telefon raqami noto'g'ri (+998XXXXXXXXX ko'rinishida bo'lsin)"), 'error');
+      return;
+    }
+  } else if (!phone.startsWith('+')) {
+    showToast(t("Telefon raqami '+' bilan boshlanishi kerak"), 'error');
     return;
   }
 
@@ -340,6 +353,14 @@ window.renderClientHistoryRows = function (transactions) {
               ${hasDebt ? `<div class="acc-detail-item" style="border-color:#FCA5A5;">
                 <span class="acc-detail-icon">⚠️</span>
                 <div><div class="acc-detail-label" style="color:#EF4444;">${t("Qarz")}</div><div class="acc-detail-value" style="color:#EF4444;">${formatPrice(trans.debt)} ${t("so'm")}</div></div>
+              </div>` : ''}
+              ${trans.useCashbackAmount > 0 ? `<div class="acc-detail-item" style="border-left: 2px solid var(--success);">
+                <span class="acc-detail-icon">💰</span>
+                <div><div class="acc-detail-label" style="color:var(--success);">${t("Keshbek")}</div><div class="acc-detail-value" style="color:var(--success); font-weight:700;">- ${formatPrice(trans.useCashbackAmount)} ${t("so'm")}</div></div>
+              </div>` : ''}
+              ${trans.usePointsAmount > 0 ? `<div class="acc-detail-item" style="border-left: 2px solid var(--accent);">
+                <span class="acc-detail-icon">⭐</span>
+                <div><div class="acc-detail-label" style="color:var(--accent);">${t("Ballar")}</div><div class="acc-detail-value" style="color:var(--accent); font-weight:700;">- ${formatPrice(trans.usePointsAmount)} ${t("so'm")}</div></div>
               </div>` : ''}
             </div>
             <div id="client-trans-items-${trans.id}"></div>

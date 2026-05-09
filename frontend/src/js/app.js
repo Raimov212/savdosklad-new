@@ -26,12 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (langSelector) {
     langSelector.value = currentLang;
   }
+  const langSelSidebar = document.getElementById('lang-selector-sidebar');
+  if (langSelSidebar) {
+    langSelSidebar.value = currentLang;
+  }
 
   loadUserInfo();
   loadBusinesses().then(() => {
     if (typeof translateDOM === 'function') translateDOM();
+    const savedPage = getSelectedPage();
+    navigateTo(savedPage);
   });
-  navigateTo('dashboard');
 
   // Global UI listener for Modal Inputs (Selection start on focus)
   const handleModalInputFocus = (e) => {
@@ -154,8 +159,12 @@ async function loadBusinesses() {
       });
 
       const savedBid = getSelectedBusinessId();
-      if (savedBid && businesses.find(b => b.id === savedBid)) {
+      if (savedBid && businesses.find(b => b.id == savedBid)) {
         selector.value = savedBid;
+      } else if (businesses.length > 0) {
+        const firstId = businesses[0].id;
+        selector.value = firstId;
+        setSelectedBusinessId(firstId);
       } else {
         selector.value = "";
         setSelectedBusinessId(0);
@@ -197,6 +206,7 @@ function navigateTo(page) {
 
   currentPage = page;
   window.currentPage = page;
+  setSelectedPage(page);
 
   // Update active nav
   document.querySelectorAll('.nav-item').forEach(el => {
