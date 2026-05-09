@@ -28,7 +28,7 @@ func NewUserUseCase(repo repository.UserRepository, jwtManager *auth.JWTManager,
 }
 
 func (uc *UserUseCase) CreateEmployee(req entity.RegisterRequest, adminID int) (*entity.User, error) {
-	existing, _ := uc.repo.GetByUsername(req.UserName)
+	existing, _ := uc.repo.GetByUserName(req.UserName)
 	if existing != nil {
 		return nil, errors.New(i18n.MsgUsernameAlreadyExists)
 	}
@@ -84,7 +84,7 @@ func (uc *UserUseCase) CreateEmployee(req entity.RegisterRequest, adminID int) (
 }
 
 func (uc *UserUseCase) Register(req entity.RegisterRequest) (*entity.User, error) {
-	existing, _ := uc.repo.GetByUsername(req.UserName)
+	existing, _ := uc.repo.GetByUserName(req.UserName)
 	if existing != nil {
 		return nil, errors.New(i18n.MsgUsernameAlreadyExists)
 	}
@@ -100,12 +100,35 @@ func (uc *UserUseCase) Register(req entity.RegisterRequest) (*entity.User, error
 
 	// 1. Yangi foydalanuvchining o'z kodi (username katta harflarda)
 	selfOfferCode := strings.ToUpper(strings.TrimSpace(req.UserName))
-	
-	// 2. Uni taklif qilgan odamning kodi (agar ro'yxatdan o'tishda kiritgan bo'lsa)
+	selfReferralCode := selfOfferCode // For now use same logic
+
+	// 2. Uni taklif qilgan odamning kodi
 	var hisInviterCode *string
-	if strings.TrimSpace(req.OfferCode) != "" {
-		code := strings.TrimSpace(req.OfferCode)
+	var referredByID *int
+
+	// Try both OfferCode (legacy) and ReferralCode
+	refCode := ""
+	if req.ReferralCode != nil {
+		refCode = *req.ReferralCode
+	}
+	if refCode == "" {
+		refCode = req.OfferCode
+	}
+
+	if strings.TrimSpace(refCode) != "" {
+		code := strings.TrimSpace(refCode)
 		hisInviterCode = &code
+		// Try to find the referrer by their code
+		referrer, err := uc.repo.GetByReferralCode(code)
+		if err == nil && referrer != nil {
+			referredByID = &referrer.ID
+		} else {
+			// Fallback to searching by offerCode (legacy)
+			referrer, err = uc.repo.GetByOfferCode(code)
+			if err == nil && referrer != nil {
+				referredByID = &referrer.ID
+			}
+		}
 	}
 
 	user := &entity.User{
@@ -114,15 +137,17 @@ func (uc *UserUseCase) Register(req entity.RegisterRequest) (*entity.User, error
 		PhoneNumber:    &req.PhoneNumber,
 		UserName:       req.UserName,
 		Password:       string(hashedPassword),
-		Role:           entity.RoleAdmin, // Ro'yxatdan o'tgan foydalanuvchi = Biznes egasi (Admin)
+		Role:           entity.RoleAdmin,
 		IsVerified:     false,
 		IsExpired:      false,
 		Image:          &req.Image,
 		BrandName:      &req.BrandName,
 		BrandImage:     &req.BrandImage,
 		MarketID:       req.MarketID,
-		OfferCode:      &selfOfferCode,   // O'zining kodi
-		InviterCode:    hisInviterCode,   // Taklif qilgan odamning kodi
+		OfferCode:      &selfOfferCode,
+		ReferralCode:   &selfReferralCode,
+		InviterCode:    hisInviterCode,
+		ReferredBy:     referredByID,
 		ExpirationDate: time.Now().AddDate(0, 1, 0),
 	}
 
@@ -136,7 +161,7 @@ func (uc *UserUseCase) Register(req entity.RegisterRequest) (*entity.User, error
 }
 
 func (uc *UserUseCase) Login(req entity.LoginRequest) (*entity.LoginResponse, error) {
-	user, err := uc.repo.GetByUsername(req.UserName)
+	user, err := uc.repo.GetByUserName(req.UserName)
 	if err != nil {
 		return nil, errors.New(i18n.MsgInvalidCredentials)
 	}
@@ -248,7 +273,7 @@ func (uc *UserUseCase) GetEmployees(adminID int) ([]entity.User, error) {
 }
 
 func (uc *UserUseCase) ExtendSubscription(req entity.ExtendSubscriptionRequest) error {
-	user, err := uc.repo.GetByUsername(req.UserName)
+	user, err := uc.repo.GetByUserName(req.UserName)
 	if err != nil {
 		return errors.New("Foydalanuvchi topilmadi")
 	}
@@ -297,7 +322,7 @@ func (uc *UserUseCase) HasPermission(userID, businessID int, action string) (boo
 }
 
 func (uc *UserUseCase) ForgotPassword(req entity.ForgotPasswordRequest) error {
-	user, err := uc.repo.GetByUsername(req.UserName)
+	user, err := uc.repo.GetByUserName(req.UserName)
 	if err != nil {
 		// Do not reveal if user exists or not for security, but we need to for UX here.
 		return errors.New(i18n.MsgUserNotFound)
@@ -356,7 +381,7 @@ func (uc *UserUseCase) ResetPassword(req entity.ResetPasswordRequest) error {
 		return errors.New("Noto'g'ri kod kiritildi")
 	}
 
-	user, err := uc.repo.GetByUsername(req.UserName)
+	user, err := uc.repo.GetByUserName(req.UserName)
 	if err != nil {
 		return errors.New(i18n.MsgUserNotFound)
 	}
@@ -379,4 +404,8 @@ func (uc *UserUseCase) ResetPassword(req entity.ResetPasswordRequest) error {
 	// Delete from cache
 	cache.PasswordResetCache.Delete(req.UserName)
 	return nil
+}
+
+func (uc *UserUseCase) GetReferredUsers(referralCode string) ([]entity.User, error) {
+	return uc.repo.GetReferredUsers(referralCode)
 }

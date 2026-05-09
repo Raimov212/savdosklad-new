@@ -50,6 +50,8 @@ type TotalTransaction struct {
 	BusinessName  string     `json:"businessName"` // Join field
 	CashbackEarned float64    `json:"cashbackEarned"`
 	CashbackUsed   float64    `json:"cashbackUsed"`
+	PointsEarned   float64    `json:"pointsEarned"`
+	PointsUsed     float64    `json:"pointsUsed"`
 	CreatedBy     *int       `json:"createdBy"`
 	CreatedByName string     `json:"createdByName"` // Join field
 	CreatedAt     time.Time  `json:"createdAt"`
@@ -69,6 +71,7 @@ type CreateTotalTransactionRequest struct {
 	Description       string                         `json:"description"`
 	DebtLimitDate     *time.Time                     `json:"debtLimitDate"`
 	UseCashbackAmount float64                        `json:"useCashbackAmount"`
+	UsePointsAmount   float64                        `json:"usePointsAmount"`
 	Items             []CreateTransactionItemRequest `json:"items" binding:"required"`
 }
 
@@ -150,6 +153,7 @@ type UpdateTotalTransactionRequest struct {
 	ClientNumber  string     `json:"clientNumber"`
 	Description   string     `json:"description"`
 	DebtLimitDate *time.Time `json:"debtLimitDate"`
+	PointsUsed    float64    `json:"pointsUsed"`
 }
 type UpdateTransactionItemRequest struct {
 	ProductQuantity int     `json:"productQuantity"`

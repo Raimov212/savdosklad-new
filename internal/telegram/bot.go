@@ -60,8 +60,8 @@ func NewBot(cfg config.TelegramConfig,
 
 func (b *Bot) Start() {
 	log.Printf("Bot authorized on account %s", b.api.Self.UserName)
-	// Store bot username so the web API can build t.me links
-	cache.TgAuthCache.Store("__bot_username__", b.api.Self.UserName)
+	// Store bot userName so the web API can build t.me links
+	cache.TgAuthCache.Store("__bot_userName__", b.api.Self.UserName)
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	// Go tili imkoniyati - "Channel (Kanal)": Goroutine'lar o'rtasida ma'lumot almashish va sinxronizatsiya vositasi.

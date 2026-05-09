@@ -40,6 +40,8 @@ type User struct {
 	BusinessPermissions []BusinessPermission `json:"businessPermissions"`
 	ExpirationDate      time.Time            `json:"expirationDate"`
 	IsMarketplaceEnabled bool                `json:"isMarketplaceEnabled"`
+	ReferralCode        *string              `json:"referralCode"`
+	ReferredBy          *int                 `json:"referredBy"`
 	CreatedAt           time.Time            `json:"createdAt"`
 	UpdatedAt           time.Time            `json:"updatedAt"`
 }
@@ -58,6 +60,7 @@ type RegisterRequest struct {
 	BusinessPermissions []BusinessPermission `json:"businessPermissions"`
 	OfferCode           string               `json:"offerCode"`
 	Role                int                  `json:"role"`
+	ReferralCode        *string              `json:"referralCode"`
 	ExpirationDate      *time.Time           `json:"expirationDate"`
 }
 

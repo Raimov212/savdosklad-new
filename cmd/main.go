@@ -141,6 +141,20 @@ func main() {
 	_, _ = db.Exec(`ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "cashbackUsed" NUMERIC(15,2) DEFAULT 0;`)
 	_, _ = db.Exec(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "cashbackAmount" NUMERIC(15,2) DEFAULT 0;`)
 
+	// Points System updates
+	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "pointsEnabled" BOOLEAN DEFAULT FALSE;`)
+	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "pointsRate" NUMERIC(15,2) DEFAULT 10000;`)
+	_, _ = db.Exec(`ALTER TABLE businesses ADD COLUMN IF NOT EXISTS "pointValue" NUMERIC(15,2) DEFAULT 1;`)
+	_, _ = db.Exec(`ALTER TABLE clients ADD COLUMN IF NOT EXISTS "pointsBalance" NUMERIC(15,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "pointsEarned" NUMERIC(15,2) DEFAULT 0;`)
+	_, _ = db.Exec(`ALTER TABLE total_transactions ADD COLUMN IF NOT EXISTS "pointsUsed" NUMERIC(15,2) DEFAULT 0;`)
+
+	// Referral System updates
+	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "referralCode" VARCHAR(50) UNIQUE;`)
+	_, _ = db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS "referredBy" INTEGER REFERENCES users(id);`)
+	// Populate referralCode for existing users
+	_, _ = db.Exec(`UPDATE users SET "referralCode" = UPPER("userName") WHERE "referralCode" IS NULL;`)
+
 	// Region repository
 	regionRepo := postgres.NewRegionRepo(db)
 
@@ -435,7 +449,7 @@ func main() {
 
 func ensureSuperAdmin(repo *postgres.UserRepo) {
 	username := "admin"
-	existing, _ := repo.GetByUsername(username)
+	existing, _ := repo.GetByUserName(username)
 	if existing != nil {
 		return
 	}

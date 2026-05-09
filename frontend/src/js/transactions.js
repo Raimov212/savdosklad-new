@@ -274,6 +274,10 @@ async function openSaleModal() {
               <span style="color:var(--text-muted);">${t("Keshbek ishlatildi")}:</span>
               <span id="breakdown-cashback" style="font-weight:600; color:var(--success);">- 0 ${t("so'm")}</span>
             </div>
+            <div style="display:flex; justify-content:space-between; display:none;" id="breakdown-points-row">
+              <span style="color:var(--text-muted);">${t("Ball ishlatildi")}:</span>
+              <span id="breakdown-points" style="font-weight:600; color:var(--accent);">- 0 ${t("so'm")}</span>
+            </div>
             <div style="height:1px; background:var(--border); margin:4px 0;"></div>
             <div style="display:flex; justify-content:space-between; font-size:18px;">
               <span style="font-weight:700;">${t("To'lanishi kerak")}:</span>
@@ -319,6 +323,13 @@ async function openSaleModal() {
             <div style="position:relative">
               <input type="number" step="0.01" class="form-control form-control-lg" id="sale-cashback-used" value="0" oninput="updateSalePayment()">
               <div id="client-cashback-hint" style="position:absolute; right:0; bottom:-18px; font-size:10px; color:var(--success); font-weight:600;"></div>
+            </div>
+          </div>
+          <div class="form-group" id="points-use-group" style="display:none">
+            <label>⭐ ${t("Ballar orqali to'lash")}</label>
+            <div style="position:relative">
+              <input type="number" step="0.01" class="form-control form-control-lg" id="sale-points-used" value="0" oninput="updateSalePayment()">
+              <div id="client-points-hint" style="position:absolute; right:0; bottom:-18px; font-size:10px; color:var(--accent); font-weight:600;"></div>
             </div>
           </div>
         </div>
@@ -699,10 +710,11 @@ function updateSalePayment() {
   const card = parseFloat(cardInp.value) || 0;
   const click = parseFloat(clickInp.value) || 0;
   const cashbackUsed = parseFloat(document.getElementById('sale-cashback-used')?.value || 0) || 0;
+  const pointsUsedValue = parseFloat(document.getElementById('sale-points-used')?.value || 0) || 0; // This is the monetary value of points
   const discount = parseFloat(document.getElementById('sale-discount')?.value || 0) || 0;
 
   const overallPaidSoFar = cumulativePayments.cash + cumulativePayments.card + cumulativePayments.click;
-  const currentPayments = cash + card + click + cashbackUsed;
+  const currentPayments = cash + card + click + cashbackUsed + pointsUsedValue;
   const totalPaid = overallPaidSoFar + currentPayments;
 
   const debtEl = document.getElementById('sale-debt');
@@ -715,6 +727,8 @@ function updateSalePayment() {
   const bdDiscount = document.getElementById('breakdown-discount');
   const bdCashbackRow = document.getElementById('breakdown-cashback-row');
   const bdCashback = document.getElementById('breakdown-cashback');
+  const bdPointsRow = document.getElementById('breakdown-points-row');
+  const bdPoints = document.getElementById('breakdown-points');
   const bdPayable = document.getElementById('breakdown-payable');
   const bdPaid = document.getElementById('breakdown-paid');
   const bdDebt = document.getElementById('breakdown-debt');
@@ -729,8 +743,15 @@ function updateSalePayment() {
     if (bdCashbackRow) bdCashbackRow.style.display = 'none';
   }
 
-  // To'lanishi kerak bo'lgan jami (chegirma va keshbek ayirilgandan keyin)
-  const finalPayable = payableTotal - cashbackUsed;
+  if (pointsUsedValue > 0) {
+    if (bdPointsRow) bdPointsRow.style.display = 'flex';
+    if (bdPoints) bdPoints.textContent = `- ${formatPrice(pointsUsedValue)} ${t("so'm")}`;
+  } else {
+    if (bdPointsRow) bdPointsRow.style.display = 'none';
+  }
+
+  // To'lanishi kerak bo'lgan jami (chegirma, keshbek va ballar ayirilgandan keyin)
+  const finalPayable = payableTotal - cashbackUsed - pointsUsedValue;
   if (bdPayable) bdPayable.textContent = `${formatPrice(Math.max(0, finalPayable))} ${t("so'm")}`;
 
   // Mijoz real to'layotgan puli
@@ -924,7 +945,8 @@ async function finalizeSale(e) {
     const clientId = document.getElementById('sale-client-id').value;
     const desc = document.getElementById('sale-desc').value.trim();
     const cashbackUsed = parseFloat(document.getElementById('sale-cashback-used')?.value || 0) || 0;
-    const debt = Math.max(0, payableTotal - (overallPaidSoFar + cash + card + click + cashbackUsed));
+    const pointsUsedAmount = parseFloat(document.getElementById('sale-points-used')?.value || 0) || 0;
+    const debt = Math.max(0, payableTotal - (overallPaidSoFar + cash + card + click + cashbackUsed + pointsUsedAmount));
 
     // Calculate first batch total or just use it
     if (!currentTotalTransactionID) {
@@ -938,6 +960,7 @@ async function finalizeSale(e) {
         debt: debt,
         discount: discount,
         useCashbackAmount: cashbackUsed,
+        usePointsAmount: pointsUsedAmount,
         clientId: clientId ? parseInt(clientId) : null,
         description: desc,
         items: saleItems.map(i => ({
@@ -969,6 +992,7 @@ async function finalizeSale(e) {
         click: cumulativePayments.click + click,
         debt: debt,
         discount: discount,
+        usePointsAmount: pointsUsedAmount,
         clientId: clientId ? parseInt(clientId) : null,
         description: desc,
       });
@@ -1362,23 +1386,32 @@ window.currentTransactions = currentTransactions;
 window.saleProducts = saleProducts;
 window.saleItems = saleItems;
 window.onSaleClientChange = function(clientId) {
-  const group = document.getElementById('cashback-use-group');
-  const hint = document.getElementById('client-cashback-hint');
-  const input = document.getElementById('sale-cashback-used');
+  const bid = getSelectedBusinessId();
+  const cbGroup = document.getElementById('cashback-use-group');
+  const cbHint = document.getElementById('client-cashback-hint');
+  const cbInput = document.getElementById('sale-cashback-used');
   
+  const ptGroup = document.getElementById('points-use-group');
+  const ptHint = document.getElementById('client-points-hint');
+  const ptInput = document.getElementById('sale-points-used');
+
   if (!clientId) {
-    if (group) group.style.display = 'none';
-    if (input) input.value = 0;
+    if (cbGroup) cbGroup.style.display = 'none';
+    if (cbInput) cbInput.value = 0;
+    if (ptGroup) ptGroup.style.display = 'none';
+    if (ptInput) ptInput.value = 0;
     updateSalePayment();
     return;
   }
   
   const client = globalClients.find(c => c.id == clientId);
-  if (client && group) {
-    group.style.display = 'block';
-    hint.textContent = `${t("Keshbek balansi")}: ${formatPrice(client.cashbackBalance)} ${t("so'm")}`;
-    // Limit input to balance
-    input.oninput = (e) => {
+  if (!client) return;
+
+  // 1. Cashback logic
+  if (cbGroup) {
+    cbGroup.style.display = 'block';
+    cbHint.textContent = `${t("Keshbek balansi")}: ${formatPrice(client.cashbackBalance)} ${t("so'm")}`;
+    cbInput.oninput = (e) => {
       let val = parseFloat(e.target.value) || 0;
       if (val > client.cashbackBalance) {
         val = client.cashbackBalance;
@@ -1386,7 +1419,28 @@ window.onSaleClientChange = function(clientId) {
       }
       updateSalePayment();
     };
-  } else if (group) {
-    group.style.display = 'none';
   }
+
+  // 2. Points logic
+  api.get(`/businesses/${bid}`).then(business => {
+    if (business && business.pointsEnabled && ptGroup) {
+      ptGroup.style.display = 'block';
+      const pointValueInMoney = (client.pointsBalance || 0) * (business.pointValue || 1);
+      ptHint.textContent = `${t("Mijoz ballari")}: ${client.pointsBalance || 0} (${formatPrice(pointValueInMoney)} ${t("so'm")})`;
+      
+      ptInput.oninput = (e) => {
+        let val = parseFloat(e.target.value) || 0;
+        if (val > pointValueInMoney) {
+          val = pointValueInMoney;
+          e.target.value = val;
+        }
+        updateSalePayment();
+      };
+    } else if (ptGroup) {
+      ptGroup.style.display = 'none';
+    }
+  }).catch(err => {
+    console.error("Error fetching business for points:", err);
+    if (ptGroup) ptGroup.style.display = 'none';
+  });
 };

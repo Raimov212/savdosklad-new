@@ -15,6 +15,7 @@ async function renderAdmin() {
             <button class="btn btn-secondary" onclick="showAdminTab('regions')" id="tab-regions">🗺️ ${t("Viloyatlar")}</button>
             <button class="btn btn-secondary" onclick="showAdminTab('districts')" id="tab-districts">🏘️ ${t("Tumanlar")}</button>
             <button class="btn btn-secondary" onclick="showAdminTab('markets')" id="tab-markets">🏪 ${t("Bozorlar")}</button>
+            <button class="btn btn-secondary" onclick="showAdminTab('referrals')" id="tab-referrals">🎁 ${t("Referral")}</button>
             ` : ''}
         </div>
         <div id="admin-content"></div>
@@ -25,7 +26,7 @@ async function renderAdmin() {
 function showAdminTab(tab) {
     // Admin (role=1) faqat 'users' tabini ko'ra oladi
     const me = api.getUser() || {};
-    if (me.role !== 2 && ['regions', 'districts', 'markets'].includes(tab)) {
+    if (me.role !== 2 && ['regions', 'districts', 'markets', 'referrals'].includes(tab)) {
         tab = 'users';
     }
     activeAdminTab = tab;
@@ -44,6 +45,7 @@ function showAdminTab(tab) {
         case 'regions': loadAdminRegions(); break;
         case 'districts': loadAdminDistricts(); break;
         case 'markets': loadAdminMarkets(); break;
+        case 'referrals': loadAdminReferrals(); break;
     }
 }
 
@@ -100,7 +102,7 @@ function renderAdminUsersTable(list, isAppend = false) {
     if (adminUserPage > totalPages) adminUserPage = totalPages || 1;
     const start = (adminUserPage - 1) * limit;
     const paginated = currentAdminUsers.slice(start, start + limit);
-    
+
     const me = api.getUser() || {};
     const isSuperAdmin = me.role === 2;
     const colCount = isSuperAdmin ? 10 : 9;
@@ -762,6 +764,76 @@ async function deleteDistrict(id) {
         showToast(t('Tuman o\'chirildi'), 'success');
         loadAdminDistricts();
     } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function loadAdminReferrals() {
+    const container = document.getElementById('admin-content');
+    container.innerHTML = '<div class="loader"></div>';
+
+    try {
+        const referred = await api.get('/users/referred');
+        renderAdminReferrals(referred || []);
+    } catch (e) {
+        container.innerHTML = `<p class="error">${t("Xatolik")}: ` + e.message + '</p>';
+    }
+}
+
+function renderAdminReferrals(list) {
+    const container = document.getElementById('admin-content');
+    const me = api.getUser() || {};
+    const myRefCode = me.userName ? me.userName.toUpperCase() : 'ADMIN';
+
+    const rowsHtml = list.length === 0 ? `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">${t("Hali hech kim taklif qilinmagan")}</td></tr>` :
+        list.map((u, i) => {
+            const roleName = u.role === 2 ? 'Super Admin' : u.role === 1 ? 'Admin' : u.role === 3 ? 'Client' : 'Employee';
+            return `
+                <tr>
+                    <td style="text-align:center">${i + 1}</td>
+                    <td>${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}</td>
+                    <td>${escapeHtml(u.userName)}</td>
+                    <td style="text-align:center"><span class="badge ${u.role === 1 ? 'badge-warning' : ''}">${t(roleName)}</span></td>
+                    <td style="text-align:center">${formatDate(u.createdAt)}</td>
+                </tr>
+            `}).join('');
+
+    container.innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 2fr; gap:20px; margin-top:20px;">
+            <div class="card" style="padding:20px; text-align:center; height:fit-content;">
+                <div class="icon" style="font-size:40px; margin-bottom:15px;">🎁</div>
+                <h4 style="margin-bottom:10px;">${t("Mening taklif kodim")}</h4>
+                <div style="font-size:24px; font-weight:800; color:var(--primary); background:var(--bg-secondary); padding:15px; border-radius:12px; border:2px dashed var(--primary); margin-bottom:15px; letter-spacing:2px;">
+                    ${myRefCode}
+                </div>
+                <button class="btn btn-primary" style="width:100%" onclick="copyToClipboard('${myRefCode}')">📋 ${t("Nusxa olish")}</button>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:15px;">
+                    ${t("Ushbu kodni yangi foydalanuvchilarga yuboring. Ular ro'yxatdan o'tayotganda ushbu kodni kiritsalar, sizga biriktiriladi.")}
+                </p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="margin:0">${t("Taklif qilinganlar")}</h4>
+                    <span class="badge badge-info">${list.length}</span>
+                </div>
+                <div class="table-container">
+                    <table style="width:100%">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center">№</th>
+                                <th>${t("Ism")}</th>
+                                <th>${t("Foydalanuvchi nomi")}</th>
+                                <th style="text-align:center">${t("Rol")}</th>
+                                <th style="text-align:center">${t("Sana")}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // ==================== MARKETS ====================
@@ -1516,7 +1588,7 @@ async function renderMpSales() {
         const bid = getSelectedBusinessId();
         // Fetch only confirmed/delivered orders as 'sales'
         const orders = await api.get(`/admin/marketplace/orders?businessId=${bid}&status=CONFIRMED,DELIVERED`);
-        
+
         // Map order structure to what sales table expects
         const sales = (orders || []).map(o => ({
             id: o.id,
@@ -1676,6 +1748,9 @@ window.filterAdminUsers = filterAdminUsers;
 window.openCreateUserModal = openCreateUserModal;
 window.createAdminUser = createAdminUser;
 window.previewAdminBrandImage = previewAdminBrandImage;
+
+window.loadAdminReferrals = loadAdminReferrals;
+window.renderAdminReferrals = renderAdminReferrals;
 
 Object.defineProperty(window, 'adminUserPage', { get: () => adminUserPage, set: (v) => adminUserPage = v });
 Object.defineProperty(window, 'adminRegionPage', { get: () => adminRegionPage, set: (v) => adminRegionPage = v });

@@ -21,10 +21,10 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 func (r *UserRepo) Create(user *entity.User) (int, error) {
 	var id int
 	err := r.db.QueryRow(
-		`INSERT INTO users ("firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt")
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING id`,
+		`INSERT INTO users ("firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "referralCode", "referredBy", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt")
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23) RETURNING id`,
 		user.FirstName, user.LastName, user.PhoneNumber, user.UserName, user.Password,
-		user.Role, user.InviterCode, user.OfferCode, user.IsVerified, user.IsExpired,
+		user.Role, user.InviterCode, user.OfferCode, user.ReferralCode, user.ReferredBy, user.IsVerified, user.IsExpired,
 		user.Image, user.BrandName, user.BrandImage, user.TelegramUserID, user.Language, user.MarketID, user.CreatedBy, user.ExpirationDate, user.IsMarketplaceEnabled, time.Now(), time.Now(),
 	).Scan(&id)
 	if err == nil && len(user.BusinessIDs) > 0 {
@@ -42,10 +42,10 @@ func (r *UserRepo) GetByID(id int) (*entity.User, error) {
 	var lang sql.NullString
 	var expDate sql.NullTime
 	err := r.db.QueryRow(
-		`SELECT id, "firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt"
+		`SELECT id, "firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "referralCode", "referredBy", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt"
 		FROM users WHERE id = $1`, id,
 	).Scan(&u.ID, &u.FirstName, &u.LastName, &u.PhoneNumber, &u.UserName, &u.Password,
-		&u.Role, &u.InviterCode, &u.OfferCode, &u.IsVerified, &u.IsExpired,
+		&u.Role, &u.InviterCode, &u.OfferCode, &u.ReferralCode, &u.ReferredBy, &u.IsVerified, &u.IsExpired,
 		&u.Image, &u.BrandName, &u.BrandImage, &tgID, &lang, &u.MarketID, &u.CreatedBy, &expDate, &u.IsMarketplaceEnabled, &u.CreatedAt, &u.UpdatedAt)
 	if tgID.Valid { u.TelegramUserID = tgID.Int64 }
 	if lang.Valid { u.Language = lang.String }
@@ -59,22 +59,22 @@ func (r *UserRepo) GetByID(id int) (*entity.User, error) {
 	return &u, nil
 }
 
-func (r *UserRepo) GetByUsername(username string) (*entity.User, error) {
+func (r *UserRepo) GetByUserName(userName string) (*entity.User, error) {
 	var u entity.User
 	var tgID sql.NullInt64
 	var lang sql.NullString
 	var expDate sql.NullTime
 	err := r.db.QueryRow(
-		`SELECT id, "firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt"
-		FROM users WHERE "userName" = $1`, username,
+		`SELECT id, "firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "referralCode", "referredBy", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt"
+		FROM users WHERE "userName" = $1`, userName,
 	).Scan(&u.ID, &u.FirstName, &u.LastName, &u.PhoneNumber, &u.UserName, &u.Password,
-		&u.Role, &u.InviterCode, &u.OfferCode, &u.IsVerified, &u.IsExpired,
+		&u.Role, &u.InviterCode, &u.OfferCode, &u.ReferralCode, &u.ReferredBy, &u.IsVerified, &u.IsExpired,
 		&u.Image, &u.BrandName, &u.BrandImage, &tgID, &lang, &u.MarketID, &u.CreatedBy, &expDate, &u.IsMarketplaceEnabled, &u.CreatedAt, &u.UpdatedAt)
 	if tgID.Valid { u.TelegramUserID = tgID.Int64 }
 	if lang.Valid { u.Language = lang.String }
 	if expDate.Valid { u.ExpirationDate = expDate.Time }
 	if err != nil {
-		log.Printf("[Repo] GetByUsername error for %s: %v", username, err)
+		log.Printf("[Repo] GetByUserName error for %s: %v", userName, err)
 		return nil, err
 	}
 	u.BusinessIDs, _ = r.getBusinessIDs(u.ID)
@@ -368,10 +368,73 @@ func (r *UserRepo) HasPermission(userID, businessID int, action string) (bool, e
 	return false, nil
 }
 
+func (r *UserRepo) GetByReferralCode(code string) (*entity.User, error) {
+	var u entity.User
+	var tgID sql.NullInt64
+	var lang sql.NullString
+	var expDate sql.NullTime
+	err := r.db.QueryRow(
+		`SELECT id, "firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "referralCode", "referredBy", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt"
+		FROM users WHERE "referralCode" = $1`, code,
+	).Scan(&u.ID, &u.FirstName, &u.LastName, &u.PhoneNumber, &u.UserName, &u.Password,
+		&u.Role, &u.InviterCode, &u.OfferCode, &u.ReferralCode, &u.ReferredBy, &u.IsVerified, &u.IsExpired,
+		&u.Image, &u.BrandName, &u.BrandImage, &tgID, &lang, &u.MarketID, &u.CreatedBy, &expDate, &u.IsMarketplaceEnabled, &u.CreatedAt, &u.UpdatedAt)
+	if tgID.Valid { u.TelegramUserID = tgID.Int64 }
+	if lang.Valid { u.Language = lang.String }
+	if expDate.Valid { u.ExpirationDate = expDate.Time }
+	if err != nil { return nil, err }
+	return &u, nil
+}
+
+func (r *UserRepo) GetByOfferCode(code string) (*entity.User, error) {
+	var u entity.User
+	var tgID sql.NullInt64
+	var lang sql.NullString
+	var expDate sql.NullTime
+	err := r.db.QueryRow(
+		`SELECT id, "firstName", "lastName", "phoneNumber", "userName", password, role, "inviterCode", "offerCode", "referralCode", "referredBy", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "marketId", "createdBy", "expirationDate", "isMarketplaceEnabled", "createdAt", "updatedAt"
+		FROM users WHERE "offerCode" = $1`, code,
+	).Scan(&u.ID, &u.FirstName, &u.LastName, &u.PhoneNumber, &u.UserName, &u.Password,
+		&u.Role, &u.InviterCode, &u.OfferCode, &u.ReferralCode, &u.ReferredBy, &u.IsVerified, &u.IsExpired,
+		&u.Image, &u.BrandName, &u.BrandImage, &tgID, &lang, &u.MarketID, &u.CreatedBy, &expDate, &u.IsMarketplaceEnabled, &u.CreatedAt, &u.UpdatedAt)
+	if tgID.Valid { u.TelegramUserID = tgID.Int64 }
+	if lang.Valid { u.Language = lang.String }
+	if expDate.Valid { u.ExpirationDate = expDate.Time }
+	if err != nil { return nil, err }
+	return &u, nil
+}
+
 func (r *UserRepo) Delete(id int) error {
 	_, err := r.db.Exec(`DELETE FROM users WHERE id = $1`, id)
 	if err != nil && (strings.Contains(err.Error(), "foreign key constraint") || strings.Contains(err.Error(), "violates foreign key constraint")) {
 		return fmt.Errorf("Foydalanuvchiga tegishli bizneslar mavjudligi sababli o'chirib bo'lmaydi.")
 	}
 	return err
+}
+
+func (r *UserRepo) GetReferredUsers(referralCode string) ([]entity.User, error) {
+	rows, err := r.db.Query(
+		`SELECT id, "firstName", "lastName", "phoneNumber", "userName", role, "inviterCode", "offerCode", "referralCode", "isVerified", "isExpired", image, "brandName", "brandImage", "telegramUserId", "language", "createdAt"
+		FROM users WHERE "inviterCode" = $1 ORDER BY "createdAt" DESC`, referralCode,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []entity.User
+	for rows.Next() {
+		var u entity.User
+		var tgID sql.NullInt64
+		var lang sql.NullString
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.PhoneNumber, &u.UserName, &u.Role,
+			&u.InviterCode, &u.OfferCode, &u.ReferralCode, &u.IsVerified, &u.IsExpired,
+			&u.Image, &u.BrandName, &u.BrandImage, &tgID, &lang, &u.CreatedAt); err != nil {
+			return nil, err
+		}
+		if tgID.Valid { u.TelegramUserID = tgID.Int64 }
+		if lang.Valid { u.Language = lang.String }
+		users = append(users, u)
+	}
+	return users, nil
 }

@@ -11,6 +11,7 @@ type Client struct {
 	TelegramUserID *int64    `json:"telegramUserId"`
 	Language       *string   `json:"language"`
 	CashbackBalance float64   `json:"cashbackBalance"`
+	PointsBalance   float64   `json:"pointsBalance"`
 	TotalSpent      float64   `json:"totalSpent"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
@@ -29,5 +30,6 @@ type UpdateClientRequest struct {
 	Phone      *string  `json:"phone"`
 	Address    *string  `json:"address"`
 	CashbackBalance *float64 `json:"cashbackBalance"`
+	PointsBalance   *float64 `json:"pointsBalance"`
 	TotalSpent      *float64 `json:"totalSpent"`
 }

@@ -45,22 +45,22 @@ func (uc *OrganizationUseCase) Update(id int, req entity.UpdateOrganizationReque
 		org.OrgName = *req.OrgName
 	}
 	if req.Inn != nil {
-		org.Inn = *req.Inn
+		org.Inn = req.Inn
 	}
 	if req.BankName != nil {
-		org.BankName = *req.BankName
+		org.BankName = req.BankName
 	}
 	if req.Mfo != nil {
-		org.Mfo = *req.Mfo
+		org.Mfo = req.Mfo
 	}
 	if req.BankAccount != nil {
-		org.BankAccount = *req.BankAccount
+		org.BankAccount = req.BankAccount
 	}
 	if req.Logo != nil {
-		org.Logo = *req.Logo
+		org.Logo = req.Logo
 	}
 	if req.Description != nil {
-		org.Description = *req.Description
+		org.Description = req.Description
 	}
 
 	return uc.repo.Update(id, org)

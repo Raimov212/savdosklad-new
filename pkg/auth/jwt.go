@@ -15,7 +15,7 @@ type JWTManager struct {
 
 type Claims struct {
 	UserID   int    `json:"user_id"`
-	Username string `json:"username"`
+	UserName string `json:"userName"`
 	Role     int    `json:"role"`
 	jwt.RegisteredClaims
 }
@@ -27,10 +27,10 @@ func NewJWTManager(secret string, expirationHours int) *JWTManager {
 	}
 }
 
-func (m *JWTManager) GenerateToken(userID int, username string, role int) (string, error) {
+func (m *JWTManager) GenerateToken(userID int, userName string, role int) (string, error) {
 	claims := &Claims{
 		UserID:   userID,
-		Username: username,
+		UserName: userName,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.expiration)),

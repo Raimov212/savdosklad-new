@@ -81,11 +81,11 @@ async function handleLogin(e) {
     else btn.innerText = t('Yuklanmoqda...');
 
     try {
-        const username = document.getElementById('login-username').value.trim();
+        const userName = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
 
         const data = await api.post('/auth/login', {
-            userName: username,
+            userName: userName,
             password: password
         });
 
@@ -200,11 +200,11 @@ async function handleForgotPassword(e) {
     else btn.innerText = t('Yuklanmoqda...');
 
     try {
-        const username = document.getElementById('forgot-username').value.trim();
+        const userName = document.getElementById('forgot-username').value.trim();
         const response = await fetch(`/api/v1/auth/forgot-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userName: username })
+            body: JSON.stringify({ userName: userName })
         });
         
         const result = await response.json();
@@ -212,10 +212,10 @@ async function handleForgotPassword(e) {
 
         showToast(t(result.message));
         
-        // Save username for reset password step
+        // Save userName for reset password step
         document.getElementById('reset-code').value = '';
         document.getElementById('reset-password').value = '';
-        document.getElementById('reset-password-form').dataset.username = username;
+        document.getElementById('reset-password-form').dataset.userName = userName;
         
         switchTab('reset-password');
     } catch (err) {
@@ -240,14 +240,14 @@ async function handleResetPassword(e) {
     else btn.innerText = t('Yuklanmoqda...');
 
     try {
-        const username = document.getElementById('reset-password-form').dataset.username;
+        const userName = document.getElementById('reset-password-form').dataset.userName;
         const code = document.getElementById('reset-code').value.trim();
         const newPassword = document.getElementById('reset-password').value;
 
         const response = await fetch(`/api/v1/auth/reset-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userName: username, code: code, newPassword: newPassword })
+            body: JSON.stringify({ userName: userName, code: code, newPassword: newPassword })
         });
         
         const result = await response.json();

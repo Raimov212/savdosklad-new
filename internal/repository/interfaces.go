@@ -8,7 +8,7 @@ import (
 type UserRepository interface {
 	Create(user *entity.User) (int, error)
 	GetByID(id int) (*entity.User, error)
-	GetByUsername(username string) (*entity.User, error)
+	GetByUserName(userName string) (*entity.User, error)
 	GetByTelegramID(tgID int64) (*entity.User, error)
 	GetByPhoneNumber(phone string) (*entity.User, error)
 	GetAll() ([]entity.User, error)
@@ -16,6 +16,9 @@ type UserRepository interface {
 	UpdateTelegramID(id int, tgID int64) error
 	UpdateLanguage(id int, lang string) error
 	GetByCreatedBy(adminID int) ([]entity.User, error)
+	GetByReferralCode(code string) (*entity.User, error)
+	GetByOfferCode(code string) (*entity.User, error)
+	GetReferredUsers(referralCode string) ([]entity.User, error)
 	Delete(id int) error
 	HasPermission(userID, businessID int, action string) (bool, error)
 }

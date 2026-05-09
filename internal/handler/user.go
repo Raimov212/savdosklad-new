@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -254,28 +255,54 @@ func (h *UserHandler) GenerateTelegramLink(c *gin.Context) {
 		return
 	}
 	userID := c.GetInt("userID")
-	
+
 	bytes := make([]byte, 16)
 	if _, err := rand.Read(bytes); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}
-	
+
 	token := hex.EncodeToString(bytes)
-	
+
 	// Store in cache: token -> userID
 	cache.TgAuthCache.Store(token, userID)
-	
-	// Also retrieve the bot username (stored when bot started)
-	botUsername := "savdosklad_bot"
-	if val, ok := cache.TgAuthCache.Load("__bot_username__"); ok {
+
+	// Also retrieve the bot userName (stored when bot started)
+	botUserName := "savdosklad_bot"
+	if val, ok := cache.TgAuthCache.Load("__bot_userName__"); ok {
 		if name, ok := val.(string); ok && name != "" {
-			botUsername = name
+			botUserName = name
 		}
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"link":        token,
-		"botUsername": botUsername,
+		"botUserName": botUserName,
 	})
+}
+
+// GetReferredUsers godoc
+// @Summary      Get users referred by the current user
+// @Tags         Users
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200 {array} entity.User
+// @Router       /users/referred [get]
+func (h *UserHandler) GetReferredUsers(c *gin.Context) {
+	// Retrieve the user from context (set by AuthMiddleware)
+	userName := c.GetString("userName")
+	if userName == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Referral code is currently derived from username (uppercase)
+	refCode := strings.ToUpper(strings.TrimSpace(userName))
+
+	users, err := h.uc.GetReferredUsers(refCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }

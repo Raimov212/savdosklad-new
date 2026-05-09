@@ -24,6 +24,9 @@ type Business struct {
 	CashbackEnabled       bool      `json:"cashbackEnabled"`
 	CashbackType          string    `json:"cashbackType"`
 	CashbackPercentage    float64   `json:"cashbackPercentage"`
+	PointsEnabled         bool      `json:"pointsEnabled"`
+	PointsRate            float64   `json:"pointsRate"`
+	PointValue            float64   `json:"pointValue"`
 }
 
 type CreateBusinessRequest struct {
@@ -39,6 +42,9 @@ type CreateBusinessRequest struct {
 	CashbackEnabled       bool    `json:"cashbackEnabled"`
 	CashbackType          string  `json:"cashbackType"`
 	CashbackPercentage    float64 `json:"cashbackPercentage"`
+	PointsEnabled         bool    `json:"pointsEnabled"`
+	PointsRate            float64 `json:"pointsRate"`
+	PointValue            float64 `json:"pointValue"`
 }
 
 type UpdateBusinessRequest struct {
@@ -56,4 +62,7 @@ type UpdateBusinessRequest struct {
 	CashbackEnabled       *bool    `json:"cashbackEnabled"`
 	CashbackType          *string  `json:"cashbackType"`
 	CashbackPercentage    *float64 `json:"cashbackPercentage"`
+	PointsEnabled         *bool    `json:"pointsEnabled"`
+	PointsRate            *float64 `json:"pointsRate"`
+	PointValue            *float64 `json:"pointValue"`
 }

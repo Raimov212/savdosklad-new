@@ -131,7 +131,7 @@ function openBusinessModal(b = null) {
       <div class="form-group">
         <label>${t("Tashkilot")}</label>
         <select class="form-control" id="biz-org-sel">
-          <option value="">${t("Tashkilotni tanlang")} (ixtiyoriy)</option>
+          <option value="">${t("Tashkilotni tanlang")}</option>
         </select>
       </div>
 
@@ -219,6 +219,32 @@ function openBusinessModal(b = null) {
           </div>
         </div>
       </div>
+      <div class="form-group" style="margin-top:10px; padding:12px; background:rgba(var(--accent-rgb), 0.05); border-radius:8px; border:1px solid rgba(var(--accent-rgb), 0.1);">
+        <label style="font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="biz-points-enabled" ${isEdit && b.pointsEnabled ? 'checked' : ''} onchange="togglePointsSettings(this.checked)">
+          <span>${t("Ballar tizimi")}</span>
+        </label>
+        <div id="points-settings-group" style="display: ${isEdit && b.pointsEnabled ? 'flex' : 'none'}; flex-direction:column; gap:10px; margin-top:10px; padding-top:10px; border-top:1px dashed rgba(0,0,0,0.1);">
+          <div class="form-row">
+            <div class="form-group">
+              <label>${t("Ballar kursi (1 ball uchun UZS)")}</label>
+              <div style="position:relative">
+                <input type="number" step="100" class="form-control" id="biz-points-rate" value="${isEdit ? b.pointsRate : 1000}">
+                <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); opacity:0.5; font-size:12px;">UZS</span>
+              </div>
+              <p style="font-size:10px; color:var(--text-muted); margin-top:4px;">${t("Masalan: 1000 so'm uchun 1 ball")}</p>
+            </div>
+            <div class="form-group">
+              <label>${t("1 ball qiymati (UZS)")}</label>
+              <div style="position:relative">
+                <input type="number" step="1" class="form-control" id="biz-point-value" value="${isEdit ? b.pointValue : 1}">
+                <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); opacity:0.5; font-size:12px;">UZS</span>
+              </div>
+              <p style="font-size:10px; color:var(--text-muted); margin-top:4px;">${t("Masalan: 1 ball = 1 so'm")}</p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal-footer" style="padding-top:10px">
         <button type="button" class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
         <button type="submit" class="btn btn-primary" style="padding:10px 40px;">${isEdit ? t('Saqlash') : t('Yaratish')}</button>
@@ -293,7 +319,7 @@ async function loadOrganizationsForBusiness(b = null) {
   try {
     const list = await api.get('/organizations/my');
     if (orgSelect) {
-      orgSelect.innerHTML = `<option value="">${t("Tashkilotni tanlang")} (ixtiyoriy)</option>` +
+      orgSelect.innerHTML = `<option value="">${t("Tashkilotni tanlang")}</option>` +
         list.map(o => `<option value="${o.id}" ${b && b.organizationId == o.id ? 'selected' : ''}>${o.orgName}</option>`).join('');
     }
   } catch (err) {
@@ -387,7 +413,10 @@ async function saveBusiness(e, id) {
     globalBarcodeLookup: document.getElementById('biz-global-lookup').checked,
     cashbackEnabled: document.getElementById('biz-cashback-enabled').checked,
     cashbackType: document.getElementById('biz-cashback-type').value,
-    cashbackPercentage: parseFloat(document.getElementById('biz-cashback-pct').value) || 0
+    cashbackPercentage: parseFloat(document.getElementById('biz-cashback-pct').value) || 0,
+    pointsEnabled: document.getElementById('biz-points-enabled').checked,
+    pointsRate: parseFloat(document.getElementById('biz-points-rate').value) || 0,
+    pointValue: parseFloat(document.getElementById('biz-point-value').value) || 0
   };
 
   try {
@@ -439,23 +468,23 @@ window.previewBusinessImage = previewBusinessImage;
 window.businessPage = businessPage;
 window.allBusinessesList = allBusinessesList;
 window.currentBusinesses = currentBusinesses;
-window.toggleCashbackSettings = function(enabled) {
+window.toggleCashbackSettings = function (enabled) {
   const group = document.getElementById('cashback-settings-group');
   if (group) group.style.display = enabled ? 'flex' : 'none';
 };
-window.toggleCashbackTypeFields = function(type) {
+window.toggleCashbackTypeFields = function (type) {
   const pctGroup = document.getElementById('cashback-pct-group');
   const tieredGroup = document.getElementById('tiered-cashback-btn-group');
   if (pctGroup) pctGroup.style.display = type === 'percentage' ? 'block' : 'none';
   if (tieredGroup) tieredGroup.style.display = type === 'tiered' ? 'block' : 'none';
 };
 
-window.openCashbackTiersModal = async function(businessId) {
+window.openCashbackTiersModal = async function (businessId) {
   if (!businessId) {
     showToast(t("Avval biznesni saqlang"), 'warning');
     return;
   }
-  
+
   openModal(`
     <div class="modal-header">
       <h3>${t("Keshbek darajalari")}</h3>
@@ -469,7 +498,7 @@ window.openCashbackTiersModal = async function(businessId) {
       <button class="btn btn-ghost" onclick="closeModal()">${t("Yopish")}</button>
     </div>
   `, true); // Use secondary modal if supported, or just overwrite (SavdoSklad usually uses one modal)
-  
+
   await renderCashbackTiers(businessId);
 };
 
@@ -485,7 +514,7 @@ async function renderCashbackTiers(businessId) {
         </div>`;
       return;
     }
-    
+
     container.innerHTML = `
       <table style="width:100%; border-collapse:collapse; font-size:13px;">
         <thead>
@@ -515,12 +544,12 @@ async function renderCashbackTiers(businessId) {
   }
 }
 
-window.addCashbackTierUI = function(businessId) {
+window.addCashbackTierUI = function (businessId) {
   const minAmount = prompt(t("Minimal harid summasi"));
   if (minAmount === null) return;
   const percentage = prompt(t("Keshbek foizi") + " (%)");
   if (percentage === null) return;
-  
+
   api.createCashbackTier({
     businessId: businessId,
     minAmount: parseFloat(minAmount),
@@ -531,10 +560,15 @@ window.addCashbackTierUI = function(businessId) {
   }).catch(err => showToast(err.message, 'error'));
 };
 
-window.deleteCashbackTier = function(businessId, tierId) {
+window.deleteCashbackTier = function (businessId, tierId) {
   if (!confirm(t("O'chirishni xohlaysizmi?"))) return;
   api.deleteCashbackTier(tierId).then(() => {
     showToast(t("O'chirildi"));
     renderCashbackTiers(businessId);
   }).catch(err => showToast(err.message, 'error'));
+};
+
+window.togglePointsSettings = function (enabled) {
+  const group = document.getElementById('points-settings-group');
+  if (group) group.style.display = enabled ? 'flex' : 'none';
 };

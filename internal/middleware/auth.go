@@ -41,7 +41,7 @@ func JWTAuth(jwtManager *auth.JWTManager) gin.HandlerFunc {
 		}
 
 		c.Set("userID", claims.UserID)
-		c.Set("username", claims.Username)
+		c.Set("userName", claims.UserName)
 		c.Set("role", claims.Role)
 		c.Next()
 	}

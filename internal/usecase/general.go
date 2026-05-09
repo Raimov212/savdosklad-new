@@ -232,12 +232,30 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 		}
 	}
 
+	// 3a. Handle using points
+	if req.UsePointsAmount > 0 && req.ClientID != nil {
+		client, err := uc.clientRepo.GetByID(*req.ClientID)
+		if err == nil && client.PointsBalance >= req.UsePointsAmount {
+			// Actually use it - deduct from balance later
+		} else {
+			req.UsePointsAmount = 0 // Reset if not enough balance
+		}
+	}
+
+	// 3b. Calculate points earned
+	var pointsEarned float64
+	if business.PointsEnabled && business.PointsRate > 0 {
+		pointsEarned = req.Total / business.PointsRate
+	}
+
 	tt := &entity.TotalTransaction{
 		BusinessID: req.BusinessID, ClientID: req.ClientID,
 		Total: req.Total, Cash: req.Cash, Card: req.Card, Click: req.Click, Debt: req.Debt,
 		Discount: req.Discount, CreatedBy: &userID,
 		CashbackEarned: cashbackEarned,
 		CashbackUsed:   req.UseCashbackAmount,
+		PointsEarned:   pointsEarned,
+		PointsUsed:     req.UsePointsAmount,
 	}
 	if req.ClientNumber != "" {
 		cn := req.ClientNumber
@@ -287,10 +305,12 @@ func (uc *TransactionUseCase) CreateSale(userID int, req entity.CreateTotalTrans
 		client, err := uc.clientRepo.GetByID(*req.ClientID)
 		if err == nil {
 			newBalance := client.CashbackBalance + cashbackEarned - req.UseCashbackAmount
+			newPointsBalance := client.PointsBalance + pointsEarned - req.UsePointsAmount
 			newTotalSpent := client.TotalSpent + (req.Total - req.Discount) // Net total
 			
 			updateReq := entity.UpdateClientRequest{
 				CashbackBalance: &newBalance,
+				PointsBalance:   &newPointsBalance,
 				TotalSpent:      &newTotalSpent,
 			}
 			_ = uc.clientRepo.Update(client.ID, updateReq)

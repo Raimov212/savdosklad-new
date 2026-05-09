@@ -1164,8 +1164,8 @@ window.generateTelegramLink = async function() {
         showToast(t("Havola yaratilmoqda..."), 'info');
         const res = await api.post('/users/telegram-link', {});
         if (res && res.link) {
-            const botUsername = res.botUsername || 'savdosklad_bot';
-            const url = `https://t.me/${botUsername}?start=${res.link}`;
+            const botUserName = res.botUserName || 'savdosklad_bot';
+            const url = `https://t.me/${botUserName}?start=${res.link}`;
             const box = document.createElement('div');
             box.id = 'tg-link-popup';
             box.style.cssText = `position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center;`;
