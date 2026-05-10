@@ -338,17 +338,18 @@ function renderRefundSelection() {
         </thead>
         <tbody>
           ${currentTransactionItems.map((item, idx) => {
-    const availableQty = item.productQuantity - item.refundedQuantity;
+    const availableQty = item.productQuantity - (item.refundedQuantity || 0);
+    const isFullyRefunded = availableQty <= 0;
     return `
-            <tr style="border-bottom: 1px solid var(--border);">
+            <tr style="border-bottom: 1px solid var(--border); ${isFullyRefunded ? 'display:none;' : ''}" class="${isFullyRefunded ? 'fully-refunded-row' : ''}">
               <td style="padding: 8px 10px;">
                 <div style="font-weight:600;">${escapeHtml(item.productName)}</div>
                 <small style="opacity:0.6;">${item.productBarcode || ''}</small>
               </td>
               <td style="padding: 8px; text-align:center;">${item.productQuantity}</td>
               <td style="padding: 8px; text-align:center;">${formatPrice(item.productPrice)}</td>
-              <td style="padding: 8px; text-align:center; background: rgba(var(--danger-rgb), 0.02); border-left: 1px solid var(--border);">${item.refundedQuantity}</td>
-              <td style="padding: 8px; text-align:right; background: rgba(var(--danger-rgb), 0.02);">${formatPrice(item.refundedSum)}</td>
+              <td style="padding: 8px; text-align:center; background: rgba(var(--danger-rgb), 0.02); border-left: 1px solid var(--border);">${item.refundedQuantity || 0}</td>
+              <td style="padding: 8px; text-align:right; background: rgba(var(--danger-rgb), 0.02);">${formatPrice(item.refundedSum || 0)}</td>
               <td style="padding: 8px; width: 80px; border-left: 1px solid var(--border);">
                 <input type="number" class="form-control" style="padding:4px; text-align:center; font-weight: 600;" 
                   id="refund-qty-${idx}" value="0" min="0" max="${availableQty}" 
@@ -380,10 +381,17 @@ function renderRefundSelection() {
 }
 
 function onRefundQtyChange(idx, val) {
-  const qty = parseInt(val) || 0;
+  let qty = parseInt(val) || 0;
   const item = currentTransactionItems[idx];
-  const amountInput = document.getElementById(`refund-amount-${idx}`);
+  const availableQty = item.productQuantity - (item.refundedQuantity || 0);
 
+  if (qty > availableQty) {
+    showToast(`${t("Maksimal qaytarish miqdori")}: ${availableQty}`, 'warning');
+    qty = availableQty;
+    document.getElementById(`refund-qty-${idx}`).value = qty;
+  }
+
+  const amountInput = document.getElementById(`refund-amount-${idx}`);
   // Default amount = qty * price
   const defaultAmount = qty * item.productPrice;
   amountInput.value = defaultAmount;
@@ -450,8 +458,20 @@ async function submitRefund() {
     }
   });
 
-  if (items.length === 0) {
-    showToast(t("Kamida bitta mahsulot miqdorini kiriting"), 'error');
+  if (items.length === 0 || total <= 0) {
+    openModal(`
+      <div class="modal-header">
+        <h3 style="color:var(--danger);">${t("Xatolik")}</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div style="padding:20px; text-align:center;">
+        <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
+        <p>${t("Qaytarish uchun kamida bitta mahsulot miqdorini kiriting")}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal()">${t("Tushunarli")}</button>
+      </div>
+    `);
     return;
   }
 

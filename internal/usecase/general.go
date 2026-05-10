@@ -562,13 +562,14 @@ func (uc *TransactionUseCase) DeleteSale(id int) error {
 
 
 type RefundUseCase struct {
-	repo        repository.RefundRepository
-	productRepo repository.ProductRepository
-	notifier    *notifier.TelegramNotifier
+	repo            repository.RefundRepository
+	productRepo     repository.ProductRepository
+	transactionRepo repository.TransactionRepository
+	notifier        *notifier.TelegramNotifier
 }
 
-func NewRefundUseCase(r repository.RefundRepository, pr repository.ProductRepository, n *notifier.TelegramNotifier) *RefundUseCase {
-	return &RefundUseCase{repo: r, productRepo: pr, notifier: n}
+func NewRefundUseCase(r repository.RefundRepository, pr repository.ProductRepository, tr repository.TransactionRepository, n *notifier.TelegramNotifier) *RefundUseCase {
+	return &RefundUseCase{repo: r, productRepo: pr, transactionRepo: tr, notifier: n}
 }
 func (uc *RefundUseCase) Create(userID int, req entity.CreateTotalRefundRequest) (int, error) {
 	tr := &entity.TotalRefund{
@@ -607,9 +608,28 @@ func (uc *RefundUseCase) Create(userID int, req entity.CreateTotalRefundRequest)
 
 		// Update product quantity in stock (return items to ombor)
 		if err := uc.productRepo.UpdateQuantity(item.ProductID, item.ProductQuantity); err != nil {
-			// Log error but continue or decide how to handle? 
-			// Usually we should rollback, but here we just try our best.
 			fmt.Printf("Error updating product quantity during refund: %v\n", err)
+		}
+
+		// Update original transaction item quantity (kamaytirish)
+		if item.TransactionID != 0 {
+			origItem, err := uc.transactionRepo.GetTransactionByID(item.TransactionID)
+			if err == nil && origItem != nil {
+				origItem.ProductQuantity -= item.ProductQuantity
+				if origItem.ProductQuantity < 0 {
+					origItem.ProductQuantity = 0
+				}
+				_ = uc.transactionRepo.UpdateTransaction(origItem)
+
+				// Update TotalTransaction total
+				tt, err := uc.transactionRepo.GetTotalTransactionByID(origItem.TotalTransactionID)
+				if err == nil && tt != nil {
+					refundValue := item.ProductPrice * float64(item.ProductQuantity)
+					tt.Total -= refundValue
+					if tt.Total < 0 { tt.Total = 0 }
+					_ = uc.transactionRepo.UpdateTotalTransaction(tt)
+				}
+			}
 		}
 	}
 	return totalID, nil

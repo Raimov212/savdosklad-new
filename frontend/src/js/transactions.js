@@ -1098,8 +1098,9 @@ async function viewTransactionItems(ids) {
   try {
     showToast(t('Tafsilotlar yuklanmoqda...'), 'info');
 
-    const allTrans = await Promise.all(ids.map(id => api.get(`/transactions/${id}`)));
-    const allItems = await Promise.all(ids.map(id => api.get(`/transactions/${id}/items`)));
+    const bid = getSelectedBusinessId();
+    const allTrans = await Promise.all(ids.map(id => api.get(`/transactions/${id}?businessId=${bid}`)));
+    const allItems = await Promise.all(ids.map(id => api.get(`/transactions/${id}/items?businessId=${bid}`)));
     
     const list = allItems.filter(items => items !== null).flat();
     

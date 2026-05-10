@@ -35,6 +35,7 @@ func main() {
 	refundRepo := postgres.NewRefundRepo(db)
 	expenseRepo := postgres.NewExpenseRepo(db)
 	clientRepo := postgres.NewClientRepo(db)
+	cashbackTierRepo := postgres.NewCashbackTierRepo(db)
 
 	// Notifier
 	tgNotifier, _ := notifier.NewTelegramNotifier(cfg.Telegram.Token, userRepo, businessRepo)
@@ -43,8 +44,8 @@ func main() {
 	userUC := usecase.NewUserUseCase(userRepo, jwtManager, tgNotifier)
 	businessUC := usecase.NewBusinessUseCase(businessRepo)
 	productUC := usecase.NewProductUseCase(productRepo)
-	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, productRepo, tgNotifier)
-	refundUC := usecase.NewRefundUseCase(refundRepo, tgNotifier)
+	transactionUC := usecase.NewTransactionUseCase(transactionRepo, clientRepo, productRepo, businessRepo, cashbackTierRepo, tgNotifier)
+	refundUC := usecase.NewRefundUseCase(refundRepo, productRepo, transactionRepo, tgNotifier)
 	expenseUC := usecase.NewExpenseUseCase(expenseRepo, tgNotifier)
 	clientUC := usecase.NewClientUseCase(clientRepo, userRepo)
 
