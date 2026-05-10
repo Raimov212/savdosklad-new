@@ -263,3 +263,46 @@ func (r *TransactionRepo) DeleteTransaction(id int) error {
 	return err
 }
 
+func (r *TransactionRepo) DeleteTotalTransaction(id int) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// 1. Collect totalRefundIds before deleting refunds
+	var trIDs []int
+	rows, err := tx.Query(`SELECT DISTINCT "totalRefundId" FROM refunds WHERE "transactionId" IN (SELECT id FROM transactions WHERE "totalTransactionId" = $1)`, id)
+	if err == nil {
+		for rows.Next() {
+			var trID int
+			if err := rows.Scan(&trID); err == nil {
+				trIDs = append(trIDs, trID)
+			}
+		}
+		rows.Close()
+	}
+
+	// 2. Delete refunds (CHILD)
+	_, _ = tx.Exec(`DELETE FROM refunds WHERE "transactionId" IN (SELECT id FROM transactions WHERE "totalTransactionId" = $1)`, id)
+
+	// 3. Delete total_refunds (PARENT)
+	for _, trID := range trIDs {
+		_, _ = tx.Exec(`DELETE FROM total_refunds WHERE id = $1`, trID)
+	}
+
+	// 4. Delete items (CHILD)
+	_, err = tx.Exec(`DELETE FROM transactions WHERE "totalTransactionId" = $1`, id)
+	if err != nil {
+		return err
+	}
+
+	// 5. Delete total transaction (PARENT)
+	_, err = tx.Exec(`DELETE FROM total_transactions WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+

@@ -751,6 +751,26 @@ func (h *TransactionHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, tt)
 }
 
+// @Summary Delete total transaction
+// @Tags Transactions
+// @Security BearerAuth
+// @Param id path int true "Total Transaction ID"
+// @Param businessId query int true "Business ID"
+// @Success 200 {object} map[string]string
+// @Router /transactions/{id} [delete]
+func (h *TransactionHandler) Delete(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	bid, _ := strconv.Atoi(c.Query("businessId"))
+	if bid != 0 && !h.checkPerm(c, bid, "delete") {
+		return
+	}
+	if err := h.uc.DeleteSale(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
 // @Summary Get transaction items
 // @Tags Transactions
 // @Security BearerAuth
@@ -1372,6 +1392,7 @@ func RegisterRoutes(
 	r.POST("/transactions", transactionH.Create)
 	r.GET("/transactions", transactionH.GetByBusinessID)
 	r.GET("/transactions/:id", transactionH.GetByID)
+	r.DELETE("/transactions/:id", transactionH.Delete)
 	r.PUT("/transactions/:id", transactionH.Update)
 	r.GET("/transactions/:id/items", transactionH.GetItems)
 	r.POST("/transactions/:id/items", transactionH.AddItems)

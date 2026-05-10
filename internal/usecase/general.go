@@ -521,6 +521,45 @@ func (uc *TransactionUseCase) DeleteItem(id int) error {
 	return uc.repo.DeleteTransaction(id)
 }
 
+func (uc *TransactionUseCase) DeleteSale(id int) error {
+	// 1. Get total transaction
+	tt, err := uc.repo.GetTotalTransactionByID(id)
+	if err != nil {
+		return err
+	}
+
+	// 2. Get all items
+	items, err := uc.repo.GetTransactionsByTotalID(id, tt.BusinessID)
+	if err != nil {
+		return err
+	}
+
+	// 3. Return products to stock
+	for _, item := range items {
+		_ = uc.productRepo.UpdateQuantity(item.ProductID, item.ProductQuantity)
+	}
+
+	// 4. Revert client balances
+	if tt.ClientID != nil {
+		client, err := uc.clientRepo.GetByID(*tt.ClientID)
+		if err == nil {
+			newBalance := client.CashbackBalance - tt.CashbackEarned + tt.CashbackUsed
+			newPointsBalance := client.PointsBalance - tt.PointsEarned + tt.PointsUsed
+			newTotalSpent := client.TotalSpent - (tt.Total - tt.Discount)
+
+			updateReq := entity.UpdateClientRequest{
+				CashbackBalance: &newBalance,
+				PointsBalance:   &newPointsBalance,
+				TotalSpent:      &newTotalSpent,
+			}
+			_ = uc.clientRepo.Update(client.ID, updateReq)
+		}
+	}
+
+	// 5. Delete total transaction and items (handled in repo)
+	return uc.repo.DeleteTotalTransaction(id)
+}
+
 
 type RefundUseCase struct {
 	repo        repository.RefundRepository

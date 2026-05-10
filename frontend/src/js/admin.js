@@ -110,6 +110,7 @@ function renderAdminUsersTable(list, isAppend = false) {
     const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="${colCount}" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
         paginated.map((u, i) => {
             const roleName = u.role === 2 ? 'Super Admin' : u.role === 1 ? 'Admin' : u.role === 3 ? 'Client' : 'Employee';
+            const isUserExpired = (u.isExpired || (u.expirationDate && new Date(u.expirationDate) < new Date())) && u.role !== 2;
             return `
                 <tr>
                     <td style="text-align:center">${start + i + 1}</td>
@@ -119,7 +120,7 @@ function renderAdminUsersTable(list, isAppend = false) {
                     <td style="text-align:center">${u.phoneNumber || '—'}</td>
                     <td style="text-align:center"><span class="badge ${u.role === 2 ? 'badge-success' : u.role === 1 ? 'badge-warning' : u.role === 3 ? 'badge-info' : ''}">${t(roleName)}</span></td>
                     <td style="text-align:center">${formatDate(u.expirationDate)}</td>
-                    <td style="text-align:center">${(u.isExpired && u.role !== 2) ? `<span class="badge badge-danger">${t("Muddati tugagan")}</span>` : `<span class="badge badge-success">${t("Faol")}</span>`}</td>
+                    <td style="text-align:center">${isUserExpired ? `<span class="badge badge-danger">${t("Muddati tugagan")}</span>` : `<span class="badge badge-success">${t("Faol")}</span>`}</td>
                     ${isSuperAdmin ? `
                     <td style="text-align:center">
                         ${u.role === 1 ? `

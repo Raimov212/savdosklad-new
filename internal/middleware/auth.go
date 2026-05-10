@@ -62,13 +62,33 @@ func SubscriptionCheck(repo repository.UserRepository) gin.HandlerFunc {
 			return
 		}
 
-		// Check expiration date
-		if !user.ExpirationDate.IsZero() && user.ExpirationDate.Before(time.Now()) {
+		// Exempt SuperAdmin
+		if user.Role == 2 {
+			c.Next()
+			return
+		}
+
+		// Check if user is expired (flag or date)
+		if user.IsExpired || (!user.ExpirationDate.IsZero() && user.ExpirationDate.Before(time.Now())) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error":   i18n.Tc(c, i18n.MsgSubscriptionExpired),
 				"expired": true,
 			})
 			return
+		}
+
+		// If user is Employee, check their Admin's expiration
+		if user.Role == 0 && user.CreatedBy != nil {
+			admin, err := repo.GetByID(*user.CreatedBy)
+			if err == nil && admin != nil {
+				if admin.IsExpired || (!admin.ExpirationDate.IsZero() && admin.ExpirationDate.Before(time.Now())) {
+					c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+						"error":   i18n.Tc(c, "Admin obunasi muddati tugagan. Iltimos, rahbaringizga murojaat qiling."),
+						"expired": true,
+					})
+					return
+				}
+			}
 		}
 
 		// Foydalanuvchining birinchi biznes IDsini kontekstga qo'yish

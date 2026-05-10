@@ -156,6 +156,7 @@ function renderTransactionsTable(list, isAppend = false) {
             <div class="acc-actions">
               <button class="btn btn-ghost btn-sm" onclick='viewTransactionItems(${idsJson})'>👁️ ${t("Tafsilotlar")}</button>
               <button class="btn btn-primary btn-sm" onclick='downloadTransactionPdf(${idsJson})'>📄 ${t("PDF")}</button>
+              ${window.hasPermission('delete') ? `<button class="btn btn-danger btn-sm" onclick='deleteTransaction(${trans.id})'>🗑️ ${t("O'chirish")}</button>` : ''}
             </div>
           </div>
         </div>`;
@@ -215,6 +216,20 @@ function filterTransactions(query) {
       try { input.setSelectionRange(_cursor, _cursor); } catch (e) { }
     }
   }, 0);
+}
+
+async function deleteTransaction(id) {
+  if (!confirm(t("Haqiqatan ham bu sotuvni o'chirmoqchimisiz? Bu mahsulotlarni omborga qaytaradi."))) return;
+
+  const bid = getSelectedBusinessId();
+  try {
+    showToast(t("O'chirilmoqda..."), 'info');
+    await api.delete(`/transactions/${id}?businessId=${bid}`);
+    showToast(t("Muvaffaqiyatli o'chirildi"));
+    renderTransactions();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
 }
 
 
@@ -1457,6 +1472,7 @@ window.viewTransactionItems = viewTransactionItems;
 window.downloadTransactionPdf = downloadTransactionPdf;
 window.downloadTransactionJpg = downloadTransactionJpg;
 window.sendTransactionToTelegram = sendTransactionToTelegram;
+window.deleteTransaction = deleteTransaction;
 window.transactionPage = transactionPage;
 window.allTransactionsList = allTransactionsList;
 window.currentTransactions = currentTransactions;
