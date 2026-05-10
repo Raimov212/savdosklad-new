@@ -1261,7 +1261,7 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
     // Fetch necessary data
     const businesses = await api.get('/businesses/my').catch(() => []);
     const [allItems, clientsResults] = await Promise.all([
-      Promise.all(ids.map(id => api.get(`/transactions/${id}/items`))),
+      Promise.all(ids.map(id => api.get(`/transactions/${id}/items?businessId=${bid}`))),
       Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => [])))
     ]);
     const clients = clientsResults.flat();

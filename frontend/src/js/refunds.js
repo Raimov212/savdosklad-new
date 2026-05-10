@@ -118,7 +118,8 @@ function renderRefundsTable(list, isAppend = false) {
 async function viewRefundItems(id) {
   try {
     showToast(t('Tafsilotlar yuklanmoqda...'), 'info');
-    const items = await api.get(`/refunds/${id}/items`);
+    const bid = getSelectedBusinessId();
+    const items = await api.get(`/refunds/${id}/items?businessId=${bid}`);
     const list = items || [];
 
     openModal(`
@@ -178,7 +179,7 @@ async function downloadRefundPdf(id) {
 
     const businesses = await api.get('/businesses/my').catch(() => []);
     const [refundItems, clientsResults, refund] = await Promise.all([
-      api.get(`/refunds/${id}/items`),
+      api.get(`/refunds/${id}/items?businessId=${bid}`),
       Promise.all(businesses.map(b => api.get(`/clients?businessId=${b.id}`).catch(() => []))),
       Promise.resolve(allRefundsList.find(r => r.id === id))
     ]);
