@@ -780,8 +780,17 @@ func (h *TransactionHandler) Delete(c *gin.Context) {
 func (h *TransactionHandler) GetItems(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	bid, _ := strconv.Atoi(c.Query("businessId"))
-	if bid != 0 && !h.checkPerm(c, bid, "view") {
-		return
+	// Super Admin and Admin can see any transaction items
+	// Employees must provide businessId and have 'view' permission
+	role := c.GetInt("role")
+	if role == 0 {
+		if bid == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "businessId is required for employees"})
+			return
+		}
+		if !h.checkPerm(c, bid, "view") {
+			return
+		}
 	}
 	list, err := h.uc.GetItems(id, bid)
 	if err != nil {
