@@ -55,7 +55,7 @@ func (r *RefundRepo) GetTotalRefundByID(id int) (*entity.TotalRefund, error) {
 
 func (r *RefundRepo) GetTotalRefundsByBusinessID(businessID int) ([]entity.TotalRefund, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t.description, t.total, t.cash, t.card, t.click, t.debt, t."clientNumber", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t.description, t.total, t.cash, t.card, t.click, t.debt, t.discount, t."clientNumber", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_refunds t
 		 LEFT JOIN users u ON t."createdBy" = u.id
@@ -84,7 +84,7 @@ func (r *RefundRepo) GetTransactionsByTotalID(totalID int, bid int) ([]entity.Tr
 
 func (r *RefundRepo) GetTotalRefundsByPeriod(bid int, start, end time.Time) ([]entity.TotalRefund, error) {
 	rows, err := r.db.Query(
-		`SELECT t.id, t.description, t.total, t.cash, t.card, t.click, t.debt, t."clientNumber", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
+		`SELECT t.id, t.description, t.total, t.cash, t.card, t.click, t.debt, t.discount, t."clientNumber", t."debtLimitDate", t."businessId", t."clientId", t."createdBy", t."createdAt", t."updatedAt",
 		        COALESCE(u."firstName" || ' ' || u."lastName", '')
 		 FROM total_refunds t
 		 LEFT JOIN users u ON t."createdBy" = u.id
