@@ -779,20 +779,21 @@ func (h *TransactionHandler) Delete(c *gin.Context) {
 // @Router /transactions/{id}/items [get]
 func (h *TransactionHandler) GetItems(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	bid, _ := strconv.Atoi(c.Query("businessId"))
-	// Super Admin and Admin can see any transaction items
-	// Employees must provide businessId and have 'view' permission
-	role := c.GetInt("role")
-	if role == 0 {
-		if bid == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "businessId is required for employees"})
-			return
-		}
-		if !h.checkPerm(c, bid, "view") {
-			return
-		}
+
+	// 1. Fetch total transaction to find its businessId
+	tt, err := h.uc.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": i18n.Tc(c, i18n.MsgNotFound)})
+		return
 	}
-	list, err := h.uc.GetItems(id, bid)
+
+	// 2. Check permission for THAT business
+	if !h.checkPerm(c, tt.BusinessID, "view") {
+		return
+	}
+
+	// 3. Fetch items
+	list, err := h.uc.GetItems(id, tt.BusinessID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -338,7 +338,7 @@ func (uc *TransactionUseCase) GetStats(bid int, start, end *time.Time) (entity.T
 	return uc.repo.GetStats(bid, start, end)
 }
 func (uc *TransactionUseCase) GetItems(totalID int, bid int) ([]entity.Transaction, error) {
-	return uc.repo.GetTransactionsByTotalID(totalID, bid)
+	return uc.repo.GetTransactionsByTotalID(totalID)
 }
 func (uc *TransactionUseCase) GetTransactionByID(id int) (*entity.Transaction, error) {
 	return uc.repo.GetTransactionByID(id)
@@ -529,7 +529,7 @@ func (uc *TransactionUseCase) DeleteSale(id int) error {
 	}
 
 	// 2. Get all items
-	items, err := uc.repo.GetTransactionsByTotalID(id, tt.BusinessID)
+	items, err := uc.repo.GetTransactionsByTotalID(id)
 	if err != nil {
 		return err
 	}

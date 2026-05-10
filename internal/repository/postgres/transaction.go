@@ -91,7 +91,7 @@ func (r *TransactionRepo) GetTotalTransactionsByBusinessID(bid int) ([]entity.To
 	return list, nil
 }
 
-func (r *TransactionRepo) GetTransactionsByTotalID(totalID int, bid int) ([]entity.Transaction, error) {
+func (r *TransactionRepo) GetTransactionsByTotalID(totalID int) ([]entity.Transaction, error) {
 	rows, err := r.db.Query(
 		`SELECT t.id, t.description, t."productPrice", t."productQuantity", t."productId", t."businessId", t."totalTransactionId", t."cashbackAmount", t."createdAt", t."updatedAt",
 		        COALESCE(p.name, ''), COALESCE(p.barcode, ''),
@@ -100,9 +100,9 @@ func (r *TransactionRepo) GetTransactionsByTotalID(totalID int, bid int) ([]enti
 		 FROM transactions t
 		 LEFT JOIN products p ON t."productId" = p.id
 		 LEFT JOIN refunds r ON t.id = r."transactionId"
-		 WHERE t."totalTransactionId" = $1 AND ($2 = 0 OR t."businessId" = $2)
+		 WHERE t."totalTransactionId" = $1
 		 GROUP BY t.id, t.description, t."productPrice", t."productQuantity", t."productId", t."businessId", t."totalTransactionId", t."createdAt", t."updatedAt", p.name, p.barcode
-		 ORDER BY t.id`, totalID, bid,
+		 ORDER BY t.id`, totalID,
 	)
 	if err != nil {
 		return nil, err
