@@ -88,102 +88,154 @@ let allMpSalesList = [];
 let filteredMpSalesList = [];
 
 function renderAdminUsersTable(list, isAppend = false) {
-    if (list === true) {
-        isAppend = true;
-        list = null;
-    }
+    if (list === true) { isAppend = true; list = null; }
     if (Array.isArray(list)) {
-        currentAdminUsers = list;
-        adminUserPage = 1;
+        allAdminUsersList = list;
     }
+    const query = (document.getElementById('admin-user-search')?.value || '').toLowerCase();
+    const filtered = allAdminUsersList.filter(u => {
+        const roleName = u.role === 2 ? 'super admin' : u.role === 1 ? 'admin' : u.role === 3 ? 'client' : 'employee';
+        return (u.firstName && String(u.firstName).toLowerCase().includes(query)) ||
+            (u.lastName && String(u.lastName).toLowerCase().includes(query)) ||
+            (u.userName && String(u.userName).toLowerCase().includes(query)) ||
+            (u.phoneNumber && String(u.phoneNumber).toLowerCase().includes(query)) ||
+            roleName.includes(query);
+    });
 
-    const limit = 10;
-    const totalPages = Math.ceil(currentAdminUsers.length / limit);
-    if (adminUserPage > totalPages) adminUserPage = totalPages || 1;
-    const start = (adminUserPage - 1) * limit;
-    const paginated = currentAdminUsers.slice(start, start + limit);
-
-    const me = api.getUser() || {};
-    const isSuperAdmin = me.role === 2;
-    const colCount = isSuperAdmin ? 10 : 9;
-
-    const rowsHtml = paginated.length === 0 && !isAppend ? `<tr><td colspan="${colCount}" style="text-align:center;color:var(--text-muted);">${t("Ma'lumot yo'q")}</td></tr>` :
-        paginated.map((u, i) => {
-            const roleName = u.role === 2 ? 'Super Admin' : u.role === 1 ? 'Admin' : u.role === 3 ? 'Client' : 'Employee';
-            const isUserExpired = (u.isExpired || (u.expirationDate && new Date(u.expirationDate) < new Date())) && u.role !== 2;
-            return `
-                <tr>
-                    <td style="text-align:center">${start + i + 1}</td>
-                    <td style="text-align:center">${u.id}</td>
-                    <td>${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}</td>
-                    <td>${escapeHtml(u.userName)}</td>
-                    <td style="text-align:center">${u.phoneNumber || '—'}</td>
-                    <td style="text-align:center"><span class="badge ${u.role === 2 ? 'badge-success' : u.role === 1 ? 'badge-warning' : u.role === 3 ? 'badge-info' : ''}">${t(roleName)}</span></td>
-                    <td style="text-align:center">${formatDate(u.expirationDate)}</td>
-                    <td style="text-align:center">${isUserExpired ? `<span class="badge badge-danger">${t("Muddati tugagan")}</span>` : `<span class="badge badge-success">${t("Faol")}</span>`}</td>
-                    ${isSuperAdmin ? `
-                    <td style="text-align:center">
-                        ${u.role === 1 ? `
-                            <button class="btn btn-sm ${u.isMarketplaceEnabled ? 'btn-success' : 'btn-secondary'}" 
-                                onclick="toggleMarketplaceAccess(${u.id}, ${u.isMarketplaceEnabled})">
-                                ${u.isMarketplaceEnabled ? '✅ MP' : '❌ MP'}
-                            </button>
-                        ` : '—'}
-                    </td>
-                    ` : ''}
-                    <td class="actions" style="justify-content:center">
-                        <button class="btn-icon" onclick='openEditUserModal(${u.id}, ${JSON.stringify(JSON.stringify(u)).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>
-                        <button class="btn-icon danger" onclick="deleteAdminUser(${u.id})" title="${t("O'chirish")}">🗑️</button>
-                    </td>
-                </tr>
-            `}).join('');
-
-    if (isAppend) {
-        const tbody = document.querySelector('#admin-content tbody');
-        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
-        const sentinel = document.getElementById('adminUserPage-sentinel');
-        if (sentinel) sentinel.outerHTML = renderPageControls('adminUserPage', totalPages, 'renderAdminUsersTable');
-        setTimeout(() => { attachInfiniteScroll('adminUserPage', totalPages, 'renderAdminUsersTable'); }, 100);
-        return;
-    }
+    const supers = filtered.filter(u => u.role === 2);
+    const admins = filtered.filter(u => u.role === 1);
+    const employees = filtered.filter(u => u.role === 0);
+    const others = filtered.filter(u => u.role === 3); 
 
     const container = document.getElementById('admin-content');
-    container.innerHTML = `
+    
+    let html = `
         <div class="card" style="margin-top:20px">
             <div class="card-header">
               <div class="toolbar" style="width:100%">
                 <div class="search-box">
                   <span class="search-icon">🔍</span>
-                  <input type="text" placeholder="${t("Qidirish...")}" id="admin-user-search" value="${escapeHtml(document.getElementById('admin-user-search')?.value || '')}" oninput="filterAdminUsers(this.value)">
+                  <input type="text" placeholder="${t("Qidirish...")}" id="admin-user-search" value="${escapeHtml(query)}" oninput="filterAdminUsers(this.value)">
                 </div>
                 <button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">${t("Qo'shish")}</button>
               </div>
             </div>
-            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 250px);">
-                <table style="min-width: 1000px; white-space: nowrap; width: 100%;">
-                    <thead style="position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #10b981, #059669);">
-                        <tr>
-                            <th style="text-align:center; color: white; border: none;">№</th>
-                            <th style="text-align:center; color: white; border: none;">ID</th>
-                            <th style="text-align:center; color: white; border: none;">${t("Ism")}</th>
-                            <th style="text-align:center; color: white; border: none;">${t("Foydalanuvchi nomi")}</th>
-                            <th style="text-align:center; color: white; border: none;">${t("Telefon")}</th>
-                            <th style="text-align:center; color: white; border: none;">${t("Rol")}</th>
-                            <th style="text-align:center; color: white; border: none;">${t("Muddati")}</th>
-                            <th style="text-align:center; color: white; border: none;">${t("Holati")}</th>
-                            ${isSuperAdmin ? `<th style="text-align:center; color: white; border: none;">Marketplace</th>` : ''}
-                            <th style="text-align:center; color: white; border: none;">${t("Amallar")}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
-                ${renderPageControls('adminUserPage', totalPages, 'renderAdminUsersTable')}
+            <div class="admin-users-list" style="padding:20px;">
+    `;
+
+    if (supers.length > 0) {
+        html += `<h4 style="margin-bottom:15px; color:var(--primary); display:flex; align-items:center; gap:10px;">🌟 Super Admins <span class="badge badge-success">${supers.length}</span></h4>`;
+        supers.forEach(u => {
+            html += renderUserRowSimple(u);
+        });
+    }
+
+    if (admins.length > 0) {
+        html += `<h4 style="margin:25px 0 15px; color:var(--warning); display:flex; align-items:center; gap:10px;">🏢 Admins & Teams <span class="badge badge-warning">${admins.length}</span></h4>`;
+        admins.forEach(admin => {
+            const adminEmployees = employees.filter(e => e.createdBy === admin.id);
+            html += renderAdminAccordion(admin, adminEmployees);
+        });
+    }
+
+    const unassignedEmployees = employees.filter(e => !admins.find(a => a.id === e.createdBy));
+    if (unassignedEmployees.length > 0 || others.length > 0) {
+        html += `<h4 style="margin:25px 0 15px; color:var(--text-muted);">${t("Boshqa foydalanuvchilar")}</h4>`;
+        [...unassignedEmployees, ...others].forEach(u => {
+            html += renderUserRowSimple(u);
+        });
+    }
+
+    if (filtered.length === 0) {
+        html += `<div class="empty-state">${t("Ma'lumot yo'q")}</div>`;
+    }
+
+    html += `</div></div>`;
+    container.innerHTML = html;
+}
+
+function renderUserRowSimple(u) {
+    const isUserExpired = (u.isExpired || (u.expirationDate && new Date(u.expirationDate) < new Date())) && u.role !== 2;
+    const roleName = u.role === 2 ? 'Super Admin' : u.role === 1 ? 'Admin' : u.role === 3 ? 'Client' : 'Employee';
+    const badgeClass = u.role === 2 ? 'badge-success' : u.role === 1 ? 'badge-warning' : u.role === 3 ? 'badge-info' : '';
+    
+    return `
+        <div class="user-item-card" style="display:flex; align-items:center; justify-content:space-between; padding:12px 15px; background:var(--bg-glass); border:1px solid var(--border); border-radius:12px; margin-bottom:10px;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <div class="acc-avatar" style="width:40px; height:40px; font-size:16px;">${u.firstName ? u.firstName[0] : '?'}</div>
+                <div>
+                    <div style="font-weight:600; font-size:14px;">${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)} <span style="color:var(--text-muted); font-weight:400; font-size:12px;">(@${u.userName})</span></div>
+                    <div style="font-size:12px; color:var(--text-muted);">${u.phoneNumber || '—'} | <span class="badge ${badgeClass}" style="font-size:10px;">${t(roleName)}</span></div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:20px;">
+                <div style="text-align:right">
+                    <div style="font-size:11px; color:var(--text-muted);">${t("Muddati")}: ${formatDate(u.expirationDate)}</div>
+                    ${isUserExpired ? `<span class="badge badge-danger" style="font-size:10px;">${t("Muddati tugagan")}</span>` : `<span class="badge badge-success" style="font-size:10px;">${t("Faol")}</span>`}
+                </div>
+                <div class="actions">
+                    <button class="btn-icon" onclick='openEditUserModal(${u.id}, ${JSON.stringify(JSON.stringify(u)).replace(/'/g, "&#39;")})'>✏️</button>
+                    <button class="btn-icon danger" onclick="deleteAdminUser(${u.id})">🗑️</button>
+                </div>
             </div>
         </div>
     `;
-    setTimeout(() => { attachInfiniteScroll('adminUserPage', totalPages, 'renderAdminUsersTable'); }, 100);
+}
+
+function renderAdminAccordion(u, team) {
+    const isUserExpired = (u.isExpired || (u.expirationDate && new Date(u.expirationDate) < new Date())) && u.role !== 2;
+    const accId = `user-acc-${u.id}`;
+    
+    return `
+        <div class="acc-item" id="${accId}" style="margin-bottom:12px; border-radius:15px; overflow:hidden; border:1px solid var(--border);">
+            <div class="acc-header" onclick="toggleAcc('${accId}')" style="padding:15px; background:var(--bg-card);">
+                <div class="acc-header-left">
+                    <div class="acc-avatar acc-avatar-indigo">${u.firstName ? u.firstName[0] : '?'}</div>
+                    <div>
+                        <div class="acc-title">${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)} (@${u.userName})</div>
+                        <div class="acc-subtitle">${u.phoneNumber || '—'} | <span class="badge badge-warning">${t("Admin")}</span> | 👥 ${team.length} xodim</div>
+                    </div>
+                </div>
+                <div class="acc-header-right">
+                    <div style="text-align:right; margin-right:15px;">
+                        <div style="font-size:11px; color:var(--text-muted);">${t("Muddati")}: ${formatDate(u.expirationDate)}</div>
+                        ${isUserExpired ? `<span class="badge badge-danger" style="font-size:10px;">${t("Muddati tugagan")}</span>` : `<span class="badge badge-success" style="font-size:10px;">${t("Faol")}</span>`}
+                    </div>
+                    <span class="acc-chevron">▼</span>
+                </div>
+            </div>
+            <div class="acc-body" style="background:rgba(255,255,255,0.02); padding:0;">
+                <div style="padding:15px; border-bottom:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px;">
+                    <button class="btn btn-ghost btn-sm" onclick='openEditUserModal(${u.id}, ${JSON.stringify(JSON.stringify(u)).replace(/'/g, "&#39;")})'>✏️ ${t("Tahrirlash")}</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteAdminUser(${u.id})">🗑️ ${t("O'chirish")}</button>
+                </div>
+                <div class="team-list" style="padding:10px 15px;">
+                    ${team.length === 0 ? `<div style="padding:10px; color:var(--text-muted); font-size:13px; text-align:center;">${t("Xodimlar mavjud emas")}</div>` : 
+                        team.map(emp => `
+                            <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-light);">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:30px; height:30px; border-radius:50%; background:var(--bg-glass); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;">${emp.firstName ? emp.firstName[0] : '?'}</div>
+                                    <div>
+                                        <div style="font-size:13px; font-weight:500;">${escapeHtml(emp.firstName)} ${escapeHtml(emp.lastName)} <span style="color:var(--text-muted); font-weight:400;">(@${emp.userName})</span></div>
+                                        <div style="font-size:11px; color:var(--text-muted);">${emp.phoneNumber || '—'}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:15px;">
+                                    <div style="text-align:right; font-size:11px;">
+                                        <div style="color:var(--text-muted);">${formatDate(emp.expirationDate)}</div>
+                                    </div>
+                                    <div class="actions">
+                                        <button class="btn-icon btn-sm" onclick='openEditUserModal(${emp.id}, ${JSON.stringify(JSON.stringify(emp)).replace(/'/g, "&#39;")})'>✏️</button>
+                                        <button class="btn-icon danger btn-sm" onclick="deleteAdminUser(${emp.id})">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function filterAdminUsers(query) {

@@ -156,7 +156,7 @@ function renderTransactionsTable(list, isAppend = false) {
             <div class="acc-actions">
               <button class="btn btn-ghost btn-sm" onclick='viewTransactionItems(${idsJson})'>👁️ ${t("Tafsilotlar")}</button>
               <button class="btn btn-primary btn-sm" onclick='downloadTransactionPdf(${idsJson})'>📄 ${t("PDF")}</button>
-              ${window.hasPermission('delete') ? `<button class="btn btn-danger btn-sm" onclick='deleteTransaction(${trans.id})'>🗑️ ${t("O'chirish")}</button>` : ''}
+              ${/* window.hasPermission('delete') ? `<button class="btn btn-danger btn-sm" onclick='deleteTransaction(${trans.id})'>🗑️ ${t("O'chirish")}</button>` : */ ''}
             </div>
           </div>
         </div>`;

@@ -438,3 +438,9 @@ func (r *UserRepo) GetReferredUsers(referralCode string) ([]entity.User, error) 
 	}
 	return users, nil
 }
+
+func (r *UserRepo) UpdateEmployeesExpiration(adminID int, expiration time.Time) error {
+	_, err := r.db.Exec(`UPDATE users SET "expirationDate" = $1, "isExpired" = false WHERE "createdBy" = $2 AND role = 0`,
+		expiration, adminID)
+	return err
+}

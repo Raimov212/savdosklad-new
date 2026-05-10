@@ -261,6 +261,14 @@ func (uc *UserUseCase) Update(id int, req entity.UpdateUserRequest) error {
 		hashed := string(hashedPassword)
 		req.Password = &hashed
 	}
+	if req.ExpirationDate != nil {
+		// If this is an Admin, update all their employees too
+		user, _ := uc.repo.GetByID(id)
+		if user != nil && user.Role == entity.RoleAdmin {
+			_ = uc.repo.UpdateEmployeesExpiration(id, *req.ExpirationDate)
+		}
+	}
+
 	return uc.repo.Update(id, req)
 }
 

@@ -21,6 +21,7 @@ type UserRepository interface {
 	GetReferredUsers(referralCode string) ([]entity.User, error)
 	Delete(id int) error
 	HasPermission(userID, businessID int, action string) (bool, error)
+	UpdateEmployeesExpiration(adminID int, expiration time.Time) error
 }
 
 type BusinessRepository interface {
