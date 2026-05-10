@@ -358,6 +358,8 @@ func (r *UserRepo) HasPermission(userID, businessID int, action string) (bool, e
 	}
 
 	switch action {
+	case "view":
+		return true, nil
 	case "add":
 		return canAdd, nil
 	case "edit":
