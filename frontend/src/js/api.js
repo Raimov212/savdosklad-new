@@ -236,20 +236,32 @@ export function setSelectedPage(page) {
     localStorage.setItem('currentPage', page);
 }
 
-// ==================== DATE PERIOD HELPERS ====================
+// In-memory cache for date periods to reset on page refresh (F5)
+const memoryDatePeriods = {};
+
+// Clean up any old localStorage date periods to avoid interference
+try {
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('datePeriod_')) {
+            localStorage.removeItem(key);
+            i--; // Adjust index after removal
+        }
+    }
+} catch (e) {
+    console.warn("Failed to clear localStorage date periods:", e);
+}
+
 export function getDatePeriod() {
     const page = window.currentPage || 'dashboard';
-    const key = `datePeriod_${page}`;
-    const stored = localStorage.getItem(key);
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) { }
+    const cached = memoryDatePeriods[page];
+    if (cached) {
+        return cached;
     }
 
-    // Default: Current Month
+    // Default: 10 days ago to current date
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const start = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
     const end = new Date();
 
     return {
@@ -260,8 +272,7 @@ export function getDatePeriod() {
 
 export function setDatePeriod(start, end) {
     const page = window.currentPage || 'dashboard';
-    const key = `datePeriod_${page}`;
-    localStorage.setItem(key, JSON.stringify({ start, end }));
+    memoryDatePeriods[page] = { start, end };
 }
 
 export function getDateQuery() {
