@@ -224,6 +224,7 @@ window.openAddEmployeeModal = function () {
 
 window.handleAddEmployee = async function (e) {
     e.preventDefault();
+    const selectedBids = Array.from(document.querySelectorAll('input[name="emp-businesses"]:checked')).map(cb => parseInt(cb.value));
     const businessPermissions = selectedBids.map(bid => {
         const row = document.getElementById(`biz-perms-${bid}`);
         return {
