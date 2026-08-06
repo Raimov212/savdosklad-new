@@ -1,25 +1,37 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SavdoSklad — Boshqaruv paneli</title>
-    <meta name="description" content="SavdoSklad biznes boshqaruv paneli">
+    <meta name="description" content="SavdoSklad biznes boshqaruv paneli — ombor, savdo, moliya va xodimlarni boshqaring.">
+    <!-- Private area: prevent indexing -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#10b981">
+    <meta name="color-scheme" content="light dark">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
     <script>
         // Init theme immediately to prevent flashing
         const savedTheme = localStorage.getItem('appTheme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
-  <script type="module" crossorigin src="/assets/dashboard-BEqps9Pf.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/api-DxYT31Ua.js">
-  <link rel="stylesheet" crossorigin href="/assets/api-D8VlJctj.css">
+  <script type="module" crossorigin src="/assets/dashboard-Dqu0wK2_.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/api-CkWzOOJ-.js">
+  <link rel="stylesheet" crossorigin href="/assets/api-OE7iB7cw.css">
 </head>
 
 <body>
@@ -28,9 +40,12 @@
         <aside class="sidebar">
             <div class="sidebar-logo">
                 <div class="brand-container">
-                    <div class="brand-logo-glow"></div>
+                    <div class="sidebar-brand-icon" id="sidebar-brand-icon">
+                        <i data-lucide="layers" style="width:20px; height:20px; color:white;"></i>
+                    </div>
                     <h2 class="brand-name">SavdoSklad</h2>
                 </div>
+                <button class="mobile-close-btn" onclick="toggleSidebar()">✕</button>
             </div>
             <nav class="sidebar-nav">
                 <button class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')"
@@ -77,6 +92,10 @@
                     title="Hisobotlar" data-i18n-title="Hisobotlar" style="display:none;">
                     <span class="icon">📉</span> <span data-i18n="Hisobotlar">Hisobotlar</span>
                 </button>
+                <button class="nav-item owner-only" data-page="bulk-delete" onclick="navigateTo('bulk-delete')"
+                    title="Ommaviy o'chirish" data-i18n-title="Ommaviy o'chirish" style="display:none;">
+                    <span class="icon">🗑️</span> <span data-i18n="Ommaviy o'chirish">Ommaviy o'chirish</span>
+                </button>
                 <button class="nav-item" data-page="profile" onclick="navigateTo('profile')" title="Sozlamalar"
                     data-i18n-title="Sozlamalar">
                     <span class="icon">⚙️</span> <span data-i18n="Sozlamalar">Sozlamalar</span>
@@ -88,7 +107,7 @@
                         data-i18n-title="Statistika">
                         <span class="icon">📈</span> <span data-i18n="Statistika">Statistika</span>
                     </button>
-                    <button class="nav-item" data-page="mp-categories" onclick="navigateTo('mp-categories')"
+                    <button class="nav-item admin-only-mp" data-page="mp-categories" onclick="navigateTo('mp-categories')"
                         title="Kategoriyalar" data-i18n-title="Kategoriyalar">
                         <span class="icon">🏷️</span> <span data-i18n="Kategoriyalar">Kategoriyalar</span>
                     </button>
@@ -100,6 +119,10 @@
                         data-i18n-title="Sotuvlar">
                         <span class="icon">📜</span> <span data-i18n="Sotilgan tovarlar">Sotuvlar</span>
                     </button>
+                    <button class="nav-item" data-page="mp-orders" onclick="navigateTo('mp-orders')" title="Buyurtmalar"
+                        data-i18n-title="Buyurtmalar">
+                        <span class="icon">📦</span> <span data-i18n="Buyurtmalar">Buyurtmalar</span>
+                    </button>
                 </div>
 
                 <div class="nav-section-title admin-only" style="display:none;" data-i18n="Admin">ADMIN</div>
@@ -109,6 +132,17 @@
                 </button>
             </nav>
             <div class="sidebar-footer">
+                <div class="sidebar-footer-tools mobile-only-flex" style="display:none; gap:10px; margin-bottom:12px; padding:0 12px;">
+                    <select class="business-selector" id="lang-selector-sidebar" onchange="setAppLang(this.value)" 
+                        style="flex:1; height:36px; font-size:12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border);">
+                        <option value="uz">O'zb</option>
+                        <option value="uz-cyrl">Ўзб</option>
+                        <option value="ru">Рус</option>
+                        <option value="en">Eng</option>
+                    </select>
+                    <button class="btn btn-ghost theme-toggle" onclick="toggleTheme()" 
+                        style="width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; font-size:16px; border: 1px solid var(--border);">☀️</button>
+                </div>
                 <button class="nav-item" onclick="api.logout()" style="color:var(--danger) !important; opacity:0.8;"
                     title="Chiqish" data-i18n-title="Chiqish">
                     <span class="icon">🚪</span> <span data-i18n="Chiqish">Chiqish</span>
@@ -165,10 +199,11 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" crossorigin="anonymous"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const ls = document.getElementById('lang-selector-app');
@@ -177,6 +212,9 @@
             // Initialize theme icon based on current root dataset
             if (typeof updateThemeIcon === 'function') {
                 updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'dark');
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         });
     </script>

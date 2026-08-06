@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="uz" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="SavdoSklad Marketplace">SavdoSklad Marketplace</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --mp-primary: #10b981;
+            --mp-secondary: #0ea5e9;
+            --mp-bg: #03040b;
+            --mp-card: rgba(255, 255, 255, 0.03);
+            --mp-border: rgba(255, 255, 255, 0.1);
+            --mp-text: #f8fafc;
+        }
+
+        [data-theme="light"] {
+            --mp-bg: #f8fafc;
+            --mp-card: #ffffff;
+            --mp-border: #cbd5e1;
+            --mp-text: #0f172a;
+        }
+
+        body {
+            background-color: var(--mp-bg);
+            color: var(--mp-text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            transition: 0.3s;
+        }
+
+        /* Centered Auth Modal with Backdrop Blur */
+        #auth-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-content {
+            background: #0f172a;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            border-radius: 28px;
+            border: 1px solid var(--mp-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* Orders Separate Layout */
+        #orders-layout {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--mp-bg);
+            z-index: 5000;
+            padding: 40px 5%;
+            overflow-y: auto;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .layout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        /* Navbar & Content blur when modal open */
+        body.modal-active #main-content {
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .mp-navbar {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--mp-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--mp-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .mp-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(to right, #10b981, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 13px; opacity: 0.7; }
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--mp-card);
+            border: 1px solid var(--mp-border);
+            border-radius: 14px;
+            color: var(--mp-text);
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .form-control:focus { border-color: var(--mp-primary); outline: none; }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .btn-primary { background: var(--mp-primary); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); }
+        .btn-ghost { background: transparent; color: var(--mp-text); }
+        .btn-ghost:hover { background: var(--mp-border); }
+
+        .mp-container { padding: 40px 5%; display: flex; gap: 30px; }
+        .mp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; flex: 1; }
+        .product-card { background: var(--mp-card); border: 1px solid var(--mp-border); border-radius: 24px; padding: 18px; transition: 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .product-card:hover { transform: translateY(-8px); border-color: var(--mp-primary); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .product-img { width: 100%; aspect-ratio: 1; border-radius: 18px; object-fit: cover; margin-bottom: 15px; }
+
+        .mp-drawer {
+            position: fixed; top: 0; right: -420px; width: 420px; height: 100%;
+            background: #080911; border-left: 1px solid var(--mp-border);
+            z-index: 1000; transition: 0.4s; display: flex; flex-direction: column;
+            box-shadow: -20px 0 40px rgba(0,0,0,0.5);
+        }
+        .mp-drawer.open { right: 0; }
+
+        .status-rejected { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+        /* Auth Modal Enhancements */
+        [data-theme="light"] .auth-content {
+            background: #ffffff;
+            color: #0f172a;
+        }
+        [data-theme="dark"] .auth-content {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        aside { transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        aside.hidden { width: 0 !important; opacity: 0; margin-right: 0 !important; overflow: hidden; pointer-events: none; }
+
+        /* Hero Section */
+        .mp-hero {
+            padding: 100px 5% 60px;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(16, 185, 129, 0.05), transparent);
+        }
+        .mp-hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        @media (max-width: 600px) {
+            .mp-drawer { width: 100%; right: -100%; }
+            .mp-hero h1 { font-size: 36px; }
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/marketplace-DSEmtpbD.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/api-CkWzOOJ-.js">
+  <link rel="stylesheet" crossorigin href="/assets/api-OE7iB7cw.css">
+</head>
+<body>
+        <div id="main-content">
+            <nav class="mp-navbar">
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <button class="btn btn-ghost" onclick="toggleSidebar()" title="Kategoriyalarni ko'rsatish/yashirish" style="padding:8px;">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div class="mp-logo" onclick="location.reload()">SavdoSklad MP</div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn btn-ghost theme-toggle" onclick="toggleTheme()" title="Mavzuni o'zgartirish" style="padding:8px;">
+                        <i id="theme-icon" data-lucide="moon" style="width:18px;"></i>
+                    </button>
+                    <select id="mp-lang-selector" class="form-control" style="width:auto; padding:5px 8px; height:32px; font-size:12px; background:var(--mp-card); border-color:var(--mp-border); color:var(--mp-text);" onchange="setAppLang(this.value)">
+                        <option value="uz">UZ</option>
+                        <option value="uz-cyrl">ЎЗ</option>
+                        <option value="ru">RU</option>
+                        <option value="en">EN</option>
+                    </select>
+                    <button class="btn btn-ghost" onclick="showOrdersLayout()" style="padding:8px 12px;">
+                        <i data-lucide="package" style="width:18px;"></i> <span data-i18n="Buyurtmalarim" class="hide-mobile">Buyurtmalarim</span>
+                    </button>
+                    <div style="position:relative; cursor:pointer; padding:8px 12px;" onclick="toggleCart()">
+                        <i data-lucide="shopping-cart" style="width:18px;"></i>
+                        <span id="cart-count" style="position:absolute; top:2px; right:4px; background:#ef4444; color:white; font-size:9px; padding:1px 5px; border-radius:10px; font-weight:900;">0</span>
+                    </div>
+                    <div id="mp-auth-section">
+                        <button class="btn btn-primary btn-sm" onclick="openAuthModal('login')" data-i18n="Kirish" style="padding:6px 16px; font-size:13px;">Kirish</button>
+                    </div>
+                </div>
+            </nav>
+
+            <header class="mp-hero">
+                <h1 data-i18n="Eng zo'r mahsulotlar — bir joyda">Eng zo'r mahsulotlar — bir joyda</h1>
+                <p style="opacity:0.6; font-size:18px; max-width:600px; margin:0 auto 30px;" data-i18n="Minglab tovarlar, ishonchli sotuvchilar va tezkor yetkazib berish.">Minglab tovarlar, ishonchli sotuvchilar va tezkor yetkazib berish.</p>
+                <div style="display:flex; justify-content:center; gap:20px;">
+                    <button class="btn btn-primary" onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})" data-i18n="Xarid qilish">Xarid qilish</button>
+                    <button class="btn btn-ghost" onclick="toggleCart()" data-i18n="Savat">Savat</button>
+                </div>
+            </header>
+
+        <div class="mp-container">
+            <aside id="mp-sidebar" style="width:240px; flex-shrink:0; margin-right:30px;">
+                <h3 data-i18n="Kategoriyalar" style="margin-bottom:20px;">Kategoriyalar</h3>
+                <div id="mp-categories-list" style="display:flex; flex-direction:column; gap:10px;">
+                    <button class="btn btn-ghost" style="justify-content:start; width:100%" onclick="filterByCategory(null)" data-i18n="Barchasi">Barchasi</button>
+                </div>
+            </aside>
+            <main class="mp-grid" id="products-grid">
+                <!-- Dynamic Products -->
+            </main>
+        </div>
+    </div>
+
+    <!-- Centered Auth Modal -->
+    <div id="auth-modal">
+        <div class="auth-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <h2 id="auth-modal-title" style="margin:0;">Kirish</h2>
+                <button class="btn btn-ghost" onclick="closeAuthModal()" style="padding:5px;"><i data-lucide="x"></i></button>
+            </div>
+
+            <form id="mp-login-form">
+                <div class="form-group">
+                    <label data-i18n="Telefon raqam">Telefon raqam</label>
+                    <input type="tel" id="login-phone" placeholder="+998XXXXXXXXX" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Parol">Parol</label>
+                    <input type="password" id="login-password" placeholder="••••••" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;">
+                    <span data-i18n="Kirish">Kirish</span>
+                </button>
+                <p style="text-align:center; margin-top:20px; font-size:14px; opacity:0.6;">
+                    <span data-i18n="Hisobingiz yo'qmi?">Hisobingiz yo'qmi?</span> 
+                    <a href="javascript:void(0)" onclick="openAuthModal('register')" style="color:var(--mp-secondary); font-weight:700;" data-i18n="Ro'yxatdan o'tish">Ro'yxatdan o'tish</a>
+                </p>
+            </form>
+
+            <form id="mp-register-form" style="display:none">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                    <div class="form-group">
+                        <label data-i18n="Ism">Ism</label>
+                        <input type="text" id="reg-firstname" placeholder="Ali" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="Familiya">Familiya</label>
+                        <input type="text" id="reg-lastname" placeholder="Valiyev" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Telefon raqam">Telefon raqam</label>
+                    <input type="tel" id="reg-phone" placeholder="+998XXXXXXXXX" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Parol">Parol</label>
+                    <input type="password" id="reg-password" placeholder="••••••" class="form-control" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="Parolni tasdiqlang">Parolni tasdiqlang</label>
+                    <input type="password" id="reg-confirm" placeholder="••••••" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;">
+                    <span data-i18n="Ro'yxatdan o'tish">Ro'yxatdan o'tish</span>
+                </button>
+                <p style="text-align:center; margin-top:20px; font-size:14px; opacity:0.6;">
+                    <span data-i18n="Hisobingiz bormi?">Hisobingiz bormi?</span> 
+                    <a href="javascript:void(0)" onclick="openAuthModal('login')" style="color:var(--mp-secondary); font-weight:700;" data-i18n="Kirish">Kirish</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Layout (Separate View) -->
+    <div id="orders-layout">
+        <div class="layout-header">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <button class="btn btn-ghost" onclick="hideOrdersLayout()"><i data-lucide="arrow-left"></i></button>
+                <h1 style="margin:0;" data-i18n="Mening buyurtmalarim">Mening buyurtmalarim</h1>
+            </div>
+        </div>
+        <div id="orders-list-container" style="max-width:900px; margin:0 auto;">
+            <!-- Dynamic Orders -->
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div id="cart-drawer" class="mp-drawer">
+        <div style="padding:25px; border-bottom:1px solid var(--mp-border); display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0;" data-i18n="Savat">Savat</h3>
+            <button class="btn btn-ghost" onclick="toggleCart()" style="padding:5px;"><i data-lucide="x"></i></button>
+        </div>
+        <div id="cart-items" style="flex:1; overflow-y:auto; padding:25px;"></div>
+        <div style="padding:25px; border-top:1px solid var(--mp-border); background:rgba(255,255,255,0.02);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:18px; font-weight:800;">
+                <span data-i18n="Jami:">Jami:</span>
+                <span id="cart-total">0 so'm</span>
+            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="handleCheckout()" data-i18n="Buyurtma berish">Buyurtma berish</button>
+        </div>
+    </div>
+
+</body>
+</html>

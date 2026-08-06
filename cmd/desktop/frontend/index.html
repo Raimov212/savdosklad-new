@@ -1,15 +1,103 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" dir="ltr">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-i18n="SavdoSklad — Biznes Boshqaruv Tizimi">SavdoSklad — Biznes Boshqaruv Tizimi</title>
   <meta name="description" data-i18n="SavdoSklad biznes boshqaruv tizimi — kirish sahifasi"
-    content="SavdoSklad biznes boshqaruv tizimi — kirish sahifasi">
+    content="SavdoSklad — kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv tizimi. Mahsulotlarni kuzating, sotuvlarni tahlil qiling, Telegram bot orqali boshqaring.">
+  <meta name="keywords" content="SavdoSklad, biznes boshqaruv, ombor tizimi, savdo dasturi, CRM, moliya hisoboti, Telegram bot, O'zbekiston, склад, учет товаров, бизнес управление, warehouse management">
+  <meta name="author" content="SavdoSklad">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#10b981">
+  <meta name="color-scheme" content="light dark">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://savdosklad.uz/">
+
+  <!-- Hreflang alternates for multilingual SEO -->
+  <link rel="alternate" hreflang="uz" href="https://savdosklad.uz/?lang=uz">
+  <link rel="alternate" hreflang="ru" href="https://savdosklad.uz/?lang=ru">
+  <link rel="alternate" hreflang="en" href="https://savdosklad.uz/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://savdosklad.uz/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://savdosklad.uz/">
+  <meta property="og:title" content="SavdoSklad — Biznes Boshqaruv Tizimi">
+  <meta property="og:description" content="Kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv platformasi. Mahsulotlarni kuzating, sotuvlarni tahlil qiling.">
+  <meta property="og:image" content="https://savdosklad.uz/og-image.png">
+  <meta property="og:locale" content="uz_UZ">
+  <meta property="og:locale:alternate" content="ru_RU">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:site_name" content="SavdoSklad">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SavdoSklad — Biznes Boshqaruv Tizimi">
+  <meta name="twitter:description" content="Kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv platformasi.">
+  <meta name="twitter:image" content="https://savdosklad.uz/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Stylesheets -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SavdoSklad",
+    "url": "https://savdosklad.uz",
+    "description": "Kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv tizimi",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "UZS"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "SavdoSklad",
+      "url": "https://savdosklad.uz",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+998886473377",
+          "contactType": "customer support"
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+998935532428",
+          "contactType": "customer support"
+        }
+      ]
+    },
+    "featureList": [
+      "Ombor boshqaruvi",
+      "Savdo va sotuvlar",
+      "Moliya hisoboti",
+      "CRM tizimi",
+      "Telegram bot integratsiyasi",
+      "Excel import/export",
+      "PDF cheklar"
+    ],
+    "inLanguage": ["uz", "ru", "en"]
+  }
+  </script>
+
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     // Init theme immediately
@@ -21,74 +109,180 @@
       if (modal) modal.classList.toggle('active');
     };
 
+    window.toggleVideoModal = function () {
+      const modal = document.getElementById('video-modal');
+      if (modal) {
+        modal.classList.toggle('active');
+        if (!modal.classList.contains('active')) {
+          const video = modal.querySelector('video');
+          if (video) video.pause();
+          const iframe = modal.querySelector('iframe');
+          if (iframe) {
+            const src = iframe.src;
+            iframe.src = src; // Reloads iframe to stop playback
+          }
+        }
+      }
+    };
+
     window.closeContactModal = function (e) {
       // Disabled: Modals should only close via X or Cancel buttons
     };
   </script>
-  <script type="module" crossorigin src="/assets/main-DWqoohKC.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/api-DxYT31Ua.js">
-  <link rel="stylesheet" crossorigin href="/assets/api-D8VlJctj.css">
-  <link rel="stylesheet" crossorigin href="/assets/main-DNwS0V0s.css">
+  <script type="module" crossorigin src="/assets/main-CJwP8cn6.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/api-CkWzOOJ-.js">
+  <link rel="stylesheet" crossorigin href="/assets/api-OE7iB7cw.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-BasHEpPc.css">
 </head>
 
 <body>
+  <!-- Noscript fallback for SEO and accessibility -->
+  <noscript>
+    <div style="padding: 40px; text-align: center; font-family: sans-serif;">
+      <h1>SavdoSklad — Biznes Boshqaruv Tizimi</h1>
+      <p>SavdoSklad — kichik va o'rta biznes uchun ombor, savdo, moliya va CRM boshqaruv platformasi.</p>
+      <p>Ushbu sahifani to'liq ko'rish uchun JavaScript yoqilgan bo'lishi kerak.</p>
+      <h2>Imkoniyatlar</h2>
+      <ul style="list-style: none; padding: 0;">
+        <li>📊 Boshqaruv paneli — Real vaqtda statistika va grafiklar</li>
+        <li>📦 Ombor nazorati — Mahsulotlarni kategoriya bo'yicha boshqarish</li>
+        <li>🛒 Savdo va sotuvlar — Tez sotuv va PDF cheklar</li>
+        <li>👥 CRM tizimi — Mijozlar bazasi va qarzlar nazorati</li>
+        <li>📉 Moliya hisoboti — Daromad, xarajat va sof foyda</li>
+        <li>🤖 Telegram bot — Real vaqtda xabarnomalar</li>
+      </ul>
+      <p>Bog'lanish: <a href="tel:+998886473377">+998 88 647 33 77</a> | <a href="https://t.me/JascoDev">@JascoDev</a></p>
+    </div>
+  </noscript>
+
   <div class="auth-page">
     <!-- Left Sidebar (Branding & Features) -->
-    <div class="auth-sidebar">
-      <div class="brand-section">
-        <div class="brand-header">
-          <div class="brand-icon-wrapper">
-             <i data-lucide="layers" style="width:32px; height:32px; color:white;"></i>
-          </div>
-          <h1 class="brand-name" data-i18n="SavdoSklad">SavdoSklad</h1>
-        </div>
-        <h2 class="brand-tagline" data-i18n="Biznesingizni aqlli boshqaring">Biznesingizni aqlli boshqaring</h2>
-        <p class="brand-desc" data-i18n="SavdoSklad ta'rifi">SavdoSklad — kichik va o'rta biznes uchun mo'ljallangan zamonaviy hisob-kitob va ombor boshqaruv tizimi.</p>
+    <div class="auth-sidebar" style="position: relative; overflow: hidden;">
+      <!-- Dynamic Background Orbs -->
+      <div
+        style="position:absolute; top:5%; left:10%; width:400px; height:400px; background:radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%); border-radius:50%; filter:blur(60px); pointer-events: none;">
+      </div>
+      <div
+        style="position:absolute; bottom:5%; right:5%; width:350px; height:350px; background:radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); border-radius:50%; filter:blur(60px); pointer-events: none;">
+      </div>
 
-        <div class="brand-features">
-          <div class="feature-item">
-            <i data-lucide="check-circle-2"></i>
-            <span data-i18n="Ombor qoldiqlarini real vaqtda kuzatish">Ombor qoldiqlarini real vaqtda kuzatish</span>
+      <div class="brand-section" style="max-width: 540px; position: relative; z-index: 10;">
+        <div class="brand-header" style="margin-bottom: 40px; display: flex; align-items: center; gap: 20px;">
+          <div class="brand-icon-wrapper"
+            style="width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); border: 1px solid rgba(255,255,255,0.2);">
+            <i data-lucide="layers" style="width:30px; height:30px; color:white;"></i>
           </div>
-          <div class="feature-item">
-            <i data-lucide="trending-up"></i>
-            <span data-i18n="Moliya va foyda-zarar hisoboti">Moliya va foyda-zarar hisoboti</span>
-          </div>
-          <div class="feature-item">
-            <i data-lucide="users"></i>
-            <span data-i18n="Mijozlar bilan ishlash (CRM)">Mijozlar bilan ishlash (CRM)</span>
-          </div>
-          <div class="feature-item">
-            <i data-lucide="send"></i>
-            <span data-i18n="Telegram bot orqali boshqarish">Telegram bot orqali boshqarish</span>
-          </div>
+          <h1 class="brand-name"
+            style="font-size: 44px; margin: 0; font-family: 'Outfit'; font-weight: 800; background: linear-gradient(135deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            data-i18n="SavdoSklad">SavdoSklad</h1>
         </div>
 
-        <a href="#" class="contact-sidebar-btn" onclick="toggleContactModal(); return false;">
-          <i data-lucide="mail"></i>
-          <span data-i18n="Bog'lanish">Bog'lanish</span>
-        </a>
+        <h2 class="brand-tagline"
+          style="font-size: 42px; line-height: 1.15; font-weight: 800; margin-bottom: 20px; color: var(--auth-text-primary);">
+          <span data-i18n="Biznesingizni">Biznesingizni</span>
+          <span style="position: relative; display: inline-block;">
+            <span style="position: relative; z-index: 1; color: #10b981;" data-i18n="aqlli">aqlli</span>
+            <svg style="position: absolute; bottom: 2px; left: -2px; width: 105%; height: 12px; z-index: 0;"
+              viewBox="0 0 100 10" preserveAspectRatio="none">
+              <path d="M0 8 Q 50 0 100 8" stroke="rgba(16, 185, 129, 0.3)" stroke-width="4" stroke-linecap="round"
+                fill="none" />
+            </svg>
+          </span>
+          <br>
+          <span data-i18n="boshqaring">boshqaring</span>
+        </h2>
+
+        <p class="brand-desc"
+          style="font-size: 17px; line-height: 1.6; color: var(--auth-text-secondary); margin-bottom: 40px;"
+          data-i18n="SavdoSklad ta'rifi">SavdoSklad — savdo hajmini oshirish, xarajatlarni optimallashtirish va
+          jarayonlarni avtomatlashtirish uchun yagona platforma.</p>
+
+        <!-- Floating Glass Widget -->
+        <div class="landing-widget"
+          style="background: var(--auth-card-bg); border: 1px solid var(--auth-border); backdrop-filter: blur(24px); border-radius: 20px; padding: 20px 24px; margin-bottom: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 20px; animation: floatAnim 6s ease-in-out infinite;">
+          <div
+            style="width: 54px; height: 54px; border-radius: 16px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; color: #10b981; flex-shrink: 0;">
+            <i data-lucide="trending-up" style="width: 26px; height: 26px;"></i>
+          </div>
+          <div style="flex: 1;">
+            <div
+              style="font-size: 12px; font-weight: 700; color: var(--auth-text-secondary); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;"
+              data-i18n="Kunlik tushum">Kunlik tushum</div>
+            <div
+              style="font-size: 26px; font-weight: 800; color: var(--auth-text-primary); display: flex; align-items: baseline; gap: 6px;">
+              +12,450,000 <span
+                style="font-size: 15px; color: var(--auth-text-secondary); font-weight: 600;">so'm</span></div>
+          </div>
+          <div
+            style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 12px; border-radius: 10px; font-size: 14px; font-weight: 800;">
+            +14%</div>
+        </div>
+
+        <div class="brand-features" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="feature-card"
+            style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--auth-border); border-radius: 16px; transition: all 0.3s; cursor: default;">
+            <div
+              style="width: 38px; height: 38px; border-radius: 10px; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; color: #10b981;">
+              <i data-lucide="package" style="width:20px;"></i>
+            </div>
+            <span style="font-weight: 600; font-size: 14px; color: var(--auth-text-primary);"
+              data-i18n="Ombor tahlili">Ombor tahlili</span>
+          </div>
+          <div class="feature-card"
+            style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--auth-border); border-radius: 16px; transition: all 0.3s; cursor: default;">
+            <div
+              style="width: 38px; height: 38px; border-radius: 10px; background: rgba(59,130,246,0.1); display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+              <i data-lucide="pie-chart" style="width:20px;"></i>
+            </div>
+            <span style="font-weight: 600; font-size: 14px; color: var(--auth-text-primary);"
+              data-i18n="Moliya hisoboti">Moliya hisoboti</span>
+          </div>
+          <div class="feature-card"
+            style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--auth-border); border-radius: 16px; transition: all 0.3s; cursor: default;">
+            <div
+              style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245,158,11,0.1); display: flex; align-items: center; justify-content: center; color: #f59e0b;">
+              <i data-lucide="users" style="width:20px;"></i>
+            </div>
+            <span style="font-weight: 600; font-size: 14px; color: var(--auth-text-primary);" data-i18n="CRM tizimi">CRM
+              tizimi</span>
+          </div>
+          <div class="feature-card"
+            style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--auth-border); border-radius: 16px; transition: all 0.3s; cursor: default;">
+            <div
+              style="width: 38px; height: 38px; border-radius: 10px; background: rgba(139,92,246,0.1); display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
+              <i data-lucide="bot" style="width:20px;"></i>
+            </div>
+            <span style="font-weight: 600; font-size: 14px; color: var(--auth-text-primary);"
+              data-i18n="Telegram bot">Telegram bot</span>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Right Main Area (Auth Card) -->
-    <div class="auth-main">
+    <div class="auth-main" style="padding-top: 80px; padding-bottom: 80px;">
+
+      <!-- Top Actions (Lang & Theme) -->
+      <div class="auth-top-actions floating-top-actions">
+        <select id="lang-selector-auth" class="auth-lang-select" onchange="setAppLang(this.value)">
+          <option value="uz">O'zb</option>
+          <option value="uz-cyrl">Ўзб</option>
+          <option value="ru">Рус</option>
+          <option value="en">Eng</option>
+        </select>
+        <button id="theme-btn" class="theme-toggle-btn theme-toggle" onclick="toggleTheme()"
+          title="Mavzuni o'zgartirish">
+          <i data-lucide="moon"></i>
+        </button>
+      </div>
+
       <div class="auth-card" id="auth-card">
-        <div class="auth-card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; gap:15px; flex-wrap:wrap;">
-          <div class="auth-tabs" style="margin-bottom:0; flex:1;">
-            <button class="auth-tab active" id="tab-login" onclick="switchMode('login')" data-i18n="Kirish">Kirish</button>
-            <button class="auth-tab" id="tab-register" onclick="switchMode('register')" data-i18n="Ro'yxatdan o'tish">Ro'yxatdan o'tish</button>
-          </div>
-          <div class="auth-top-actions" style="position:static; margin-bottom:0;">
-            <select id="lang-selector-auth" class="auth-lang-select" onchange="setAppLang(this.value)">
-              <option value="uz">O'zb</option>
-              <option value="uz-cyrl">Ўзб</option>
-              <option value="ru">Рус</option>
-              <option value="en">Eng</option>
-            </select>
-            <button id="theme-btn" class="theme-toggle-btn theme-toggle" onclick="toggleTheme()" title="Mavzuni o'zgartirish">
-               <i data-lucide="moon"></i>
-            </button>
+        <div class="auth-card-header" style="margin-bottom:30px;">
+          <div class="auth-tabs" style="margin-bottom:0;">
+            <button class="auth-tab active" id="tab-login" onclick="switchMode('login')"
+              data-i18n="Kirish">Kirish</button>
+            <button class="auth-tab" id="tab-register" onclick="switchMode('register')"
+              data-i18n="Ro'yxatdan o'tish">Ro'yxatdan o'tish</button>
           </div>
         </div>
 
@@ -108,7 +302,67 @@
                 required>
             </div>
           </div>
+          <div style="text-align: right; margin-top: -5px; margin-bottom: 20px;">
+            <a href="#" onclick="switchMode('forgot-password'); return false;"
+              style="color: var(--auth-primary); font-size: 14px; text-decoration: none; font-weight: 500;"
+              data-i18n="Parolni unutdingizmi?">Parolni unutdingizmi?</a>
+          </div>
           <button type="submit" class="auth-btn-primary" id="login-btn" data-i18n="Kirish">Kirish</button>
+        </form>
+
+        <!-- Forgot Password Form -->
+        <form id="forgot-password-form" style="display:none" onsubmit="handleForgotPassword(event)">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <i data-lucide="shield-alert"
+              style="width: 48px; height: 48px; color: var(--auth-primary); margin-bottom: 10px;"></i>
+            <h3 data-i18n="Parolni tiklash" style="margin-bottom: 10px; color: var(--auth-text-primary);">Parolni
+              tiklash</h3>
+            <p data-i18n="Parolni tiklash yo'riqnomasi" style="font-size: 14px; color: var(--auth-text-secondary);">
+              Telegram bot orqali parolni tiklash kodi yuboriladi.</p>
+          </div>
+          <div class="auth-form-group">
+            <label data-i18n="Foydalanuvchi nomi">Foydalanuvchi nomi <span>*</span></label>
+            <div class="auth-input-wrapper">
+              <input type="text" class="form-control" id="forgot-username" data-i18n="Foydalanuvchi nomi"
+                placeholder="Foydalanuvchi nomi" required>
+            </div>
+          </div>
+          <button type="submit" class="auth-btn-primary" id="forgot-btn" data-i18n="Kodni olish">Kodni olish</button>
+          <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="switchMode('login'); return false;"
+              style="color: var(--auth-text-secondary); font-size: 14px; text-decoration: none; font-weight: 500;"
+              data-i18n="Ortga qaytish">Ortga qaytish</a>
+          </div>
+        </form>
+
+        <!-- Reset Password Form -->
+        <form id="reset-password-form" style="display:none" onsubmit="handleResetPassword(event)">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <i data-lucide="key-round" style="width: 48px; height: 48px; color: #10b981; margin-bottom: 10px;"></i>
+            <h3 data-i18n="Yangi parol" style="margin-bottom: 10px; color: var(--auth-text-primary);">Yangi parol</h3>
+            <p data-i18n="Kodni va yangi parolni kiriting" style="font-size: 14px; color: var(--auth-text-secondary);">
+              Telegram botga yuborilgan kodni va yangi parolni kiriting.</p>
+          </div>
+          <div class="auth-form-group">
+            <label data-i18n="Tasdiqlash kodi">Tasdiqlash kodi <span>*</span></label>
+            <div class="auth-input-wrapper">
+              <input type="text" class="form-control" id="reset-code" data-i18n="Kodni kiriting"
+                placeholder="Kodni kiriting" required autocomplete="off">
+            </div>
+          </div>
+          <div class="auth-form-group">
+            <label data-i18n="Yangi parol">Yangi parol <span>*</span></label>
+            <div class="auth-input-wrapper">
+              <input type="password" class="form-control" id="reset-password" data-i18n="Yangi parol"
+                placeholder="••••••" required minlength="6">
+            </div>
+          </div>
+          <button type="submit" class="auth-btn-primary" id="reset-btn" data-i18n="Saqlash">Saqlash</button>
+          <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="switchMode('login'); return false;"
+              style="color: var(--auth-text-secondary); font-size: 14px; text-decoration: none; font-weight: 500;"
+              data-i18n="Ortga qaytish">Ortga qaytish</a>
+          </div>
         </form>
 
         <!-- Register Form -->
@@ -177,7 +431,7 @@
             </div>
           </div>
           <div class="auth-form-group">
-            <label data-i18n="Taklif kodi (ixtiyoriy)">Taklif kodi (ixtiyoriy)</label>
+            <label data-i18n="Taklif kodi">Taklif kodi</label>
             <div class="auth-input-wrapper">
               <input type="text" class="form-control" id="reg-offercode" data-i18n="Taklif kodi"
                 placeholder="Taklif kodi" autocomplete="off">
@@ -186,6 +440,141 @@
           <button type="submit" class="auth-btn-primary" id="register-btn" data-i18n="Ro'yxatdan o'tish">Ro'yxatdan
             o'tish</button>
         </form>
+      </div>
+
+      <!-- Floating Action Buttons -->
+      <div class="floating-btn-group">
+        <a href="#" class="video-floating-btn" onclick="toggleVideoModal(); return false;">
+          <i data-lucide="sparkles"></i>
+          <span data-i18n="Imkoniyatlarni ko'rish">Imkoniyatlarni ko'rish</span>
+        </a>
+        <a href="#" class="contact-floating-btn" onclick="toggleContactModal(); return false;">
+          <i data-lucide="mail"></i>
+          <span data-i18n="Bog'lanish">Bog'lanish</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video / Demo Slideshow Modal -->
+  <div id="video-modal" class="modal-overlay">
+    <div class="contact-modal-content" style="max-width: 900px;" onclick="event.stopPropagation()">
+      <button class="contact-close-btn" onclick="toggleVideoModal()">×</button>
+      <div class="contact-header" style="margin-bottom: 20px;">
+        <div class="contact-icon-top">
+          <i data-lucide="sparkles" style="width: 32px; height: 32px;"></i>
+        </div>
+        <h2 data-i18n="Platforma imkoniyatlari">Platforma imkoniyatlari</h2>
+        <p data-i18n="Platforma imkoniyatlari bilan tanishing">Platforma imkoniyatlari bilan tanishing</p>
+      </div>
+
+      <!-- Slideshow Container -->
+      <div class="demo-slideshow" id="demo-slideshow">
+        <div class="demo-slides-wrapper" id="demo-slides-wrapper">
+          <!-- Slide 1 -->
+          <div class="demo-slide active" data-slide="0">
+            <div class="demo-slide-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+              <i data-lucide="layout-dashboard" style="width:48px; height:48px; color:#fff;"></i>
+            </div>
+            <h3 data-i18n="Boshqaruv paneli">Boshqaruv paneli</h3>
+            <p data-i18n="demo_slide_1">Barcha savdo, foyda, ombor va mijoz ma'lumotlari bitta ekranda. Real vaqtda
+              yangilanuvchi statistika va grafiklar.</p>
+            <div class="demo-slide-tags">
+              <span>📊 <span data-i18n="Statistika">Statistika</span></span><span>📈 <span
+                  data-i18n="Grafiklar">Grafiklar</span></span><span>⚡ <span data-i18n="Real vaqt">Real
+                  vaqt</span></span>
+            </div>
+          </div>
+          <!-- Slide 2 -->
+          <div class="demo-slide" data-slide="1">
+            <div class="demo-slide-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+              <i data-lucide="package" style="width:48px; height:48px; color:#fff;"></i>
+            </div>
+            <h3 data-i18n="Ombor nazorati">Ombor nazorati</h3>
+            <p data-i18n="demo_slide_2">Mahsulotlarni kategoriya bo'yicha guruhlang. Barcode orqali qidiring. Excel
+              orqali ommaviy yuklang. Kam qolgan tovarlar haqida ogohlantirish oling.</p>
+            <div class="demo-slide-tags">
+              <span>📦 <span data-i18n="Mahsulotlar">Mahsulotlar</span></span><span>🏷️ Barcode</span><span>📋
+                Excel</span>
+            </div>
+          </div>
+          <!-- Slide 3 -->
+          <div class="demo-slide" data-slide="2">
+            <div class="demo-slide-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+              <i data-lucide="shopping-cart" style="width:48px; height:48px; color:#fff;"></i>
+            </div>
+            <h3 data-i18n="Savdo va sotuvlar">Savdo va sotuvlar</h3>
+            <p data-i18n="demo_slide_3">Bir necha bosqichda sotuv yarating. Naqd, karta yoki qarzga sotish. Har bir
+              tranzaksiyaning PDF chekini chiqaring.</p>
+            <div class="demo-slide-tags">
+              <span>💳 <span data-i18n="To'lov turlari">To'lov turlari</span></span><span>🧾 <span
+                  data-i18n="PDF chek">PDF chek</span></span><span>🛒 <span data-i18n="Tez sotuv">Tez
+                  sotuv</span></span>
+            </div>
+          </div>
+          <!-- Slide 4 -->
+          <div class="demo-slide" data-slide="3">
+            <div class="demo-slide-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+              <i data-lucide="users" style="width:48px; height:48px; color:#fff;"></i>
+            </div>
+            <h3 data-i18n="Mijozlar va CRM">Mijozlar va CRM</h3>
+            <p data-i18n="demo_slide_4">Mijozlar bazasini yuritib boring. Savdo tarixi, qarzlar va to'lovlarni kuzating.
+              Qarzdorlar ro'yxatini boshqaring.</p>
+            <div class="demo-slide-tags">
+              <span>👥 <span data-i18n="Mijozlar">Mijozlar</span></span><span>💰 <span
+                  data-i18n="Qarzlar">Qarzlar</span></span><span>📱 CRM</span>
+            </div>
+          </div>
+          <!-- Slide 5 -->
+          <div class="demo-slide" data-slide="4">
+            <div class="demo-slide-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+              <i data-lucide="calculator" style="width:48px; height:48px; color:#fff;"></i>
+            </div>
+            <h3 data-i18n="Moliya hisoboti">Moliya hisoboti</h3>
+            <p data-i18n="demo_slide_5">Oylik daromad, xarajatlar, ish haqi va soliqlarni avtomatik hisoblang. Sof
+              foydani bir qarashda bilib oling.</p>
+            <div class="demo-slide-tags">
+              <span>📊 <span data-i18n="Hisobot">Hisobot</span></span><span>💵 <span
+                  data-i18n="Foyda">Foyda</span></span><span>📉 <span data-i18n="Xarajatlar">Xarajatlar</span></span>
+            </div>
+          </div>
+          <!-- Slide 6 -->
+          <div class="demo-slide" data-slide="5">
+            <div class="demo-slide-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+              <i data-lucide="bot" style="width:48px; height:48px; color:#fff;"></i>
+            </div>
+            <h3 data-i18n="Telegram bot">Telegram bot</h3>
+            <p data-i18n="demo_slide_6">Telegram bot orqali savdo xabarnomalarini oling. Biznesingizni telefoningizdan
+              real vaqtda kuzatib boring.</p>
+            <div class="demo-slide-tags">
+              <span>🤖 Bot</span><span>🔔 <span data-i18n="Xabarnomalar">Xabarnomalar</span></span><span>📲 <span
+                  data-i18n="Mobil">Mobil</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="demo-slide-nav">
+          <button class="demo-nav-btn" onclick="changeSlide(-1)">
+            <i data-lucide="chevron-left" style="width:20px; height:20px;"></i>
+          </button>
+          <div class="demo-dots" id="demo-dots">
+            <span class="demo-dot active" onclick="goToSlide(0)"></span>
+            <span class="demo-dot" onclick="goToSlide(1)"></span>
+            <span class="demo-dot" onclick="goToSlide(2)"></span>
+            <span class="demo-dot" onclick="goToSlide(3)"></span>
+            <span class="demo-dot" onclick="goToSlide(4)"></span>
+            <span class="demo-dot" onclick="goToSlide(5)"></span>
+          </div>
+          <button class="demo-nav-btn" onclick="changeSlide(1)">
+            <i data-lucide="chevron-right" style="width:20px; height:20px;"></i>
+          </button>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="demo-progress">
+          <div class="demo-progress-bar" id="demo-progress-bar"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -312,11 +701,114 @@
       const params = new URLSearchParams(window.location.search);
       const reason = params.get('reason');
       if (reason === 'org_required') {
-          setTimeout(() => {
-              alert(t("Davom etishdan avval kamida bitta tashkilot yaratishingiz shart."));
-          }, 500);
+        setTimeout(() => {
+          alert(t("Davom etishdan avval kamida bitta tashkilot yaratishingiz shart."));
+        }, 500);
       }
     });
+
+    // ========== Demo Slideshow Logic ==========
+    let currentSlide = 0;
+    const totalSlides = 6;
+    let slideInterval = null;
+    let progressInterval = null;
+    const SLIDE_DURATION = 4000; // 4 seconds per slide
+
+    window.goToSlide = function (index) {
+      const slides = document.querySelectorAll('.demo-slide');
+      const dots = document.querySelectorAll('.demo-dot');
+      if (index < 0 || index >= totalSlides) return;
+
+      // Exit current slide
+      slides[currentSlide].classList.remove('active');
+      slides[currentSlide].classList.add('exit-left');
+      dots[currentSlide].classList.remove('active');
+
+      // After transition, remove exit class
+      setTimeout(() => {
+        slides[currentSlide].classList.remove('exit-left');
+      }, 500);
+
+      currentSlide = index;
+
+      // Enter new slide
+      slides[currentSlide].classList.add('active');
+      dots[currentSlide].classList.add('active');
+
+      // Re-init lucide icons for new slide
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // Reset progress
+      resetProgress();
+    };
+
+    window.changeSlide = function (direction) {
+      let next = currentSlide + direction;
+      if (next >= totalSlides) next = 0;
+      if (next < 0) next = totalSlides - 1;
+      goToSlide(next);
+
+      // Restart auto-play
+      startAutoPlay();
+    };
+
+    function resetProgress() {
+      const bar = document.getElementById('demo-progress-bar');
+      if (!bar) return;
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      // Force reflow
+      bar.offsetHeight;
+      bar.style.transition = `width ${SLIDE_DURATION}ms linear`;
+      bar.style.width = '100%';
+    }
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      resetProgress();
+      slideInterval = setInterval(() => {
+        let next = currentSlide + 1;
+        if (next >= totalSlides) next = 0;
+        goToSlide(next);
+      }, SLIDE_DURATION);
+    }
+
+    function stopAutoPlay() {
+      if (slideInterval) {
+        clearInterval(slideInterval);
+        slideInterval = null;
+      }
+    }
+
+    // Override toggleVideoModal to start/stop autoplay
+    const originalToggleVideo = window.toggleVideoModal;
+    window.toggleVideoModal = function () {
+      const modal = document.getElementById('video-modal');
+      if (modal) {
+        const wasActive = modal.classList.contains('active');
+        modal.classList.toggle('active');
+
+        if (!wasActive) {
+          // Modal just opened - start slideshow
+          currentSlide = 0;
+          document.querySelectorAll('.demo-slide').forEach((s, i) => {
+            s.classList.remove('active', 'exit-left');
+            if (i === 0) s.classList.add('active');
+          });
+          document.querySelectorAll('.demo-dot').forEach((d, i) => {
+            d.classList.remove('active');
+            if (i === 0) d.classList.add('active');
+          });
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+          startAutoPlay();
+        } else {
+          // Modal just closed - stop slideshow
+          stopAutoPlay();
+          const bar = document.getElementById('demo-progress-bar');
+          if (bar) bar.style.width = '0%';
+        }
+      }
+    };
   </script>
 </body>
 

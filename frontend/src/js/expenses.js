@@ -13,6 +13,7 @@ let currentFixed = [];
 let allFixedList = [];
 
 async function renderExpenses() {
+  window.expensePage = 1;
   const content = document.getElementById('page-content');
   const bid = getSelectedBusinessId();
 
@@ -71,6 +72,7 @@ async function renderExpenses() {
 }
 
 function setExpensePeriod(p) {
+  window.expensePage = 1;
   window.expensePeriod = p;
   renderExpenses();
 }
@@ -85,15 +87,25 @@ function renderExpenseTable(list, isAppend = false) {
     isAppend = list;
     list = null;
   }
-  if (list) {
-    if (!isAppend) window.expensePage = 1;
+  if (!isAppend) {
+    window.expensePage = 1;
   }
-  // Use allExpensesList filtered by search query
-  const query = (document.getElementById('expense-search')?.value || '').toLowerCase();
-  let filteredRaw = allExpensesList.filter(e => 
-    !query || (e.description && String(e.description).toLowerCase().includes(query)) ||
-    (e.createdAt && String(e.createdAt).toLowerCase().includes(query))
-  );
+  if (list) {
+    allExpensesList = list;
+  }
+  const query = (document.getElementById('expense-search')?.value || '').toLowerCase().trim();
+  const sourceList = allExpensesList;
+  let filteredRaw = sourceList.filter(e => {
+    if (!query) return true;
+    const desc = (e.description || '').toLowerCase();
+    const creator = (e.createdByName || '').toLowerCase();
+    const formattedDate = formatDateTime(e.createdAt).toLowerCase();
+    const dateISO = (e.createdAt || '').toLowerCase();
+    const total = String(e.total || '');
+    const cash = String(e.cash || '');
+    const card = String(e.card || '');
+    return desc.includes(query) || creator.includes(query) || formattedDate.includes(query) || dateISO.includes(query) || total.includes(query) || cash.includes(query) || card.includes(query);
+  });
 
   if (window.expensePeriod === 'monthly') {
     // Group by Day for all time
@@ -134,7 +146,10 @@ function renderExpenseTable(list, isAppend = false) {
   }
 
   const limit = 15;
-  const totalPages = Math.ceil(currentExpenses.length / limit);
+  const totalPages = Math.ceil(currentExpenses.length / limit) || 1;
+  if (window.expensePage > totalPages) window.expensePage = totalPages;
+  if (window.expensePage < 1) window.expensePage = 1;
+
   const end = window.expensePage * limit;
   const paginated = currentExpenses.slice(end - limit, end);
 

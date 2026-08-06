@@ -14,6 +14,14 @@ import (
 	"savdosklad/pkg/i18n"
 )
 
+func getTashkentLoc() *time.Location {
+	loc, err := time.LoadLocation("Asia/Tashkent")
+	if err != nil {
+		return time.FixedZone("UTC+5", 5*3600)
+	}
+	return loc
+}
+
 type BusinessHandler struct{ uc *usecase.BusinessUseCase }
 
 func NewBusinessHandler(uc *usecase.BusinessUseCase) *BusinessHandler {
@@ -696,11 +704,12 @@ func (h *TransactionHandler) GetByBusinessID(c *gin.Context) {
 	endStr := c.Query("endDate")
 
 	if startStr != "" && endStr != "" {
-		start, errS := time.Parse("2006-01-02", startStr)
-		end, errE := time.Parse("2006-01-02", endStr)
+		loc := getTashkentLoc()
+		start, errS := time.ParseInLocation("2006-01-02", startStr, loc)
+		end, errE := time.ParseInLocation("2006-01-02", endStr, loc)
 		if errS == nil && errE == nil {
 			// Set end to end of day
-			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 0, end.Location())
+			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 999999999, loc)
 			list, err := h.uc.GetByPeriod(bid, start, end)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -994,10 +1003,11 @@ func (h *RefundHandler) GetByBusinessID(c *gin.Context) {
 	endStr := c.Query("endDate")
 
 	if startStr != "" && endStr != "" {
-		start, errS := time.Parse("2006-01-02", startStr)
-		end, errE := time.Parse("2006-01-02", endStr)
+		loc := getTashkentLoc()
+		start, errS := time.ParseInLocation("2006-01-02", startStr, loc)
+		end, errE := time.ParseInLocation("2006-01-02", endStr, loc)
 		if errS == nil && errE == nil {
-			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 0, end.Location())
+			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 999999999, loc)
 			list, err := h.uc.GetByPeriod(bid, start, end)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -1091,10 +1101,11 @@ func (h *ExpenseHandler) GetByBusinessID(c *gin.Context) {
 	endStr := c.Query("endDate")
 
 	if startStr != "" && endStr != "" {
-		start, errS := time.Parse("2006-01-02", startStr)
-		end, errE := time.Parse("2006-01-02", endStr)
+		loc := getTashkentLoc()
+		start, errS := time.ParseInLocation("2006-01-02", startStr, loc)
+		end, errE := time.ParseInLocation("2006-01-02", endStr, loc)
 		if errS == nil && errE == nil {
-			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 0, end.Location())
+			end = time.Date(end.Year(), end.Month(), end.Day(), 23, 59, 59, 999999999, loc)
 			list, err := h.uc.GetByPeriod(bid, start, end)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

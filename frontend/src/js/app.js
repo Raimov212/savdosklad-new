@@ -1559,9 +1559,12 @@ window.openDateFilterModal = function() {
           <input type="date" class="form-control" id="filter-end-date" value="${period.end}">
         </div>
       </div>
-      <div class="modal-footer" style="padding-top:15px; border-top:1px solid var(--border);">
-        <button class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
-        <button class="btn btn-primary" onclick="applyDateFilter()">${t("Qo'llash")}</button>
+      <div class="modal-footer" style="padding-top:15px; border-top:1px solid var(--border); display:flex; justify-content:space-between; width:100%;">
+        <button class="btn btn-ghost" style="color:var(--danger);" onclick="resetDateFilter()">${t("Filterni tozalash")}</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-ghost" onclick="closeModal()">${t("Bekor qilish")}</button>
+          <button class="btn btn-primary" onclick="applyDateFilter()">${t("Qo'llash")}</button>
+        </div>
       </div>
     </div>
   `);
@@ -1575,6 +1578,12 @@ window.applyDateFilter = function() {
     return;
   }
   setDatePeriod(start, end);
+  closeModal();
+  navigateTo(window.currentPage);
+};
+
+window.resetDateFilter = function() {
+  clearDatePeriod();
   closeModal();
   navigateTo(window.currentPage);
 };

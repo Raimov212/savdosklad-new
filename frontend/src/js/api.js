@@ -275,9 +275,18 @@ export function setDatePeriod(start, end) {
     memoryDatePeriods[page] = { start, end };
 }
 
+export function clearDatePeriod() {
+    const page = window.currentPage || 'dashboard';
+    delete memoryDatePeriods[page];
+}
+
 export function getDateQuery() {
-    const period = getDatePeriod();
-    return `&startDate=${period.start}&endDate=${period.end}`;
+    const page = window.currentPage || 'dashboard';
+    const cached = memoryDatePeriods[page];
+    if (!cached || !cached.start || !cached.end) {
+        return '';
+    }
+    return `&startDate=${cached.start}&endDate=${cached.end}`;
 }
 
 
@@ -359,6 +368,7 @@ window.getSelectedPage = getSelectedPage;
 window.setSelectedPage = setSelectedPage;
 window.getDatePeriod = getDatePeriod;
 window.setDatePeriod = setDatePeriod;
+window.clearDatePeriod = clearDatePeriod;
 window.getDateQuery = getDateQuery;
 window.escapeHtml = escapeHtml;
 window.hasPermission = hasPermission;
