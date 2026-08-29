@@ -160,7 +160,7 @@ func (r *ExpenseRepo) CreateFixedCost(fc *entity.FixedCost) (int, error) {
 func (r *ExpenseRepo) GetFixedCostsByBusinessID(bid int) ([]entity.FixedCost, error) {
 	rows, err := r.db.Query(
 		`SELECT id, name, description, amount, type, "businessId", "createdAt", "updatedAt"
-		FROM fixed_costs WHERE "businessId" = $1 ORDER BY id DESC`, bid,
+		FROM fixed_costs WHERE "businessId" = $1 AND "isDeleted" = false ORDER BY id DESC`, bid,
 	)
 	if err != nil {
 		return nil, err
@@ -178,7 +178,44 @@ func (r *ExpenseRepo) GetFixedCostsByBusinessID(bid int) ([]entity.FixedCost, er
 }
 
 func (r *ExpenseRepo) UpdateFixedCost(id int, req entity.UpdateFixedCostRequest) error {
-	_, err := r.db.Exec(`UPDATE fixed_costs SET amount = $1, "updatedAt" = $2 WHERE id = $3`, req.Amount, time.Now(), id)
+	query := `UPDATE fixed_costs SET "updatedAt" = $1`
+	args := []interface{}{time.Now()}
+	idx := 2
+
+	if req.Name != nil {
+		query += `, name = $` + strconv.Itoa(idx)
+		args = append(args, *req.Name)
+		idx++
+	}
+	if req.Description != nil {
+		query += `, description = $` + strconv.Itoa(idx)
+		args = append(args, *req.Description)
+		idx++
+	}
+	if req.Amount != nil {
+		query += `, amount = $` + strconv.Itoa(idx)
+		args = append(args, *req.Amount)
+		idx++
+	}
+	if req.Type != nil {
+		query += `, type = $` + strconv.Itoa(idx)
+		args = append(args, *req.Type)
+		idx++
+	}
+	if req.IsDeleted != nil {
+		query += `, "isDeleted" = $` + strconv.Itoa(idx)
+		args = append(args, *req.IsDeleted)
+		idx++
+	}
+	query += ` WHERE id = $` + strconv.Itoa(idx)
+	args = append(args, id)
+
+	_, err := r.db.Exec(query, args...)
+	return err
+}
+
+func (r *ExpenseRepo) DeleteFixedCost(id int) error {
+	_, err := r.db.Exec(`UPDATE fixed_costs SET "isDeleted" = true, "updatedAt" = $1 WHERE id = $2`, time.Now(), id)
 	return err
 }
 

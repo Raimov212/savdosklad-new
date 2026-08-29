@@ -1217,6 +1217,21 @@ func (h *ExpenseHandler) UpdateFixedCost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgUpdated)})
 }
 
+// @Summary Delete fixed cost
+// @Tags FixedCosts
+// @Security BearerAuth
+// @Param id path int true "ID"
+// @Success 200 {object} map[string]string
+// @Router /fixed-costs/{id} [delete]
+func (h *ExpenseHandler) DeleteFixedCost(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.uc.DeleteFixedCost(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": i18n.Tc(c, i18n.MsgDeleted)})
+}
+
 // ---- Money Handler ----
 type MoneyHandler struct{ uc *usecase.MoneyUseCase }
 
@@ -1435,6 +1450,7 @@ func RegisterRoutes(
 	r.POST("/fixed-costs", expenseH.CreateFixedCost)
 	r.GET("/fixed-costs", expenseH.GetFixedCostsByBusinessID)
 	r.PUT("/fixed-costs/:id", expenseH.UpdateFixedCost)
+	r.DELETE("/fixed-costs/:id", expenseH.DeleteFixedCost)
 
 	// Money Handlers
 	r.POST("/money", moneyH.Create)

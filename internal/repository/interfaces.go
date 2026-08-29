@@ -111,6 +111,7 @@ type ExpenseRepository interface {
 	CreateFixedCost(fc *entity.FixedCost) (int, error)
 	GetFixedCostsByBusinessID(businessID int) ([]entity.FixedCost, error)
 	UpdateFixedCost(id int, req entity.UpdateFixedCostRequest) error
+	DeleteFixedCost(id int) error
 	CreateFixedFactedCost(ffc *entity.FixedFactedCost) (int, error)
 	GetFixedFactedCostsByBusinessID(businessID int) ([]entity.FixedFactedCost, error)
 }

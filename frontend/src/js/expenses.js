@@ -78,8 +78,29 @@ function setExpensePeriod(p) {
 }
 
 function filterExpensesByPeriod(list, period) {
-  // We show all data grouped correctly in each tab
-  return list; 
+  if (!list || !Array.isArray(list)) return [];
+  if (getDateQuery()) {
+    return list;
+  }
+  const now = new Date();
+  const curYear = now.getFullYear();
+  const curMonth = now.getMonth();
+  const curDate = now.getDate();
+
+  return list.filter(e => {
+    if (!e.createdAt) return false;
+    const d = new Date(e.createdAt);
+    if (isNaN(d.getTime())) return false;
+
+    if (period === 'daily') {
+      return d.getFullYear() === curYear && d.getMonth() === curMonth && d.getDate() === curDate;
+    } else if (period === 'monthly') {
+      return d.getFullYear() === curYear && d.getMonth() === curMonth;
+    } else if (period === 'yearly') {
+      return d.getFullYear() === curYear;
+    }
+    return true;
+  });
 }
 
 function renderExpenseTable(list, isAppend = false) {
@@ -94,7 +115,7 @@ function renderExpenseTable(list, isAppend = false) {
     allExpensesList = list;
   }
   const query = (document.getElementById('expense-search')?.value || '').toLowerCase().trim();
-  const sourceList = allExpensesList;
+  const sourceList = filterExpensesByPeriod(allExpensesList, window.expensePeriod);
   let filteredRaw = sourceList.filter(e => {
     if (!query) return true;
     const desc = (e.description || '').toLowerCase();
@@ -293,6 +314,7 @@ function renderFixedTable(list, isAppend = false) {
       <td style="text-align:center"><span style="font-size:13px; color:var(--text-muted)">${escapeHtml(f.description) || '—'}</span></td>
       <td class="actions" style="justify-content:center">
         ${window.hasPermission('edit') ? `<button class="btn-icon" onclick='openFixedCostModal(${JSON.stringify(f).replace(/'/g, "&#39;")})' title="${t("Tahrirlash")}">✏️</button>` : ''}
+        ${window.hasPermission('delete') ? `<button class="btn-icon" onclick="deleteFixedCost(${f.id})" style="color:var(--danger)" title="${t("O'chirish")}">🗑️</button>` : ''}
       </td>
     </tr>`).join('');
 
@@ -398,6 +420,39 @@ async function deleteExpense(id) {
   }
 }
 
+async function deleteFixedCost(id) {
+  if (!confirm(t("Haqiqatan ham bu doimiy xarajatni o'chirmoqchimisiz?"))) return;
+  try {
+    await api.delete('/fixed-costs/' + id);
+    showToast(t("O'chirildi"));
+    renderExpenses();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+function syncExpenseTotal(source) {
+  const totalEl = document.getElementById('exp-total');
+  const cashEl = document.getElementById('exp-cash');
+  const cardEl = document.getElementById('exp-card');
+  if (!totalEl || !cashEl || !cardEl) return;
+
+  if (source === 'pay') {
+    const cash = parseFloat(cashEl.value) || 0;
+    const card = parseFloat(cardEl.value) || 0;
+    totalEl.value = (cash + card) > 0 ? (cash + card) : '';
+  } else if (source === 'total') {
+    const total = parseFloat(totalEl.value) || 0;
+    const card = parseFloat(cardEl.value) || 0;
+    if (card <= 0 || card > total) {
+      cashEl.value = total > 0 ? total : 0;
+      cardEl.value = 0;
+    } else {
+      cashEl.value = total - card;
+    }
+  }
+}
+
 function openExpenseModal(e = null) {
   const isEdit = !!e;
   openModal(`
@@ -409,7 +464,7 @@ function openExpenseModal(e = null) {
       <div class="form-group">
         <label>${t("Jami summa")}</label>
         <div style="position:relative">
-          <input type="number" step="0.01" class="form-control" id="exp-total" value="${isEdit ? e.total : ''}" placeholder="0.00" required style="padding-right:45px; font-weight:700; font-size:18px;">
+          <input type="number" step="0.01" class="form-control" id="exp-total" value="${isEdit ? e.total : ''}" placeholder="0.00" required oninput="syncExpenseTotal('total')" style="padding-right:45px; font-weight:700; font-size:18px;">
           <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); opacity:0.5; font-size:12px;">UZS</span>
         </div>
       </div>
@@ -419,11 +474,11 @@ function openExpenseModal(e = null) {
         <div class="form-row" style="margin-bottom:0">
           <div class="form-group" style="margin-bottom:0">
             <label style="font-size:11px">${t("Naqd")}</label>
-            <input type="number" step="0.01" class="form-control" id="exp-cash" value="${isEdit ? e.cash : '0'}">
+            <input type="number" step="0.01" class="form-control" id="exp-cash" value="${isEdit ? e.cash : '0'}" oninput="syncExpenseTotal('pay')">
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label style="font-size:11px">${t("Karta")}</label>
-            <input type="number" step="0.01" class="form-control" id="exp-card" value="${isEdit ? e.card : '0'}">
+            <input type="number" step="0.01" class="form-control" id="exp-card" value="${isEdit ? e.card : '0'}" oninput="syncExpenseTotal('pay')">
           </div>
         </div>
       </div>
@@ -445,11 +500,22 @@ async function saveExpense(e, id) {
   e.preventDefault();
   const bid = getSelectedBusinessId();
   try {
+    let total = parseFloat(document.getElementById('exp-total').value) || 0;
+    let cash = parseFloat(document.getElementById('exp-cash').value) || 0;
+    let card = parseFloat(document.getElementById('exp-card').value) || 0;
+
+    if (cash === 0 && card === 0 && total > 0) {
+      cash = total;
+    }
+    if (cash + card !== total) {
+      total = cash + card;
+    }
+
     const payload = {
       businessId: bid,
-      total: parseFloat(document.getElementById('exp-total').value),
-      cash: parseFloat(document.getElementById('exp-cash').value) || 0,
-      card: parseFloat(document.getElementById('exp-card').value) || 0,
+      total: total,
+      cash: cash,
+      card: card,
       description: document.getElementById('exp-desc').value.trim(),
     };
     if (id) {
@@ -558,6 +624,8 @@ window.openExpenseModal = openExpenseModal;
 window.saveExpense = saveExpense;
 window.editExpense = editExpense;
 window.deleteExpense = deleteExpense;
+window.deleteFixedCost = deleteFixedCost;
+window.syncExpenseTotal = syncExpenseTotal;
 window.renderFixedTable = renderFixedTable;
 window.filterFixed = filterFixed;
 window.openFixedCostModal = openFixedCostModal;

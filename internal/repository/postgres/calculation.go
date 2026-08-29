@@ -107,7 +107,7 @@ func (r *CalculationRepo) GetStats(bid, month, year int) (*entity.CalculationSta
 	// 4. Total Fixed Costs
 	err = r.db.QueryRow(
 		`SELECT COALESCE(SUM(amount), 0) FROM fixed_costs
-		 WHERE "businessId" = $1`,
+		 WHERE "businessId" = $1 AND "isDeleted" = false`,
 		bid,
 	).Scan(&stats.TotalFixedCosts)
 	if err != nil {
@@ -186,7 +186,7 @@ func (r *CalculationRepo) GetExpenseBreakdown(bid, month, year int) ([]entity.To
 func (r *CalculationRepo) GetFixedBreakdown(bid int) ([]entity.FixedCost, error) {
 	query := `SELECT id, name, description, amount, type, "businessId", "createdAt", "updatedAt"
 		 FROM fixed_costs 
-		 WHERE "businessId" = $1 
+		 WHERE "businessId" = $1 AND "isDeleted" = false
 		 ORDER BY amount DESC`
 
 	rows, err := r.db.Query(query, bid)

@@ -702,6 +702,9 @@ func (uc *ExpenseUseCase) GetFixedCostsByBusinessID(bid int) ([]entity.FixedCost
 func (uc *ExpenseUseCase) UpdateFixedCost(id int, req entity.UpdateFixedCostRequest) error {
 	return uc.repo.UpdateFixedCost(id, req)
 }
+func (uc *ExpenseUseCase) DeleteFixedCost(id int) error {
+	return uc.repo.DeleteFixedCost(id)
+}
 
 type MoneyUseCase struct{ repo repository.MoneyRepository }
 
