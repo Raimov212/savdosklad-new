@@ -489,10 +489,10 @@ function searchSaleProduct(query) {
   }
 
   const q = (query || '').toLowerCase();
-  
+
   // Check for exact barcode match (Scanner support)
   const exactBarcodeMatch = saleProducts.find(p => p.barcode === (query || '').trim());
-  
+
   const filtered = saleProducts.filter(p =>
     (p.name && String(p.name).toLowerCase().includes(q)) || (p.barcode && String(p.barcode).toLowerCase().includes(q))
   ).slice(0, 10);
@@ -537,7 +537,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-window.searchSaleClient = function(query) {
+window.searchSaleClient = function (query) {
   const dropdown = document.getElementById('sale-client-results');
   if (!dropdown) return;
   if (!query.trim()) {
@@ -569,19 +569,19 @@ window.searchSaleClient = function(query) {
   dropdown.style.display = 'block';
 };
 
-window.selectSaleClient = function(id) {
+window.selectSaleClient = function (id) {
   const client = globalClients.find(c => c.id == id);
   if (!client) return;
 
   const input = document.getElementById('sale-client-search');
   if (input) input.value = client.fullName;
-  
+
   const hiddenInput = document.getElementById('sale-client-id');
   if (hiddenInput) hiddenInput.value = id;
 
   const dropdown = document.getElementById('sale-client-results');
   if (dropdown) dropdown.style.display = 'none';
-  
+
   window.onSaleClientChange(id);
 };
 
@@ -601,8 +601,8 @@ function addSaleProductById(id) {
   if (existing) {
     existing.quantity++;
   } else {
-    const priceAfterDiscount = product.discount > 0 
-      ? product.price * (1 - product.discount / 100) 
+    const priceAfterDiscount = product.discount > 0
+      ? product.price * (1 - product.discount / 100)
       : product.price;
 
     saleItems.push({
@@ -771,7 +771,7 @@ function updateSalePayment() {
 
   if (bdSubtotal) bdSubtotal.textContent = `${formatPrice(overallTotal)} ${t("so'm")}`;
   if (bdDiscount) bdDiscount.textContent = `- ${formatPrice(discount)} ${t("so'm")}`;
-  
+
   if (cashbackUsed > 0) {
     if (bdCashbackRow) bdCashbackRow.style.display = 'flex';
     if (bdCashback) bdCashback.textContent = `- ${formatPrice(cashbackUsed)} ${t("so'm")}`;
@@ -799,9 +799,9 @@ function updateSalePayment() {
   if (bdRemaining) {
     bdRemaining.textContent = `${formatPrice(Math.max(0, remainingToPay))} ${t("so'm")}`;
     if (remainingToPay <= 0) {
-        bdRemaining.style.color = 'var(--success)';
+      bdRemaining.style.color = 'var(--success)';
     } else {
-        bdRemaining.style.color = 'var(--primary)';
+      bdRemaining.style.color = 'var(--primary)';
     }
   }
 
@@ -1046,19 +1046,19 @@ async function finalizeSale(e) {
     }
 
     showToast(t('Sotuv muvaffaqiyatli yakunlandi!'), 'success');
-    
+
     // Reset sale state and return to step 1
     saleItems = [];
     savedBatchItems = [];
     currentTotalTransactionID = null;
     cumulativePayments = { cash: 0, card: 0, click: 0, debt: 0 };
-    
+
     if (document.getElementById('sale-step-1')) {
       document.getElementById('sale-step-1').style.display = 'block';
       document.getElementById('sale-step-2').style.display = 'none';
       document.getElementById('step-1-indicator').classList.add('active');
       document.getElementById('step-2-indicator').classList.remove('active');
-      
+
       const cashInp = document.getElementById('sale-cash');
       const cardInp = document.getElementById('sale-card');
       const clickInp = document.getElementById('sale-click');
@@ -1067,25 +1067,25 @@ async function finalizeSale(e) {
       if (clickInp) clickInp.value = 0;
       const discountInp = document.getElementById('sale-discount');
       if (discountInp) discountInp.value = 0;
-      
+
       const clientInp = document.getElementById('sale-client-search');
       if (clientInp) clientInp.value = '';
       const clientIdInp = document.getElementById('sale-client-id');
       if (clientIdInp) clientIdInp.value = '';
-      
+
       const descInp = document.getElementById('sale-desc');
       if (descInp) descInp.value = '';
-      
+
       renderSaleItems();
       updateSaleTotal();
-      
+
       const searchInp = document.getElementById('sale-product-search');
       if (searchInp) {
         searchInp.value = '';
         searchInp.focus();
       }
     } else {
-        closeModal();
+      closeModal();
     }
     renderTransactions();
   } catch (err) {
@@ -1101,9 +1101,9 @@ async function viewTransactionItems(ids) {
     const bid = getSelectedBusinessId();
     const allTrans = await Promise.all(ids.map(id => api.get(`/transactions/${id}?businessId=${bid}`)));
     const allItems = await Promise.all(ids.map(id => api.get(`/transactions/${id}/items?businessId=${bid}`)));
-    
+
     const list = allItems.filter(items => items !== null).flat();
-    
+
     // Sum up totals from all transactions in the set
     const totalCashback = allTrans.reduce((s, t) => s + (t.cashbackUsed || 0), 0);
     const totalPointsMoney = allTrans.reduce((s, t) => s + (t.pointsUsed || 0), 0);
@@ -1219,7 +1219,7 @@ async function editTransactionItem(itemId, transIds) {
 
     const newQty = prompt(t("Yangi miqdorni kiriting:"), item.productQuantity);
     if (newQty === null) return;
-    
+
     const newPrice = prompt(t("Yangi narxni kiriting:"), item.productPrice);
     if (newPrice === null) return;
 
@@ -1255,6 +1255,8 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
   if (!Array.isArray(ids)) ids = [ids];
   const { jsPDF } = window.jspdf;
   const bid = getSelectedBusinessId();
+
+
   try {
     showToast(t('PDF tayyorlanmoqda...'), 'info');
 
@@ -1266,6 +1268,7 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
     ]);
     const clients = clientsResults.flat();
     const transItems = allItems.flat();
+
 
     // Use the provided grouped metadata or find the first one
     const transaction = groupedTrans || allTransactionsList.find(t => t.id === ids[0]);
@@ -1297,7 +1300,7 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
     doc.setTextColor(0, 0, 0);
     const client = clients && transaction.clientId ? clients.find(c => c.id === transaction.clientId) : null;
 
-    let currentY = 15;
+    let currentY = 20;
     if (client) {
       doc.text(`${t("Mijoz")}: ${client.fullName}`, 15, currentY); currentY += 6;
       doc.text(`${t("Manzil")}: ${client.address || "-"}`, 15, currentY); currentY += 6;
@@ -1358,7 +1361,10 @@ async function downloadTransactionPdf(ids, groupedTrans = null) {
     doc.setTextColor(180, 180, 180);
     doc.text(`${formatDateTime(transaction.createdAt)} ${t("da generatsiya qilindi")} [IDs: ${ids.join(',')}]`, 10, 285);
 
-    doc.text(`${t("Sotuv tafsilotlari")}` + ` ` + `№: ${ids.join(', ')}`, 105, 10, { align: "center" });
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${t("Sotuv tafsilotlari")}` + ` ` + `№ : ${ids.join(', ')} `, 105, 10, { align: "center" });
+    doc.text(`Sana : ${formatDateTime(transaction.createdAt)} `, 105, 15, { align: "center" });
     doc.save(`${t("Sotuv_")}${ids.join('_')}.pdf`);
     showToast(t('PDF yuklab olindi'));
     return doc.output('blob'); // Return for Telegram use
@@ -1479,7 +1485,7 @@ window.allTransactionsList = allTransactionsList;
 window.currentTransactions = currentTransactions;
 window.saleProducts = saleProducts;
 window.saleItems = saleItems;
-window.onSaleClientChange = function(clientId) {
+window.onSaleClientChange = function (clientId) {
   const bid = getSelectedBusinessId();
   const bonusSection = document.getElementById('bonus-section');
   const bonusCards = document.getElementById('bonus-cards-container');
@@ -1496,7 +1502,7 @@ window.onSaleClientChange = function(clientId) {
     updateSalePayment();
     return;
   }
-  
+
   const client = globalClients.find(c => c.id == clientId);
   if (!client) return;
 
@@ -1528,10 +1534,10 @@ window.onSaleClientChange = function(clientId) {
   const ptCard = document.createElement('div');
   ptCard.className = 'bonus-card';
   ptCard.style = `background:var(--bg-glass); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;`;
-  
+
   const pointsBalance = client.pointsBalance || 0;
-  let pointValue = 100; 
-  let earnRate = 10000; 
+  let pointValue = 100;
+  let earnRate = 10000;
 
   ptCard.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px;">
@@ -1586,13 +1592,13 @@ window.onSaleClientChange = function(clientId) {
   let targetBid = bid;
   if (!targetBid && saleItems.length > 0) targetBid = saleItems[0].businessId;
   if (targetBid) {
-      api.get(`/businesses/${targetBid}`).then(business => {
-        if (business) {
-          pointValue = business.pointValue || 100;
-          earnRate = business.pointsRate || 10000;
-          if (window.updatePointsEarnedPreview) window.updatePointsEarnedPreview();
-        }
-      });
+    api.get(`/businesses/${targetBid}`).then(business => {
+      if (business) {
+        pointValue = business.pointValue || 100;
+        earnRate = business.pointsRate || 10000;
+        if (window.updatePointsEarnedPreview) window.updatePointsEarnedPreview();
+      }
+    });
   }
   updateSalePayment();
 };
