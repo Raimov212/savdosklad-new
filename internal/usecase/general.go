@@ -660,6 +660,13 @@ func NewExpenseUseCase(r repository.ExpenseRepository, n *notifier.TelegramNotif
 }
 func (uc *ExpenseUseCase) CreateTotalExpense(userID int, req entity.CreateTotalExpenseRequest) (int, error) {
 	te := &entity.TotalExpense{BusinessID: req.BusinessID, Total: req.Total, Cash: req.Cash, Card: req.Card, CreatedBy: &userID}
+	if req.ExpenseDate != "" {
+		d, err := parseExpenseDate(req.ExpenseDate)
+		if err != nil {
+			return 0, err
+		}
+		te.CreatedAt = d
+	}
 	if req.Description != "" {
 		d := req.Description
 		te.Description = &d
@@ -681,7 +688,33 @@ func (uc *ExpenseUseCase) GetByPeriod(bid int, start, end time.Time) ([]entity.T
 	return uc.repo.GetTotalExpensesByPeriod(bid, start, end)
 }
 func (uc *ExpenseUseCase) UpdateTotalExpense(id int, req entity.UpdateTotalExpenseRequest) error {
+	if req.ExpenseDate != nil && *req.ExpenseDate != "" {
+		d, err := parseExpenseDate(*req.ExpenseDate)
+		if err != nil {
+			return err
+		}
+		req.CreatedAt = &d
+	}
 	return uc.repo.UpdateTotalExpense(id, req)
+}
+
+// parseExpenseDate "YYYY-MM-DD" sanani Toshkent vaqtida, hozirgi soat bilan qaytaradi.
+// Kelajakdagi sana qabul qilinmaydi.
+func parseExpenseDate(s string) (time.Time, error) {
+	loc, err := time.LoadLocation("Asia/Tashkent")
+	if err != nil {
+		loc = time.FixedZone("UTC+5", 5*3600)
+	}
+	day, err := time.ParseInLocation("2006-01-02", s, loc)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("noto'g'ri sana: %s", s)
+	}
+	now := time.Now().In(loc)
+	d := time.Date(day.Year(), day.Month(), day.Day(), now.Hour(), now.Minute(), now.Second(), 0, loc)
+	if d.After(now) {
+		return time.Time{}, fmt.Errorf("kelajakdagi sanani kiritib bo'lmaydi")
+	}
+	return d, nil
 }
 func (uc *ExpenseUseCase) DeleteTotalExpense(id int) error {
 	return uc.repo.DeleteTotalExpense(id)
@@ -753,8 +786,8 @@ func (uc *CalculationUseCase) GetIncomeBreakdown(bid, month, year int) ([]entity
 func (uc *CalculationUseCase) GetExpenseBreakdown(bid, month, year int) ([]entity.TotalExpense, error) {
 	return uc.repo.GetExpenseBreakdown(bid, month, year)
 }
-func (uc *CalculationUseCase) GetFixedBreakdown(bid int) ([]entity.FixedCost, error) {
-	return uc.repo.GetFixedBreakdown(bid)
+func (uc *CalculationUseCase) GetFixedBreakdown(bid, month, year int) ([]entity.FixedCost, error) {
+	return uc.repo.GetFixedBreakdown(bid, month, year)
 }
 
 type CashbackTierUseCase struct {

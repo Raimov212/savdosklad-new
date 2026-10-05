@@ -289,7 +289,7 @@ function openCalculationModal() {
           <div class="form-group">
             <label style="font-size:12px; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
               ${t("Doimiy xarajatlar")}
-              <button type="button" class="btn btn-ghost" style="padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; opacity:0.6; background:rgba(239, 68, 68, 0.1); border-radius:50%;" onclick="const bid = getSelectedBusinessId(); showFixedBreakdown(bid);" title="${t("Doimiy xarajatlar yoyilmasini ko'rish")}">ℹ️</button>
+              <button type="button" class="btn btn-ghost" style="padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; opacity:0.6; background:rgba(239, 68, 68, 0.1); border-radius:50%;" onclick="const bid = getSelectedBusinessId(); const month = document.getElementById('calc-month').value; const year = document.getElementById('calc-year').value; showFixedBreakdown(bid, month, year);" title="${t("Doimiy xarajatlar yoyilmasini ko'rish")}">ℹ️</button>
             </label>
             <input type="number" step="0.01" class="form-control" id="calc-fixed" value="0" oninput="calculateNetProfit()">
           </div>
@@ -512,9 +512,9 @@ window.showExpenseBreakdown = async function(bid, month, year) {
   }
 };
 
-window.showFixedBreakdown = async function(bid) {
+window.showFixedBreakdown = async function(bid, month, year) {
   try {
-    const data = await api.get(`/calculations/fixed-breakdown?businessId=${bid}`);
+    const data = await api.get(`/calculations/fixed-breakdown?businessId=${bid}${month && year ? `&month=${month}&year=${year}` : ''}`);
     if (!data || data.length === 0) {
       showToast(t("Ma'lumot topilmadi"), 'info');
       return;

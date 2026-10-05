@@ -107,8 +107,8 @@ func (r *CalculationRepo) GetStats(bid, month, year int) (*entity.CalculationSta
 	// 4. Total Fixed Costs
 	err = r.db.QueryRow(
 		`SELECT COALESCE(SUM(amount), 0) FROM fixed_costs
-		 WHERE "businessId" = $1 AND "isDeleted" = false`,
-		bid,
+		 WHERE "businessId" = $1 AND `+fixedCostActiveInMonth,
+		bid, month, year,
 	).Scan(&stats.TotalFixedCosts)
 	if err != nil {
 		return nil, err
@@ -183,13 +183,26 @@ func (r *CalculationRepo) GetExpenseBreakdown(bid, month, year int) ([]entity.To
 	return list, nil
 }
 
-func (r *CalculationRepo) GetFixedBreakdown(bid int) ([]entity.FixedCost, error) {
+// fixedCostActiveInMonth: doimiy xarajat shu oy oxirigacha qo'shilgan bo'lsin va
+// o'chirilmagan yoki shu oy boshlangandan keyin o'chirilgan bo'lsin ($2 = oy, $3 = yil).
+const fixedCostActiveInMonth = `"createdAt" < make_date($3, $2, 1) + interval '1 month'
+		   AND ("isDeleted" = false OR "updatedAt" >= make_date($3, $2, 1))`
+
+func (r *CalculationRepo) GetFixedBreakdown(bid, month, year int) ([]entity.FixedCost, error) {
 	query := `SELECT id, name, description, amount, type, "businessId", "createdAt", "updatedAt"
-		 FROM fixed_costs 
+		 FROM fixed_costs
 		 WHERE "businessId" = $1 AND "isDeleted" = false
 		 ORDER BY amount DESC`
+	args := []interface{}{bid}
+	if month >= 1 && month <= 12 && year > 0 {
+		query = `SELECT id, name, description, amount, type, "businessId", "createdAt", "updatedAt"
+		 FROM fixed_costs
+		 WHERE "businessId" = $1 AND ` + fixedCostActiveInMonth + `
+		 ORDER BY amount DESC`
+		args = append(args, month, year)
+	}
 
-	rows, err := r.db.Query(query, bid)
+	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

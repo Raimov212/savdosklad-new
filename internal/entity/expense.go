@@ -33,14 +33,17 @@ type CreateTotalExpenseRequest struct {
 	Cash        float64                    `json:"cash"`
 	Card        float64                    `json:"card"`
 	Description string                     `json:"description"`
+	ExpenseDate string                     `json:"expenseDate"` // YYYY-MM-DD, bo'sh bo'lsa hozirgi vaqt
 	Items       []CreateExpenseItemRequest `json:"items"`
 }
 
 type UpdateTotalExpenseRequest struct {
-	Total       *float64 `json:"total"`
-	Cash        *float64 `json:"cash"`
-	Card        *float64 `json:"card"`
-	Description *string  `json:"description"`
+	Total       *float64   `json:"total"`
+	Cash        *float64   `json:"cash"`
+	Card        *float64   `json:"card"`
+	Description *string    `json:"description"`
+	ExpenseDate *string    `json:"expenseDate"` // YYYY-MM-DD
+	CreatedAt   *time.Time `json:"-"`
 }
 
 type CreateExpenseItemRequest struct {

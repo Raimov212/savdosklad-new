@@ -453,14 +453,30 @@ function syncExpenseTotal(source) {
   }
 }
 
+// Date -> "YYYY-MM-DD" (mahalliy vaqt bo'yicha)
+function toDateInputValue(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function openExpenseModal(e = null) {
   const isEdit = !!e;
+  const today = toDateInputValue(new Date());
+  const created = isEdit && e.createdAt ? new Date(e.createdAt) : null;
+  const dateValue = created && !isNaN(created.getTime()) ? toDateInputValue(created) : today;
   openModal(`
     <div class="modal-header">
       <h3>${isEdit ? t("Xarajatni tahrirlash") : t("Yangi xarajat")}</h3>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <form onsubmit="saveExpense(event, ${isEdit ? e.id : 'null'})" style="width:100%">
+      <div class="form-group">
+        <label>${t("Sana")}</label>
+        <input type="date" class="form-control" id="exp-date" value="${dateValue}" data-original="${dateValue}" max="${today}" required>
+      </div>
+
       <div class="form-group">
         <label>${t("Jami summa")}</label>
         <div style="position:relative">
@@ -518,6 +534,14 @@ async function saveExpense(e, id) {
       card: card,
       description: document.getElementById('exp-desc').value.trim(),
     };
+    const dateEl = document.getElementById('exp-date');
+    const expenseDate = dateEl ? dateEl.value : '';
+    if (id) {
+      // Tahrirlashda sana o'zgarmagan bo'lsa, asl vaqtni saqlab qolamiz
+      if (expenseDate && expenseDate !== dateEl.dataset.original) payload.expenseDate = expenseDate;
+    } else if (expenseDate && expenseDate !== toDateInputValue(new Date())) {
+      payload.expenseDate = expenseDate;
+    }
     if (id) {
       await api.put('/expenses/' + id, payload);
       showToast(t("O'zgarishlar saqlandi"));

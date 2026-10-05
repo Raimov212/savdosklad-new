@@ -18,10 +18,14 @@ func NewExpenseRepo(db *sql.DB) *ExpenseRepo {
 func (r *ExpenseRepo) CreateTotalExpense(te *entity.TotalExpense) (int, error) {
 	var id int
 	now := time.Now()
+	createdAt := now
+	if !te.CreatedAt.IsZero() {
+		createdAt = te.CreatedAt
+	}
 	err := r.db.QueryRow(
 		`INSERT INTO total_expenses ("total", "cash", "card", "description", "businessId", "createdBy", "createdAt", "updatedAt")
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-		te.Total, te.Cash, te.Card, te.Description, te.BusinessID, te.CreatedBy, now, now,
+		te.Total, te.Cash, te.Card, te.Description, te.BusinessID, te.CreatedBy, createdAt, now,
 	).Scan(&id)
 	return id, err
 }
@@ -133,6 +137,11 @@ func (r *ExpenseRepo) UpdateTotalExpense(id int, req entity.UpdateTotalExpenseRe
 	if req.Description != nil {
 		query += `, "description" = $` + strconv.Itoa(idx)
 		args = append(args, *req.Description)
+		idx++
+	}
+	if req.CreatedAt != nil {
+		query += `, "createdAt" = $` + strconv.Itoa(idx)
+		args = append(args, *req.CreatedAt)
 		idx++
 	}
 	query += ` WHERE id = $` + strconv.Itoa(idx)

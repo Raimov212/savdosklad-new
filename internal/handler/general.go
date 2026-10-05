@@ -1321,8 +1321,10 @@ func (h *CalculationHandler) GetExpenseBreakdown(c *gin.Context) {
 
 func (h *CalculationHandler) GetFixedBreakdown(c *gin.Context) {
 	bid, _ := strconv.Atoi(c.Query("businessId"))
+	month, _ := strconv.Atoi(c.Query("month"))
+	year, _ := strconv.Atoi(c.Query("year"))
 
-	list, err := h.uc.GetFixedBreakdown(bid)
+	list, err := h.uc.GetFixedBreakdown(bid, month, year)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
