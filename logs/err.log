@@ -358,3 +358,5 @@
 2026/10/05 05:42:06 [Repo] GetByUserID returned 2 businesses for 5
 2026/10/05 05:42:08 [Repo] GetByUserID returned 2 businesses for 5
 2026/10/05 05:45:07 Database connected successfully
+2026/10/05 05:45:08 Server starting on port 8080...
+2026/10/05 05:45:12 [Repo] GetByUserID returned 2 businesses for 5
