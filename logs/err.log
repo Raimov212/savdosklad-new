@@ -342,3 +342,19 @@
 2026/10/05 03:12:19 [Repo] GetByUserID returned 1 businesses for 18
 2026/10/05 03:45:46 [Repo] GetByUserID returned 2 businesses for 5
 2026/10/05 03:58:35 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 04:09:31 Database connected successfully
+2026/10/05 04:09:31 Server starting on port 8080...
+2026/10/05 04:09:52 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 04:49:50 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 04:53:45 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 04:53:46 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 04:53:48 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 04:55:15 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 04:55:28 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 05:22:46 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 05:33:14 Database connected successfully
+2026/10/05 05:33:14 Server starting on port 8080...
+2026/10/05 05:33:19 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 05:42:06 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 05:42:08 [Repo] GetByUserID returned 2 businesses for 5
+2026/10/05 05:45:07 Database connected successfully

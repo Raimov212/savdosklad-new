@@ -5775,3 +5775,860 @@ Error #01: write tcp 127.0.0.1:8080->127.0.0.1:62367: wsasend: An established co
 [GIN] 2026/10/05 - 04:01:12 | 200 |     10.1512ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
 [GIN] 2026/10/05 - 04:01:12 | 200 |       2.573ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
 [GIN] 2026/10/05 - 04:04:10 | 404 |            0s |  45.198.224.125 | GET      "/"
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /images/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] HEAD   /images/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (5 handlers)
+[GIN-debug] POST   /api/v1/auth/register     --> savdosklad/internal/handler.(*UserHandler).Register-fm (5 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> savdosklad/internal/handler.(*UserHandler).Login-fm (5 handlers)
+[GIN-debug] POST   /api/v1/auth/forgot-password --> savdosklad/internal/handler.(*UserHandler).ForgotPassword-fm (5 handlers)
+[GIN-debug] POST   /api/v1/auth/reset-password --> savdosklad/internal/handler.(*UserHandler).ResetPassword-fm (5 handlers)
+[GIN-debug] GET    /api/v1/geography/regions --> savdosklad/internal/handler.(*GeographyHandler).GetRegions-fm (5 handlers)
+[GIN-debug] GET    /api/v1/geography/districts --> savdosklad/internal/handler.(*GeographyHandler).GetDistricts-fm (5 handlers)
+[GIN-debug] GET    /api/v1/geography/markets --> savdosklad/internal/handler.(*GeographyHandler).GetMarkets-fm (5 handlers)
+[GIN-debug] POST   /api/v1/upload            --> savdosklad/internal/handler.(*UploadHandler).Upload-fm (5 handlers)
+[GIN-debug] GET    /api/v1/users             --> savdosklad/internal/handler.(*UserHandler).GetAll-fm (7 handlers)
+[GIN-debug] GET    /api/v1/users/my-employees --> savdosklad/internal/handler.(*UserHandler).GetMyEmployees-fm (7 handlers)
+[GIN-debug] POST   /api/v1/users/employees   --> savdosklad/internal/handler.(*UserHandler).CreateEmployee-fm (7 handlers)
+[GIN-debug] POST   /api/v1/users/telegram-link --> savdosklad/internal/handler.(*UserHandler).GenerateTelegramLink-fm (7 handlers)
+[GIN-debug] GET    /api/v1/users/referred    --> savdosklad/internal/handler.(*UserHandler).GetReferredUsers-fm (7 handlers)
+[GIN-debug] GET    /api/v1/users/:id         --> savdosklad/internal/handler.(*UserHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/users/:id         --> savdosklad/internal/handler.(*UserHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/users/:id         --> savdosklad/internal/handler.(*UserHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/businesses        --> savdosklad/internal/handler.(*BusinessHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/businesses        --> savdosklad/internal/handler.(*BusinessHandler).GetAll-fm (7 handlers)
+[GIN-debug] GET    /api/v1/businesses/my     --> savdosklad/internal/handler.(*BusinessHandler).GetMy-fm (7 handlers)
+[GIN-debug] GET    /api/v1/businesses/:id    --> savdosklad/internal/handler.(*BusinessHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/businesses/:id    --> savdosklad/internal/handler.(*BusinessHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/businesses/:id    --> savdosklad/internal/handler.(*BusinessHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/categories        --> savdosklad/internal/handler.(*CategoryHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/categories        --> savdosklad/internal/handler.(*CategoryHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/categories/:id    --> savdosklad/internal/handler.(*CategoryHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/categories/:id    --> savdosklad/internal/handler.(*CategoryHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/products          --> savdosklad/internal/handler.(*ProductHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products          --> savdosklad/internal/handler.(*ProductHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/my       --> savdosklad/internal/handler.(*ProductHandler).GetMyProducts-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/search   --> savdosklad/internal/handler.(*ProductHandler).Search-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/:id      --> savdosklad/internal/handler.(*ProductHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/products/:id      --> savdosklad/internal/handler.(*ProductHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> savdosklad/internal/handler.(*ProductHandler).Delete-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/products/bulk     --> savdosklad/internal/handler.(*ProductHandler).BulkDelete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/products/bulk/request --> savdosklad/internal/handler.(*ProductHandler).CreateBulkDeleteRequest-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/bulk/requests --> savdosklad/internal/handler.(*ProductHandler).GetBulkDeleteRequests-fm (7 handlers)
+[GIN-debug] POST   /api/v1/products/bulk/requests/:id/status --> savdosklad/internal/handler.(*ProductHandler).ApproveBulkDeleteRequest-fm (7 handlers)
+[GIN-debug] POST   /api/v1/clients           --> savdosklad/internal/handler.(*ClientHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/clients           --> savdosklad/internal/handler.(*ClientHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/clients/:id       --> savdosklad/internal/handler.(*ClientHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/clients/:id       --> savdosklad/internal/handler.(*ClientHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/transactions      --> savdosklad/internal/handler.(*TransactionHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions      --> savdosklad/internal/handler.(*TransactionHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/:id  --> savdosklad/internal/handler.(*TransactionHandler).GetByID-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/transactions/:id  --> savdosklad/internal/handler.(*TransactionHandler).Delete-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/transactions/:id  --> savdosklad/internal/handler.(*TransactionHandler).Update-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/:id/items --> savdosklad/internal/handler.(*TransactionHandler).GetItems-fm (7 handlers)
+[GIN-debug] POST   /api/v1/transactions/:id/items --> savdosklad/internal/handler.(*TransactionHandler).AddItems-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/items/:id --> savdosklad/internal/handler.(*TransactionHandler).GetItem-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/transactions/items/:id --> savdosklad/internal/handler.(*TransactionHandler).UpdateItem-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/transactions/items/:id --> savdosklad/internal/handler.(*TransactionHandler).DeleteItem-fm (7 handlers)
+[GIN-debug] POST   /api/v1/transactions/:id/send-telegram --> savdosklad/internal/handler.(*TransactionHandler).SendTelegram-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/client/:id --> savdosklad/internal/handler.(*TransactionHandler).GetByClientID-fm (7 handlers)
+[GIN-debug] POST   /api/v1/refunds           --> savdosklad/internal/handler.(*RefundHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/refunds           --> savdosklad/internal/handler.(*RefundHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/refunds/:id/items --> savdosklad/internal/handler.(*RefundHandler).GetItems-fm (7 handlers)
+[GIN-debug] POST   /api/v1/expenses          --> savdosklad/internal/handler.(*ExpenseHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/expenses          --> savdosklad/internal/handler.(*ExpenseHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/expenses/:id      --> savdosklad/internal/handler.(*ExpenseHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/expenses/:id      --> savdosklad/internal/handler.(*ExpenseHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/fixed-costs       --> savdosklad/internal/handler.(*ExpenseHandler).CreateFixedCost-fm (7 handlers)
+[GIN-debug] GET    /api/v1/fixed-costs       --> savdosklad/internal/handler.(*ExpenseHandler).GetFixedCostsByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/fixed-costs/:id   --> savdosklad/internal/handler.(*ExpenseHandler).UpdateFixedCost-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/fixed-costs/:id   --> savdosklad/internal/handler.(*ExpenseHandler).DeleteFixedCost-fm (7 handlers)
+[GIN-debug] POST   /api/v1/money             --> savdosklad/internal/handler.(*MoneyHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/money             --> savdosklad/internal/handler.(*MoneyHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] POST   /api/v1/calculations      --> savdosklad/internal/handler.(*CalculationHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations      --> savdosklad/internal/handler.(*CalculationHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/stats --> savdosklad/internal/handler.(*CalculationHandler).GetStats-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/income-breakdown --> savdosklad/internal/handler.(*CalculationHandler).GetIncomeBreakdown-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/expense-breakdown --> savdosklad/internal/handler.(*CalculationHandler).GetExpenseBreakdown-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/fixed-breakdown --> savdosklad/internal/handler.(*CalculationHandler).GetFixedBreakdown-fm (7 handlers)
+[GIN-debug] POST   /api/v1/salaries          --> savdosklad/internal/handler.(*SalaryHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/salaries          --> savdosklad/internal/handler.(*SalaryHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/salaries/total    --> savdosklad/internal/handler.(*SalaryHandler).GetTotalByPeriod-fm (7 handlers)
+[GIN-debug] GET    /api/v1/salaries/employee/:employeeId --> savdosklad/internal/handler.(*SalaryHandler).GetByEmployeeID-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/salaries/:id      --> savdosklad/internal/handler.(*SalaryHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/organizations     --> savdosklad/internal/handler.(*OrganizationHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/organizations/my  --> savdosklad/internal/handler.(*OrganizationHandler).GetMyOrganizations-fm (7 handlers)
+[GIN-debug] GET    /api/v1/organizations/:id --> savdosklad/internal/handler.(*OrganizationHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/organizations/:id --> savdosklad/internal/handler.(*OrganizationHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/organizations/:id --> savdosklad/internal/handler.(*OrganizationHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/cashback/tiers    --> savdosklad/internal/handler.(*CashbackHandler).CreateTier-fm (7 handlers)
+[GIN-debug] GET    /api/v1/cashback/tiers    --> savdosklad/internal/handler.(*CashbackHandler).GetTiersByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/cashback/tiers/:id --> savdosklad/internal/handler.(*CashbackHandler).UpdateTier-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/cashback/tiers/:id --> savdosklad/internal/handler.(*CashbackHandler).DeleteTier-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/categories/export --> savdosklad/internal/handler.(*ExcelHandler).ExportCategories-fm (7 handlers)
+[GIN-debug] POST   /api/v1/excel/categories/import --> savdosklad/internal/handler.(*ExcelHandler).ImportCategories-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/products/export --> savdosklad/internal/handler.(*ExcelHandler).ExportProducts-fm (7 handlers)
+[GIN-debug] POST   /api/v1/excel/products/import --> savdosklad/internal/handler.(*ExcelHandler).ImportProducts-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/categories/template --> savdosklad/internal/handler.(*ExcelHandler).CategoryTemplate-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/products/template --> savdosklad/internal/handler.(*ExcelHandler).ProductTemplate-fm (7 handlers)
+[GIN-debug] GET    /api/v1/admin/users       --> savdosklad/internal/handler.(*AdminHandler).GetAllUsers-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/users/:id   --> savdosklad/internal/handler.(*AdminHandler).UpdateUser-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/users/:id   --> savdosklad/internal/handler.(*AdminHandler).DeleteUser-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/users/extend --> savdosklad/internal/handler.(*AdminHandler).ExtendSubscription-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/regions     --> savdosklad/internal/handler.(*AdminHandler).CreateRegion-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/regions     --> savdosklad/internal/handler.(*AdminHandler).GetRegions-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/regions/:id --> savdosklad/internal/handler.(*AdminHandler).UpdateRegion-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/regions/:id --> savdosklad/internal/handler.(*AdminHandler).DeleteRegion-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/districts   --> savdosklad/internal/handler.(*AdminHandler).CreateDistrict-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/districts   --> savdosklad/internal/handler.(*AdminHandler).GetDistricts-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/districts/:id --> savdosklad/internal/handler.(*AdminHandler).UpdateDistrict-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/districts/:id --> savdosklad/internal/handler.(*AdminHandler).DeleteDistrict-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/markets     --> savdosklad/internal/handler.(*AdminHandler).CreateMarket-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/markets     --> savdosklad/internal/handler.(*AdminHandler).GetMarkets-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/markets/:id --> savdosklad/internal/handler.(*AdminHandler).UpdateMarket-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/markets/:id --> savdosklad/internal/handler.(*AdminHandler).DeleteMarket-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/marketplace/products --> savdosklad/internal/handler.(*MarketplaceAdminHandler).GetProducts-fm (7 handlers)
+[GIN-debug] POST   /api/v1/admin/marketplace/products --> savdosklad/internal/handler.(*MarketplaceAdminHandler).CreateProduct-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/admin/marketplace/products/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).UpdateProduct-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/admin/marketplace/products/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).DeleteProduct-fm (7 handlers)
+[GIN-debug] GET    /api/v1/admin/marketplace/categories --> savdosklad/internal/handler.(*MarketplaceAdminHandler).GetCategories-fm (7 handlers)
+[GIN-debug] POST   /api/v1/admin/marketplace/categories --> savdosklad/internal/handler.(*MarketplaceAdminHandler).CreateCategory-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/admin/marketplace/categories/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).UpdateCategory-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/admin/marketplace/categories/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).DeleteCategory-fm (7 handlers)
+[GIN-debug] GET    /api/v1/admin/marketplace/orders --> savdosklad/internal/handler.(*MarketplaceHandler).AdminGetOrders-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/admin/marketplace/orders/:id/status --> savdosklad/internal/handler.(*MarketplaceHandler).AdminUpdateOrderStatus-fm (7 handlers)
+[GIN-debug] GET    /api/v1/marketplace/products --> savdosklad/internal/handler.(*MarketplaceHandler).GetProducts-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/products/:id --> savdosklad/internal/handler.(*MarketplaceHandler).GetProductByID-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/categories --> savdosklad/internal/handler.(*MarketplaceHandler).GetCategories-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/businesses --> savdosklad/internal/handler.(*MarketplaceHandler).GetBusinesses-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/regions --> savdosklad/internal/handler.(*GeographyHandler).GetRegions-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/districts --> savdosklad/internal/handler.(*GeographyHandler).GetDistricts-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/markets --> savdosklad/internal/handler.(*GeographyHandler).GetMarkets-fm (5 handlers)
+[GIN-debug] POST   /api/v1/marketplace/auth/register --> savdosklad/internal/handler.(*CustomerHandler).Register-fm (5 handlers)
+[GIN-debug] POST   /api/v1/marketplace/auth/login --> savdosklad/internal/handler.(*CustomerHandler).Login-fm (5 handlers)
+[GIN-debug] POST   /api/v1/marketplace/orders --> savdosklad/internal/handler.(*MarketplaceHandler).CreateOrder-fm (6 handlers)
+[GIN-debug] GET    /api/v1/marketplace/orders/my --> savdosklad/internal/handler.(*MarketplaceHandler).GetMyOrders-fm (6 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN] 2026/10/05 - 04:09:52 | 200 |     17.7516ms |   80.80.215.163 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 04:09:52 | 200 |     32.3298ms |   80.80.215.163 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:09:52 | 200 |     27.0618ms |   80.80.215.163 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:09:52 | 200 |    136.9057ms |   80.80.215.163 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:09:52 | 200 |    132.4044ms |   80.80.215.163 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:09:52 | 200 |      4.0014ms |   80.80.215.163 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:09:52 | 200 |     15.8945ms |   80.80.215.163 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:09:54 | 200 |     11.6654ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:09:54 | 200 |     15.3974ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:10:19 | 201 |    246.1543ms |   80.80.215.163 | POST     "/api/v1/expenses"
+[GIN] 2026/10/05 - 04:10:19 | 200 |      3.2916ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:10:19 | 200 |      6.8668ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:10:31 | 200 |     11.5724ms |   80.80.215.163 | DELETE   "/api/v1/expenses/298"
+[GIN] 2026/10/05 - 04:10:31 | 200 |       534.5µs |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:10:31 | 200 |      4.6868ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:10:41 | 201 |     145.442ms |   80.80.215.163 | POST     "/api/v1/expenses"
+[GIN] 2026/10/05 - 04:10:41 | 200 |      2.9887ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:10:41 | 200 |      6.9874ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:10:49 | 200 |      2.7673ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-09-05&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:10:49 | 200 |      2.7673ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:11:00 | 200 |      2.7281ms |   80.80.215.163 | DELETE   "/api/v1/expenses/299"
+[GIN] 2026/10/05 - 04:11:00 | 200 |      2.5442ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-09-05&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:11:00 | 200 |      2.5442ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:11:01 | 200 |       3.774ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:11:01 | 200 |      5.6458ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-09-05&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:11:02 | 200 |      3.0924ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-09-05&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:11:02 | 200 |      3.0924ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:11:05 | 200 |      3.0807ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:11:05 | 200 |      3.0807ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-09-05&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:11:14 | 200 |      3.5511ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-05&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:11:14 | 200 |       2.302ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:11:21 | 200 |      1.0414ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:11:21 | 200 |      5.6371ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-09-29&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:11:28 | 200 |      3.3439ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:11:28 | 200 |      3.3439ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:01 | 200 |      3.2206ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:12:01 | 200 |      3.2206ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:01 | 200 |      3.6371ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:01 | 200 |      3.6371ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:12:02 | 200 |      2.5903ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:02 | 200 |       3.123ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:12:24 | 200 |      2.7889ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:12:24 | 200 |      1.8728ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:25 | 200 |      5.0127ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:12:25 | 200 |      5.5465ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:27 | 200 |      2.7858ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:12:27 | 200 |      2.7858ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:31 | 200 |      2.5601ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:31 | 200 |      3.8589ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:12:35 | 200 |      3.6807ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:12:35 | 200 |      3.6807ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:13:30 | 200 |       9.698ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:13:37 | 200 |      4.1929ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:13:37 | 200 |      6.2658ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:13:50 | 200 |      2.7219ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:13:50 | 200 |      5.3043ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:13:51 | 200 |      1.6224ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:13:51 | 200 |        5.92ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:13:53 | 200 |      2.9079ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:13:53 | 200 |       5.638ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:13:54 | 200 |      2.7198ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:13:54 | 200 |       2.431ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:13:57 | 200 |      3.2034ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:13:57 | 200 |      4.2678ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:14:17 | 200 |      2.0012ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:14:29 | 200 |       3.059ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:14:29 | 200 |      3.5925ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:24:19 | 200 |      3.9994ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:24:19 | 200 |      3.9994ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:24:20 | 200 |      2.6204ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:24:20 | 200 |      3.1797ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:24:20 | 200 |      3.5069ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:24:20 | 200 |      2.5434ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:24:21 | 200 |      3.2477ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:24:21 | 200 |      3.2477ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:24:22 | 200 |      3.2458ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:24:22 | 200 |      3.2458ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:24:27 | 200 |      4.9056ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:24:56 | 200 |     83.8594ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 04:25:41 | 200 |      2.5233ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:25:41 | 200 |      1.7853ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:26:03 | 200 |      2.9886ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:26:03 | 200 |      2.9886ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:27:44 | 200 |      3.2232ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:27:44 | 200 |      3.2232ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:27:46 | 200 |      2.6122ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:27:46 | 200 |      2.6122ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:30:33 | 200 |     15.6388ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:30:33 | 200 |     18.6844ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:30:34 | 200 |      2.6869ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:30:34 | 200 |      2.6869ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:30:34 | 200 |       539.6µs |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:30:34 | 200 |       539.6µs |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:31:05 | 200 |      2.5968ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:31:13 | 200 |       3.183ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:31:13 | 200 |      3.7141ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:32:14 | 200 |      2.1699ms |     95.46.70.20 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:32:39 | 200 |      2.3061ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:32:40 | 200 |     16.3198ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:32:43 | 200 |     15.9608ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:33:12 | 200 |     16.3523ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:33:55 | 200 |      2.5274ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10&startDate=2026-10-01&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:33:55 | 200 |      2.3945ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:35:14 | 200 |      3.1844ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:35:14 | 200 |      6.0357ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:35:58 | 200 |      7.1739ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/27"
+[GIN] 2026/10/05 - 04:35:58 | 200 |      4.1378ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:35:58 | 200 |      2.9963ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:03 | 200 |      7.4033ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/144"
+[GIN] 2026/10/05 - 04:36:03 | 200 |      5.0179ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:03 | 200 |      3.8566ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:09 | 200 |      2.6088ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/143"
+[GIN] 2026/10/05 - 04:36:09 | 200 |      3.0863ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:09 | 200 |      1.5468ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:13 | 200 |      2.7807ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/142"
+[GIN] 2026/10/05 - 04:36:13 | 200 |      3.9977ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:13 | 200 |      2.4957ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:18 | 200 |      2.2017ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/141"
+[GIN] 2026/10/05 - 04:36:18 | 200 |      8.6152ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:18 | 200 |     10.2564ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:28 | 200 |      2.5336ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/139"
+[GIN] 2026/10/05 - 04:36:28 | 200 |      4.3914ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:28 | 200 |      9.7524ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:32 | 200 |       2.326ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/138"
+[GIN] 2026/10/05 - 04:36:32 | 200 |      3.2848ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:32 | 200 |       1.902ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:39 | 200 |      2.0121ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/137"
+[GIN] 2026/10/05 - 04:36:39 | 200 |      2.3007ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:39 | 200 |       4.728ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:43 | 200 |      2.9747ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/136"
+[GIN] 2026/10/05 - 04:36:43 | 200 |      3.5989ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:43 | 200 |      2.3973ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:47 | 200 |      2.9535ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/135"
+[GIN] 2026/10/05 - 04:36:47 | 200 |      2.6096ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:47 | 200 |      5.9623ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:51 | 200 |      4.6076ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/134"
+[GIN] 2026/10/05 - 04:36:51 | 200 |      3.8755ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:36:51 | 200 |      2.6421ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:55 | 200 |      2.2283ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/133"
+[GIN] 2026/10/05 - 04:36:55 | 200 |      3.6175ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:36:55 | 200 |      6.3792ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:03 | 200 |      11.777ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/131"
+[GIN] 2026/10/05 - 04:37:03 | 200 |      3.9364ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:03 | 200 |      2.6021ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:37:07 | 200 |      9.4864ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/130"
+[GIN] 2026/10/05 - 04:37:07 | 200 |      3.0007ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:37:07 | 200 |      6.0015ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:12 | 200 |      2.7933ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/129"
+[GIN] 2026/10/05 - 04:37:12 | 200 |      7.2669ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:12 | 200 |      4.0453ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:37:19 | 200 |      2.6484ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/127"
+[GIN] 2026/10/05 - 04:37:19 | 200 |      1.9235ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:37:19 | 200 |      4.8873ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:24 | 200 |      2.8229ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/126"
+[GIN] 2026/10/05 - 04:37:24 | 200 |      4.2457ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:24 | 200 |      3.0285ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:37:36 | 200 |      2.5933ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/12"
+[GIN] 2026/10/05 - 04:37:36 | 200 |       3.928ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:36 | 200 |      1.9289ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:37:44 | 200 |       2.542ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/121"
+[GIN] 2026/10/05 - 04:37:44 | 200 |      3.1679ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:44 | 200 |      1.7692ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:37:54 | 200 |      3.7505ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/118"
+[GIN] 2026/10/05 - 04:37:54 | 200 |      4.0529ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:37:54 | 200 |      2.3832ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:01 | 200 |      3.0927ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/113"
+[GIN] 2026/10/05 - 04:38:01 | 200 |      6.2735ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:01 | 200 |      4.1397ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:10 | 200 |      2.6191ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/114"
+[GIN] 2026/10/05 - 04:38:10 | 200 |      5.3759ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:10 | 200 |      2.3419ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:16 | 200 |      2.7757ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/111"
+[GIN] 2026/10/05 - 04:38:16 | 200 |      2.9696ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:16 | 200 |      4.6075ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:20 | 200 |      2.5739ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/110"
+[GIN] 2026/10/05 - 04:38:20 | 200 |      4.1672ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:20 | 200 |      2.5759ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:24 | 200 |      2.6331ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/112"
+[GIN] 2026/10/05 - 04:38:24 | 200 |       2.769ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:24 | 200 |      4.4884ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:30 | 200 |      2.4233ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/101"
+[GIN] 2026/10/05 - 04:38:30 | 200 |      5.1206ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:30 | 200 |      3.2012ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:34 | 200 |      2.4271ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/102"
+[GIN] 2026/10/05 - 04:38:34 | 200 |       2.085ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:34 | 200 |      4.5133ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:40 | 200 |      3.5087ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/109"
+[GIN] 2026/10/05 - 04:38:40 | 200 |      6.9803ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:40 | 200 |       2.869ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:50 | 200 |      7.8078ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/107"
+[GIN] 2026/10/05 - 04:38:50 | 200 |      3.6742ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:50 | 200 |      2.7794ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:55 | 200 |      6.1123ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/99"
+[GIN] 2026/10/05 - 04:38:55 | 200 |      3.0436ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:55 | 200 |      4.5931ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:38:58 | 200 |      2.3438ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/108"
+[GIN] 2026/10/05 - 04:38:58 | 200 |      1.7446ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:38:58 | 200 |      4.2392ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:04 | 200 |       4.267ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/106"
+[GIN] 2026/10/05 - 04:39:04 | 200 |       3.701ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:04 | 200 |      2.8334ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:08 | 200 |      8.4592ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/93"
+[GIN] 2026/10/05 - 04:39:08 | 200 |      5.1116ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:08 | 200 |      6.1991ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:12 | 200 |      3.2408ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/95"
+[GIN] 2026/10/05 - 04:39:12 | 200 |      8.2825ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:12 | 200 |      2.0596ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:17 | 200 |       2.909ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/92"
+[GIN] 2026/10/05 - 04:39:17 | 200 |      3.1896ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:17 | 200 |       5.066ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:22 | 200 |      3.9384ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/91"
+[GIN] 2026/10/05 - 04:39:22 | 200 |      6.8743ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:22 | 200 |      1.8968ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:27 | 200 |      2.6339ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/83"
+[GIN] 2026/10/05 - 04:39:27 | 200 |      1.5623ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:27 | 200 |      4.4289ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:32 | 200 |      2.5106ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/90"
+[GIN] 2026/10/05 - 04:39:32 | 200 |      3.5692ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:32 | 200 |      1.8857ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:39 | 200 |      2.2511ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/104"
+[GIN] 2026/10/05 - 04:39:39 | 200 |            0s |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:39 | 200 |      8.5919ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:44 | 200 |      2.5434ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/78"
+[GIN] 2026/10/05 - 04:39:44 | 200 |      3.9772ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:44 | 200 |       2.354ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:39:48 | 200 |      2.9315ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/88"
+[GIN] 2026/10/05 - 04:39:48 | 200 |      6.1274ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:39:48 | 200 |      2.0766ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:02 | 200 |       2.033ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/105"
+[GIN] 2026/10/05 - 04:40:02 | 200 |      4.0728ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:02 | 200 |      3.1149ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:07 | 200 |      2.7252ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/87"
+[GIN] 2026/10/05 - 04:40:07 | 200 |       5.697ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:07 | 200 |      4.2302ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:14 | 200 |      2.3834ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/103"
+[GIN] 2026/10/05 - 04:40:14 | 200 |      3.7928ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:14 | 200 |      1.8172ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:20 | 200 |       2.826ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/81"
+[GIN] 2026/10/05 - 04:40:20 | 200 |      3.3767ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:20 | 200 |      2.1286ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:25 | 200 |      5.9863ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/98"
+[GIN] 2026/10/05 - 04:40:25 | 200 |      1.5768ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:25 | 200 |      4.0043ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:36 | 200 |      2.6432ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/80"
+[GIN] 2026/10/05 - 04:40:36 | 200 |      4.1505ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:36 | 200 |      2.3212ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:42 | 200 |      2.7466ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/100"
+[GIN] 2026/10/05 - 04:40:42 | 200 |      3.8039ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:42 | 200 |      2.0559ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:49 | 200 |      7.2418ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/96"
+[GIN] 2026/10/05 - 04:40:49 | 200 |      1.6461ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:40:49 | 200 |      4.4509ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:53 | 200 |       2.749ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/69"
+[GIN] 2026/10/05 - 04:40:53 | 200 |      3.7016ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:40:53 | 200 |      2.3122ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:04 | 200 |      3.1459ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/70"
+[GIN] 2026/10/05 - 04:41:04 | 200 |      3.5965ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:04 | 200 |       2.249ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:12 | 200 |    165.7207ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/56"
+[GIN] 2026/10/05 - 04:41:12 | 200 |      3.6728ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:12 | 200 |       2.003ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:16 | 200 |      2.3823ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/75"
+[GIN] 2026/10/05 - 04:41:16 | 200 |      2.1166ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:16 | 200 |      4.0479ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:20 | 200 |      1.9534ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/54"
+[GIN] 2026/10/05 - 04:41:20 | 200 |      9.9555ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:20 | 200 |      1.8002ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:25 | 200 |      2.6345ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/68"
+[GIN] 2026/10/05 - 04:41:25 | 200 |       535.7µs |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:25 | 200 |      4.1751ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:35 | 200 |      2.3415ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/66"
+[GIN] 2026/10/05 - 04:41:35 | 200 |      7.4706ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:35 | 200 |      2.4129ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:43 | 200 |       2.671ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/67"
+[GIN] 2026/10/05 - 04:41:43 | 200 |      3.7718ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:43 | 200 |      2.7335ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:49 | 200 |       2.559ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/32"
+[GIN] 2026/10/05 - 04:41:49 | 200 |      1.4223ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:49 | 200 |      3.9138ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:54 | 200 |      2.7268ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/77"
+[GIN] 2026/10/05 - 04:41:54 | 200 |        7.45ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:41:54 | 200 |      1.8719ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:59 | 200 |      2.2566ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/79"
+[GIN] 2026/10/05 - 04:41:59 | 200 |      2.2133ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:41:59 | 200 |      6.3447ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:02 | 200 |      2.7824ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/84"
+[GIN] 2026/10/05 - 04:42:02 | 200 |      3.7946ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:02 | 200 |      1.8757ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:10 | 200 |      3.8627ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/125"
+[GIN] 2026/10/05 - 04:42:10 | 200 |      5.4325ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:10 | 200 |      7.1913ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:16 | 200 |      2.0631ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/72"
+[GIN] 2026/10/05 - 04:42:16 | 200 |      4.7973ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:16 | 200 |      2.2013ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:20 | 200 |      3.2739ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/74"
+[GIN] 2026/10/05 - 04:42:20 | 200 |            0s |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:20 | 200 |      6.0908ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:24 | 200 |      2.5529ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/73"
+[GIN] 2026/10/05 - 04:42:24 | 200 |      3.8428ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:24 | 200 |       966.2µs |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:28 | 200 |      1.9898ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/33"
+[GIN] 2026/10/05 - 04:42:28 | 200 |       1.862ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:28 | 200 |      3.4054ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:33 | 200 |      4.2329ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/30"
+[GIN] 2026/10/05 - 04:42:33 | 200 |       3.717ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:33 | 200 |      1.8744ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:37 | 200 |      2.7097ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/25"
+[GIN] 2026/10/05 - 04:42:37 | 200 |      1.3361ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:37 | 200 |      4.3288ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:41 | 200 |      2.5894ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/35"
+[GIN] 2026/10/05 - 04:42:41 | 200 |        3.65ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:41 | 200 |      6.8367ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:46 | 200 |      1.9863ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/65"
+[GIN] 2026/10/05 - 04:42:46 | 200 |       535.4µs |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:46 | 200 |      4.0851ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:52 | 200 |      2.3585ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/14"
+[GIN] 2026/10/05 - 04:42:52 | 200 |      3.6652ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:42:52 | 200 |      2.7294ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:59 | 200 |      2.5366ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/124"
+[GIN] 2026/10/05 - 04:42:59 | 200 |      1.0318ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:42:59 | 200 |      4.2398ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:04 | 200 |      62.763ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/123"
+[GIN] 2026/10/05 - 04:43:04 | 200 |      4.2316ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:04 | 200 |      2.6252ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:43:12 | 200 |      2.7655ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/122"
+[GIN] 2026/10/05 - 04:43:12 | 200 |      3.8544ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:12 | 200 |      2.0578ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:43:25 | 200 |      2.5396ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/86"
+[GIN] 2026/10/05 - 04:43:25 | 200 |      3.7317ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:25 | 200 |      1.9115ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:43:32 | 200 |      6.1409ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/115"
+[GIN] 2026/10/05 - 04:43:32 | 200 |       3.879ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:32 | 200 |       2.018ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:43:39 | 200 |       2.028ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/89"
+[GIN] 2026/10/05 - 04:43:39 | 200 |       1.564ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:43:39 | 200 |      3.8578ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:44 | 200 |       2.483ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/76"
+[GIN] 2026/10/05 - 04:43:44 | 200 |      3.6399ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:44 | 200 |      1.7853ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:43:49 | 200 |      2.3003ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/51"
+[GIN] 2026/10/05 - 04:43:49 | 200 |      2.1479ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:43:49 | 200 |       4.287ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:54 | 200 |      1.0863ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/52"
+[GIN] 2026/10/05 - 04:43:54 | 200 |       3.667ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:43:54 | 200 |      1.1717ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:44:00 | 200 |      3.8341ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/64"
+[GIN] 2026/10/05 - 04:44:00 | 200 |      1.2271ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:44:00 | 200 |      3.5772ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:44:24 | 200 |      2.4453ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/116"
+[GIN] 2026/10/05 - 04:44:25 | 200 |      3.8394ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:44:25 | 200 |      1.3327ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:44:30 | 200 |      2.3378ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/97"
+[GIN] 2026/10/05 - 04:44:30 | 200 |      3.2034ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:44:30 | 200 |      1.9572ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:44:49 | 200 |      2.5899ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/6"
+[GIN] 2026/10/05 - 04:44:49 | 200 |      3.9091ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:44:49 | 200 |      1.6435ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:45:03 | 200 |       2.788ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/11"
+[GIN] 2026/10/05 - 04:45:03 | 200 |      3.8654ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:45:03 | 200 |      2.6587ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:45:17 | 200 |     12.6608ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/53"
+[GIN] 2026/10/05 - 04:45:17 | 200 |      4.0835ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:45:17 | 200 |      1.1258ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:45:23 | 200 |     10.8904ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/85"
+[GIN] 2026/10/05 - 04:45:23 | 200 |       3.867ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:45:23 | 200 |      2.1221ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:45:47 | 200 |      4.9072ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/71"
+[GIN] 2026/10/05 - 04:45:47 | 200 |     10.4954ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:45:48 | 200 |      1.9013ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:46:00 | 200 |      2.5176ms |     95.46.70.20 | DELETE   "/api/v1/fixed-costs/34"
+[GIN] 2026/10/05 - 04:46:00 | 200 |      4.8549ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:46:00 | 200 |      2.4284ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:46:44 | 404 |            0s |  68.183.124.108 | CONNECT  ""
+[GIN] 2026/10/05 - 04:47:36 | 201 |     36.1617ms |     95.46.70.20 | POST     "/api/v1/fixed-costs"
+[GIN] 2026/10/05 - 04:47:36 | 200 |      3.9767ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:47:36 | 200 |      1.8512ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:48:13 | 200 |       2.633ms |     95.46.70.20 | PUT      "/api/v1/fixed-costs/117"
+[GIN] 2026/10/05 - 04:48:13 | 200 |      5.9332ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:48:13 | 200 |      1.8966ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:48:32 | 200 |      3.1387ms |     95.46.70.20 | PUT      "/api/v1/fixed-costs/128"
+[GIN] 2026/10/05 - 04:48:32 | 200 |      3.6042ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:48:32 | 200 |       1.343ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:48:55 | 200 |      2.6829ms |     95.46.70.20 | PUT      "/api/v1/fixed-costs/120"
+[GIN] 2026/10/05 - 04:48:55 | 200 |      3.7796ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:48:55 | 200 |      1.6758ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:49:37 | 200 |      2.6229ms |     95.46.70.20 | PUT      "/api/v1/fixed-costs/119"
+[GIN] 2026/10/05 - 04:49:37 | 200 |      3.5667ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:49:37 | 200 |      1.7687ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:49:50 | 200 |      3.6202ms |     95.46.70.20 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 04:49:50 | 200 |     10.5721ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:49:50 | 200 |     21.7003ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:49:50 | 200 |      3.0125ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:49:50 | 200 |     15.9776ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:49:50 | 200 |     12.2898ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:49:50 | 200 |      3.9919ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:49:56 | 200 |      2.5959ms |     95.46.70.20 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:50:03 | 200 |     25.4532ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:50:47 | 200 |      20.789ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 04:50:50 | 200 |     20.8854ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 04:50:52 | 200 |     20.8129ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 04:50:53 | 200 |       20.97ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 04:50:56 | 201 |     19.9673ms |     95.46.70.20 | POST     "/api/v1/calculations"
+[GIN] 2026/10/05 - 04:50:56 | 200 |       3.035ms |     95.46.70.20 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:51:30 | 200 |     23.4086ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 04:51:48 | 200 |     15.5268ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:51:55 | 200 |      4.4511ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:51:55 | 200 |      4.0038ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:52:37 | 201 |      7.3738ms |     95.46.70.20 | POST     "/api/v1/fixed-costs"
+[GIN] 2026/10/05 - 04:52:37 | 200 |      3.9215ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:52:37 | 200 |      1.3334ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:53:05 | 200 |      3.0289ms |     95.46.70.20 | PUT      "/api/v1/fixed-costs/145"
+[GIN] 2026/10/05 - 04:53:05 | 200 |       3.849ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:53:05 | 200 |      2.2338ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:53:45 | 200 |      3.2864ms |     95.46.70.20 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 04:53:45 | 200 |     15.7561ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:53:45 | 200 |     15.7561ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:53:45 | 200 |      8.1919ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:53:45 | 200 |     10.4416ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:53:45 | 200 |     14.8415ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:53:45 | 200 |      3.4532ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:53:46 | 200 |      3.4318ms |     95.46.70.20 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 04:53:46 | 200 |     11.9228ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:53:46 | 200 |     15.2744ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:53:46 | 200 |      3.6385ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:53:46 | 200 |     15.0761ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:53:46 | 200 |     15.6483ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:53:46 | 200 |     14.6473ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:53:48 | 200 |      3.4767ms |     95.46.70.20 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 04:53:48 | 200 |     16.5137ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:53:48 | 200 |     25.6694ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:53:48 | 200 |     14.7228ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:53:48 | 200 |     10.9079ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:53:48 | 200 |       16.88ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:53:48 | 200 |      6.0433ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:53:53 | 200 |     15.5804ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:53:53 | 200 |     17.9837ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:53:53 | 200 |     17.9837ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:54:06 | 200 |      4.4873ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:54:06 | 200 |      1.7393ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:54:11 | 200 |      2.4729ms |     95.46.70.20 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:54:15 | 200 |     16.2612ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:54:41 | 200 |      8.0565ms |     95.46.70.20 | GET      "/api/v1/calculations/fixed-breakdown?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:54:57 | 200 |            0s |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:54:57 | 200 |      4.4572ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:55:09 | 200 |     82.6045ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10"
+[GIN] 2026/10/05 - 04:55:11 | 200 |      7.8757ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:55:11 | 200 |      1.9551ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:55:15 | 200 |       5.021ms |     95.46.70.20 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 04:55:15 | 200 |     11.0538ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:55:15 | 200 |     18.7516ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:55:15 | 200 |      4.4841ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:55:15 | 200 |       9.934ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:55:15 | 200 |      9.2145ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:55:15 | 200 |       2.853ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:55:27 | 200 |    105.7939ms |     95.46.70.20 | POST     "/api/v1/auth/login"
+[GIN] 2026/10/05 - 04:55:28 | 200 |      3.3014ms |     95.46.70.20 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 04:55:28 | 200 |     15.8887ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:55:28 | 200 |     12.6377ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:55:28 | 200 |      3.9463ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:55:28 | 200 |       9.946ms |     95.46.70.20 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 04:55:28 | 200 |     10.8361ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 04:55:28 | 200 |      3.6582ms |     95.46.70.20 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 04:55:33 | 200 |      5.7368ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:55:33 | 200 |      4.7147ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:55:38 | 200 |      3.8782ms |     95.46.70.20 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 04:55:44 | 200 |     22.4376ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 04:56:18 | 200 |      4.9332ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:56:18 | 200 |      1.2762ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:56:20 | 200 |      2.0241ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:56:20 | 200 |      4.1622ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:56:22 | 200 |      4.1688ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:56:22 | 200 |      1.8939ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:56:23 | 200 |      2.3339ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:56:23 | 200 |      4.1841ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:56:32 | 200 |      4.0462ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:56:32 | 200 |      1.6813ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:56:36 | 200 |      2.4086ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:56:36 | 200 |      5.5804ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:56:39 | 200 |      1.9538ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:56:39 | 200 |      4.3337ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:57:00 | 200 |            0s |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:57:00 | 200 |      8.9645ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:57:08 | 200 |      1.3187ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 04:57:08 | 200 |      4.9432ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 04:59:51 | 200 |     48.2798ms |     95.46.70.20 | GET      "/api/v1/transactions?businessId=10"
+[GIN] 2026/10/05 - 05:07:06 | 404 |            0s |    5.252.83.242 | GET      "/api/mcp"
+[GIN] 2026/10/05 - 05:08:46 | 200 |      8.5827ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:08:46 | 200 |      1.1614ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:09:25 | 200 |      4.9748ms |     95.46.70.20 | GET      "/api/v1/expenses?businessId=10&startDate=2026-08-01&endDate=2026-09-30"
+[GIN] 2026/10/05 - 05:09:25 | 200 |      2.5052ms |     95.46.70.20 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:10:19 | 200 |      2.7306ms |     95.46.70.20 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:10:24 | 200 |     16.6562ms |     95.46.70.20 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:22:46 | 200 |     10.3571ms |   80.80.215.163 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 05:22:46 | 200 |      5.0373ms |   80.80.215.163 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 05:22:46 | 200 |            0s |   80.80.215.163 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 05:22:46 | 200 |     21.7521ms |   80.80.215.163 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 05:22:46 | 200 |     93.2978ms |   80.80.215.163 | GET      "/images/1776421339472421600_photo_2026-04-16_10-46-35.jpg"
+[GIN] 2026/10/05 - 05:24:05 | 200 |       2.721ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:24:06 | 200 |      5.0797ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:24:06 | 200 |       2.747ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:24:15 | 200 |      2.5379ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:24:18 | 200 |     16.0653ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:24:26 | 200 |      3.9044ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:24:26 | 200 |      6.3774ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:24:36 | 200 |      1.8549ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:24:36 | 200 |      3.9027ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:24:37 | 200 |      2.5676ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:24:37 | 200 |      4.4145ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:24:38 | 200 |       2.225ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:24:42 | 200 |     14.9496ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:24:57 | 200 |      1.4341ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:24:57 | 200 |      3.9789ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:26:50 | 200 |      8.7768ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:26:53 | 200 |     45.4995ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:27:54 | 404 |            0s |  35.205.116.134 | GET      "/api/.env"
+[GIN] 2026/10/05 - 05:27:54 | 404 |            0s |  35.205.116.134 | GET      "/api/phpinfo.php"
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /images/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] HEAD   /images/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (5 handlers)
+[GIN-debug] POST   /api/v1/auth/register     --> savdosklad/internal/handler.(*UserHandler).Register-fm (5 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> savdosklad/internal/handler.(*UserHandler).Login-fm (5 handlers)
+[GIN-debug] POST   /api/v1/auth/forgot-password --> savdosklad/internal/handler.(*UserHandler).ForgotPassword-fm (5 handlers)
+[GIN-debug] POST   /api/v1/auth/reset-password --> savdosklad/internal/handler.(*UserHandler).ResetPassword-fm (5 handlers)
+[GIN-debug] GET    /api/v1/geography/regions --> savdosklad/internal/handler.(*GeographyHandler).GetRegions-fm (5 handlers)
+[GIN-debug] GET    /api/v1/geography/districts --> savdosklad/internal/handler.(*GeographyHandler).GetDistricts-fm (5 handlers)
+[GIN-debug] GET    /api/v1/geography/markets --> savdosklad/internal/handler.(*GeographyHandler).GetMarkets-fm (5 handlers)
+[GIN-debug] POST   /api/v1/upload            --> savdosklad/internal/handler.(*UploadHandler).Upload-fm (5 handlers)
+[GIN-debug] GET    /api/v1/users             --> savdosklad/internal/handler.(*UserHandler).GetAll-fm (7 handlers)
+[GIN-debug] GET    /api/v1/users/my-employees --> savdosklad/internal/handler.(*UserHandler).GetMyEmployees-fm (7 handlers)
+[GIN-debug] POST   /api/v1/users/employees   --> savdosklad/internal/handler.(*UserHandler).CreateEmployee-fm (7 handlers)
+[GIN-debug] POST   /api/v1/users/telegram-link --> savdosklad/internal/handler.(*UserHandler).GenerateTelegramLink-fm (7 handlers)
+[GIN-debug] GET    /api/v1/users/referred    --> savdosklad/internal/handler.(*UserHandler).GetReferredUsers-fm (7 handlers)
+[GIN-debug] GET    /api/v1/users/:id         --> savdosklad/internal/handler.(*UserHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/users/:id         --> savdosklad/internal/handler.(*UserHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/users/:id         --> savdosklad/internal/handler.(*UserHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/businesses        --> savdosklad/internal/handler.(*BusinessHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/businesses        --> savdosklad/internal/handler.(*BusinessHandler).GetAll-fm (7 handlers)
+[GIN-debug] GET    /api/v1/businesses/my     --> savdosklad/internal/handler.(*BusinessHandler).GetMy-fm (7 handlers)
+[GIN-debug] GET    /api/v1/businesses/:id    --> savdosklad/internal/handler.(*BusinessHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/businesses/:id    --> savdosklad/internal/handler.(*BusinessHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/businesses/:id    --> savdosklad/internal/handler.(*BusinessHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/categories        --> savdosklad/internal/handler.(*CategoryHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/categories        --> savdosklad/internal/handler.(*CategoryHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/categories/:id    --> savdosklad/internal/handler.(*CategoryHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/categories/:id    --> savdosklad/internal/handler.(*CategoryHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/products          --> savdosklad/internal/handler.(*ProductHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products          --> savdosklad/internal/handler.(*ProductHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/my       --> savdosklad/internal/handler.(*ProductHandler).GetMyProducts-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/search   --> savdosklad/internal/handler.(*ProductHandler).Search-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/:id      --> savdosklad/internal/handler.(*ProductHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/products/:id      --> savdosklad/internal/handler.(*ProductHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> savdosklad/internal/handler.(*ProductHandler).Delete-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/products/bulk     --> savdosklad/internal/handler.(*ProductHandler).BulkDelete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/products/bulk/request --> savdosklad/internal/handler.(*ProductHandler).CreateBulkDeleteRequest-fm (7 handlers)
+[GIN-debug] GET    /api/v1/products/bulk/requests --> savdosklad/internal/handler.(*ProductHandler).GetBulkDeleteRequests-fm (7 handlers)
+[GIN-debug] POST   /api/v1/products/bulk/requests/:id/status --> savdosklad/internal/handler.(*ProductHandler).ApproveBulkDeleteRequest-fm (7 handlers)
+[GIN-debug] POST   /api/v1/clients           --> savdosklad/internal/handler.(*ClientHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/clients           --> savdosklad/internal/handler.(*ClientHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/clients/:id       --> savdosklad/internal/handler.(*ClientHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/clients/:id       --> savdosklad/internal/handler.(*ClientHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/transactions      --> savdosklad/internal/handler.(*TransactionHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions      --> savdosklad/internal/handler.(*TransactionHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/:id  --> savdosklad/internal/handler.(*TransactionHandler).GetByID-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/transactions/:id  --> savdosklad/internal/handler.(*TransactionHandler).Delete-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/transactions/:id  --> savdosklad/internal/handler.(*TransactionHandler).Update-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/:id/items --> savdosklad/internal/handler.(*TransactionHandler).GetItems-fm (7 handlers)
+[GIN-debug] POST   /api/v1/transactions/:id/items --> savdosklad/internal/handler.(*TransactionHandler).AddItems-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/items/:id --> savdosklad/internal/handler.(*TransactionHandler).GetItem-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/transactions/items/:id --> savdosklad/internal/handler.(*TransactionHandler).UpdateItem-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/transactions/items/:id --> savdosklad/internal/handler.(*TransactionHandler).DeleteItem-fm (7 handlers)
+[GIN-debug] POST   /api/v1/transactions/:id/send-telegram --> savdosklad/internal/handler.(*TransactionHandler).SendTelegram-fm (7 handlers)
+[GIN-debug] GET    /api/v1/transactions/client/:id --> savdosklad/internal/handler.(*TransactionHandler).GetByClientID-fm (7 handlers)
+[GIN-debug] POST   /api/v1/refunds           --> savdosklad/internal/handler.(*RefundHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/refunds           --> savdosklad/internal/handler.(*RefundHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/refunds/:id/items --> savdosklad/internal/handler.(*RefundHandler).GetItems-fm (7 handlers)
+[GIN-debug] POST   /api/v1/expenses          --> savdosklad/internal/handler.(*ExpenseHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/expenses          --> savdosklad/internal/handler.(*ExpenseHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/expenses/:id      --> savdosklad/internal/handler.(*ExpenseHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/expenses/:id      --> savdosklad/internal/handler.(*ExpenseHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/fixed-costs       --> savdosklad/internal/handler.(*ExpenseHandler).CreateFixedCost-fm (7 handlers)
+[GIN-debug] GET    /api/v1/fixed-costs       --> savdosklad/internal/handler.(*ExpenseHandler).GetFixedCostsByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/fixed-costs/:id   --> savdosklad/internal/handler.(*ExpenseHandler).UpdateFixedCost-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/fixed-costs/:id   --> savdosklad/internal/handler.(*ExpenseHandler).DeleteFixedCost-fm (7 handlers)
+[GIN-debug] POST   /api/v1/money             --> savdosklad/internal/handler.(*MoneyHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/money             --> savdosklad/internal/handler.(*MoneyHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] POST   /api/v1/calculations      --> savdosklad/internal/handler.(*CalculationHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations      --> savdosklad/internal/handler.(*CalculationHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/stats --> savdosklad/internal/handler.(*CalculationHandler).GetStats-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/income-breakdown --> savdosklad/internal/handler.(*CalculationHandler).GetIncomeBreakdown-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/expense-breakdown --> savdosklad/internal/handler.(*CalculationHandler).GetExpenseBreakdown-fm (7 handlers)
+[GIN-debug] GET    /api/v1/calculations/fixed-breakdown --> savdosklad/internal/handler.(*CalculationHandler).GetFixedBreakdown-fm (7 handlers)
+[GIN-debug] POST   /api/v1/salaries          --> savdosklad/internal/handler.(*SalaryHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/salaries          --> savdosklad/internal/handler.(*SalaryHandler).GetByBusinessID-fm (7 handlers)
+[GIN-debug] GET    /api/v1/salaries/total    --> savdosklad/internal/handler.(*SalaryHandler).GetTotalByPeriod-fm (7 handlers)
+[GIN-debug] GET    /api/v1/salaries/employee/:employeeId --> savdosklad/internal/handler.(*SalaryHandler).GetByEmployeeID-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/salaries/:id      --> savdosklad/internal/handler.(*SalaryHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/organizations     --> savdosklad/internal/handler.(*OrganizationHandler).Create-fm (7 handlers)
+[GIN-debug] GET    /api/v1/organizations/my  --> savdosklad/internal/handler.(*OrganizationHandler).GetMyOrganizations-fm (7 handlers)
+[GIN-debug] GET    /api/v1/organizations/:id --> savdosklad/internal/handler.(*OrganizationHandler).GetByID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/organizations/:id --> savdosklad/internal/handler.(*OrganizationHandler).Update-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/organizations/:id --> savdosklad/internal/handler.(*OrganizationHandler).Delete-fm (7 handlers)
+[GIN-debug] POST   /api/v1/cashback/tiers    --> savdosklad/internal/handler.(*CashbackHandler).CreateTier-fm (7 handlers)
+[GIN-debug] GET    /api/v1/cashback/tiers    --> savdosklad/internal/handler.(*CashbackHandler).GetTiersByBusinessID-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/cashback/tiers/:id --> savdosklad/internal/handler.(*CashbackHandler).UpdateTier-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/cashback/tiers/:id --> savdosklad/internal/handler.(*CashbackHandler).DeleteTier-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/categories/export --> savdosklad/internal/handler.(*ExcelHandler).ExportCategories-fm (7 handlers)
+[GIN-debug] POST   /api/v1/excel/categories/import --> savdosklad/internal/handler.(*ExcelHandler).ImportCategories-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/products/export --> savdosklad/internal/handler.(*ExcelHandler).ExportProducts-fm (7 handlers)
+[GIN-debug] POST   /api/v1/excel/products/import --> savdosklad/internal/handler.(*ExcelHandler).ImportProducts-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/categories/template --> savdosklad/internal/handler.(*ExcelHandler).CategoryTemplate-fm (7 handlers)
+[GIN-debug] GET    /api/v1/excel/products/template --> savdosklad/internal/handler.(*ExcelHandler).ProductTemplate-fm (7 handlers)
+[GIN-debug] GET    /api/v1/admin/users       --> savdosklad/internal/handler.(*AdminHandler).GetAllUsers-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/users/:id   --> savdosklad/internal/handler.(*AdminHandler).UpdateUser-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/users/:id   --> savdosklad/internal/handler.(*AdminHandler).DeleteUser-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/users/extend --> savdosklad/internal/handler.(*AdminHandler).ExtendSubscription-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/regions     --> savdosklad/internal/handler.(*AdminHandler).CreateRegion-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/regions     --> savdosklad/internal/handler.(*AdminHandler).GetRegions-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/regions/:id --> savdosklad/internal/handler.(*AdminHandler).UpdateRegion-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/regions/:id --> savdosklad/internal/handler.(*AdminHandler).DeleteRegion-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/districts   --> savdosklad/internal/handler.(*AdminHandler).CreateDistrict-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/districts   --> savdosklad/internal/handler.(*AdminHandler).GetDistricts-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/districts/:id --> savdosklad/internal/handler.(*AdminHandler).UpdateDistrict-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/districts/:id --> savdosklad/internal/handler.(*AdminHandler).DeleteDistrict-fm (8 handlers)
+[GIN-debug] POST   /api/v1/admin/markets     --> savdosklad/internal/handler.(*AdminHandler).CreateMarket-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/markets     --> savdosklad/internal/handler.(*AdminHandler).GetMarkets-fm (8 handlers)
+[GIN-debug] PUT    /api/v1/admin/markets/:id --> savdosklad/internal/handler.(*AdminHandler).UpdateMarket-fm (8 handlers)
+[GIN-debug] DELETE /api/v1/admin/markets/:id --> savdosklad/internal/handler.(*AdminHandler).DeleteMarket-fm (8 handlers)
+[GIN-debug] GET    /api/v1/admin/marketplace/products --> savdosklad/internal/handler.(*MarketplaceAdminHandler).GetProducts-fm (7 handlers)
+[GIN-debug] POST   /api/v1/admin/marketplace/products --> savdosklad/internal/handler.(*MarketplaceAdminHandler).CreateProduct-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/admin/marketplace/products/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).UpdateProduct-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/admin/marketplace/products/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).DeleteProduct-fm (7 handlers)
+[GIN-debug] GET    /api/v1/admin/marketplace/categories --> savdosklad/internal/handler.(*MarketplaceAdminHandler).GetCategories-fm (7 handlers)
+[GIN-debug] POST   /api/v1/admin/marketplace/categories --> savdosklad/internal/handler.(*MarketplaceAdminHandler).CreateCategory-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/admin/marketplace/categories/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).UpdateCategory-fm (7 handlers)
+[GIN-debug] DELETE /api/v1/admin/marketplace/categories/:id --> savdosklad/internal/handler.(*MarketplaceAdminHandler).DeleteCategory-fm (7 handlers)
+[GIN-debug] GET    /api/v1/admin/marketplace/orders --> savdosklad/internal/handler.(*MarketplaceHandler).AdminGetOrders-fm (7 handlers)
+[GIN-debug] PUT    /api/v1/admin/marketplace/orders/:id/status --> savdosklad/internal/handler.(*MarketplaceHandler).AdminUpdateOrderStatus-fm (7 handlers)
+[GIN-debug] GET    /api/v1/marketplace/products --> savdosklad/internal/handler.(*MarketplaceHandler).GetProducts-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/products/:id --> savdosklad/internal/handler.(*MarketplaceHandler).GetProductByID-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/categories --> savdosklad/internal/handler.(*MarketplaceHandler).GetCategories-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/businesses --> savdosklad/internal/handler.(*MarketplaceHandler).GetBusinesses-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/regions --> savdosklad/internal/handler.(*GeographyHandler).GetRegions-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/districts --> savdosklad/internal/handler.(*GeographyHandler).GetDistricts-fm (5 handlers)
+[GIN-debug] GET    /api/v1/marketplace/markets --> savdosklad/internal/handler.(*GeographyHandler).GetMarkets-fm (5 handlers)
+[GIN-debug] POST   /api/v1/marketplace/auth/register --> savdosklad/internal/handler.(*CustomerHandler).Register-fm (5 handlers)
+[GIN-debug] POST   /api/v1/marketplace/auth/login --> savdosklad/internal/handler.(*CustomerHandler).Login-fm (5 handlers)
+[GIN-debug] POST   /api/v1/marketplace/orders --> savdosklad/internal/handler.(*MarketplaceHandler).CreateOrder-fm (6 handlers)
+[GIN-debug] GET    /api/v1/marketplace/orders/my --> savdosklad/internal/handler.(*MarketplaceHandler).GetMyOrders-fm (6 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN] 2026/10/05 - 05:33:19 | 200 |     23.3757ms |   80.80.215.163 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 05:33:20 | 200 |     56.8171ms |   80.80.215.163 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 05:33:20 | 200 |     15.9675ms |   80.80.215.163 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 05:33:20 | 200 |     98.2499ms |   80.80.215.163 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 05:33:20 | 200 |      9.5495ms |   80.80.215.163 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 05:33:20 | 200 |    131.4037ms |   80.80.215.163 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 05:33:20 | 200 |      9.2503ms |   80.80.215.163 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 05:33:21 | 200 |      4.8956ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:33:23 | 200 |     57.5436ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:33:32 | 200 |      3.0037ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:33:32 | 200 |      7.8324ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:34:25 | 200 |      4.9387ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:34:27 | 200 |     29.3079ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:34:47 | 200 |     10.9261ms |   80.80.215.163 | GET      "/api/v1/calculations/income-breakdown?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:34:57 | 200 |      2.8486ms |   80.80.215.163 | GET      "/api/v1/calculations/fixed-breakdown?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:35:00 | 200 |      3.0316ms |   80.80.215.163 | GET      "/api/v1/calculations/expense-breakdown?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:35:08 | 200 |     22.1562ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 05:35:13 | 200 |     27.5818ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=8&year=2026"
+[GIN] 2026/10/05 - 05:35:23 | 200 |      3.4448ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:35:25 | 200 |      7.7812ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:35:25 | 200 |      1.7477ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:35:50 | 200 |      5.3318ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:35:50 | 200 |      7.8755ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:35:51 | 200 |      2.6051ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:35:51 | 200 |      6.1217ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:36:03 | 200 |       7.259ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:36:06 | 200 |      15.908ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:36:11 | 200 |       23.42ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 05:36:17 | 200 |      1.9865ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:36:17 | 200 |      4.6776ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:36:29 | 200 |      2.2682ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:36:33 | 200 |     20.5161ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 05:36:47 | 200 |     17.6206ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=8&year=2026"
+[GIN] 2026/10/05 - 05:37:05 | 200 |      2.1806ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:37:05 | 200 |       5.008ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:37:32 | 200 |      2.6104ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:37:34 | 200 |     15.5461ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=10&year=2026"
+[GIN] 2026/10/05 - 05:39:15 | 200 |      2.8362ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:39:15 | 200 |      9.9745ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:41:31 | 200 |     21.3824ms |   80.80.215.163 | PUT      "/api/v1/fixed-costs/128"
+[GIN] 2026/10/05 - 05:41:31 | 200 |      5.5064ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:41:31 | 200 |      2.2977ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:41:34 | 200 |      2.6122ms |   80.80.215.163 | GET      "/api/v1/calculations?businessId=10"
+[GIN] 2026/10/05 - 05:41:40 | 200 |     22.8994ms |   80.80.215.163 | GET      "/api/v1/calculations/stats?businessId=10&month=9&year=2026"
+[GIN] 2026/10/05 - 05:41:55 | 200 |      2.1574ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:41:55 | 200 |      4.9296ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:42:03 | 200 |      2.5395ms |   80.80.215.163 | PUT      "/api/v1/fixed-costs/128"
+[GIN] 2026/10/05 - 05:42:03 | 200 |      2.2992ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:42:03 | 200 |      4.6504ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
+[GIN] 2026/10/05 - 05:42:06 | 200 |      6.1866ms |   80.80.215.163 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 05:42:06 | 200 |      5.0625ms |   80.80.215.163 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 05:42:06 | 200 |      5.0625ms |   80.80.215.163 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 05:42:06 | 200 |     18.5563ms |   80.80.215.163 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 05:42:06 | 200 |     13.5158ms |   80.80.215.163 | GET      "/api/v1/products?businessId=10"
+[GIN] 2026/10/05 - 05:42:06 | 200 |     11.9749ms |   80.80.215.163 | GET      "/api/v1/clients?businessId=10"
+[GIN] 2026/10/05 - 05:42:06 | 200 |     13.5158ms |   80.80.215.163 | GET      "/api/v1/transactions?businessId=10&startDate=2026-08-31&endDate=2026-10-05"
+[GIN] 2026/10/05 - 05:42:08 | 200 |      3.6093ms |   80.80.215.163 | GET      "/api/v1/businesses/my"
+[GIN] 2026/10/05 - 05:42:08 | 200 |      1.1385ms |   80.80.215.163 | GET      "/api/v1/fixed-costs?businessId=10"
+[GIN] 2026/10/05 - 05:42:08 | 200 |     15.2311ms |   80.80.215.163 | GET      "/api/v1/expenses?businessId=10"
